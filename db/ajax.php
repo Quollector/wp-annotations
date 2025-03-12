@@ -17,7 +17,7 @@ function wp_annotation_submit_comment() {
 
         parse_str($datas[0], $form_data);
 
-        $commentaire = isset($form_data['comment']) ? sanitize_text_field($form_data['comment']) : '';
+        $commentaire = isset($form_data['comment']) ? stripslashes(sanitize_text_field($form_data['comment'])) : '';
         $position_x = isset($datas[1]) ? intval($datas[1]) : 0;
         $position_y = isset($datas[2]) ? intval($datas[2]) : 0;
         $device = isset($datas[3]) ? sanitize_text_field($datas[3]) : '';
@@ -41,12 +41,10 @@ function wp_annotation_submit_comment() {
             $file_name = "screen_{$unique_id}.png";
             $file_path = $upload_dir . $file_name;
             
-            // Décoder l'image en base64
             $screenshot_data = $_POST['screenshot'];
             $screenshot_data = str_replace('data:image/png;base64,', '', $screenshot_data);
             $screenshot_data = base64_decode($screenshot_data);
 
-            // Sauvegarde de l'image
             file_put_contents($file_path, $screenshot_data);
             $screenshot_path = $file_name;
         }
@@ -191,3 +189,39 @@ function wp_annotation_update_comment() {
 }
 
 add_action('wp_ajax_update_wp_annotation', 'wp_annotation_update_comment');
+
+
+// Delete all comments
+function flush_reviews_callback() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reviews';
+    $wpdb->query("DELETE FROM $table_name");
+
+    
+    $directory_path = WP_PLUGIN_DIR . '/wp-annotations/assets/images/screenshots/';
+
+    if (is_dir($directory_path)) {
+        if ($dir = opendir($directory_path)) {
+            while (($file = readdir($dir)) !== false) {
+                if ($file != '.' && $file != '..') {
+                    $file_path = $directory_path . '/' . $file;
+                    if (is_file($file_path)) {
+                        unlink($file_path);
+                    }
+                }
+            }
+            closedir($dir);
+        }
+    }
+
+    wp_send_json_success('Tous les commentaires ont été supprimés.');
+
+    add_action('admin_notices', function() {
+        ?>
+        <div class="notice notice-success is-dismissible">
+            <p>Tous les commentaires ont été supprimés.</p>
+        </div>
+        <?php
+    });
+}
+add_action('wp_ajax_flush_reviews', 'flush_reviews_callback');

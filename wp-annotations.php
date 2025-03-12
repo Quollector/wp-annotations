@@ -132,3 +132,11 @@ if ( file_exists( WP_ANNOTATION_PATH . 'public/public.php' )) {
 if ( file_exists( WP_ANNOTATION_PATH . 'db/ajax.php' ) ) {
     include WP_ANNOTATION_PATH . 'db/ajax.php';
 }
+
+function lebleu_increase_limits() {
+    @ini_set('post_max_size', '50M');
+    @ini_set('upload_max_filesize', '50M');
+    @ini_set('max_execution_time', '300');
+    @ini_set('memory_limit', '256M');
+}
+add_action('wp_loaded', 'lebleu_increase_limits');

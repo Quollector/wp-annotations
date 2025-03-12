@@ -1,4 +1,8 @@
 <?php
+/*if (!defined('ABSPATH')) {
+    exit;
+}*/
+
 function wp_annotation_add_review_mode_class() {
     if ( isset($_GET['review-mode']) && $_GET['review-mode'] == '1' ) {
         echo '<script type="text/javascript">

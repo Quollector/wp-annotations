@@ -9,10 +9,81 @@
         // *** Switch comment / browse
         $('body').on('click', '#wp-annotations--switch-bubble', function() {
             
+            $('html').removeClass('dash-open');
             $winWidth = $(window).width();
 
             if( $('html').hasClass('review-mode') ) {
                 $('html').removeClass('review-mode laptop mobile tablet');
+                $modal.hide();                
+
+                if( $('.wp-annotations--dashboard .comment-item.edit').length ){
+
+                    var confirmation = confirm('Vous avez des commentaires en cours de modification. Souhaitez-vous les annuler ?');
+
+                    if( confirmation ){
+                        $('.wp-annotations--dashboard .comment-item').each(function() {
+                            if( $(this).hasClass('edit') ){
+                                $default = $(this).find('.comment-item__content p').text();
+        
+                                $(this).removeClass('edit');
+                                $(this).find('.comment-item__content').show().next().hide().find('textarea').val($default);
+                            }
+                        });
+                    }
+                }
+
+                $('#wp-annotations--notices').addClass('success').show().find('p').text('Mode ajout de commentaires désactivé');
+
+                setTimeout(function() {
+                    $('#wp-annotations--notices').fadeOut(function(){
+                        $(this).removeClass('error success');
+                    });
+                }, 2000);
+            }
+            else{
+                if( $winWidth <= $tablet && $winWidth > $mobile ){
+                    $('html').addClass('review-mode tablet');
+                }
+                else if( $winWidth <= $mobile ){
+                    $('html').addClass('review-mode mobile');
+                }
+                else{
+                    $('html').addClass('review-mode laptop');
+                }
+
+                $('#wp-annotations--notices').addClass('success').show().find('p').text('Mode ajout de commentaires activé');
+
+                setTimeout(function() {
+                    $('#wp-annotations--notices').fadeOut(function(){
+                        $(this).removeClass('error success');
+                    });
+                }, 2000);
+            }
+        });
+
+        $(window).resize(function() {
+            $winWidth = $(window).width();
+
+            if( $('html').hasClass('review-mode') ){
+                if( $winWidth <= $tablet && $winWidth > $mobile ){
+                    $('html').removeClass('laptop mobile').addClass('tablet');
+                }
+                else if( $winWidth <= $mobile ){
+                    $('html').removeClass('laptop tablet').addClass('mobile');
+                }
+                else{
+                    $('html').removeClass('tablet mobile').addClass('laptop');
+                }
+            }
+
+        });
+
+        // *** Open/Close dashboard 
+        $('body').on('click', '#wp-annotations--dash-bubble', function() {
+            $('html').removeClass('review-mode');
+
+            if( $('html').hasClass('dash-open') ) {
+                $('html').removeClass('dash-open laptop mobile tablet');
                 $modal.hide();
 
                 if( $('.wp-annotations--dashboard .comment-item.edit').length ){
@@ -32,33 +103,8 @@
                 }
             }
             else{
-                if( $winWidth <= $tablet && $winWidth > $mobile ){
-                    $('html').addClass('review-mode tablets');
-                }
-                else if( $winWidth <= $mobile ){
-                    $('html').addClass('review-mode mobile');
-                }
-                else{
-                    $('html').addClass('review-mode laptop');
-                }
+                $('html').addClass('dash-open');
             }
-        });
-
-        $(window).resize(function() {
-            $winWidth = $(window).width();
-
-            if( $('html').hasClass('review-mode') ){
-                if( $winWidth <= $tablet && $winWidth > $mobile ){
-                    $('html').removeClass('laptop mobile').addClass('tablet');
-                }
-                else if( $winWidth <= $mobile ){
-                    $('html').removeClass('laptop tablet').addClass('mobile');
-                }
-                else{
-                    $('html').removeClass('tablet mobile').addClass('laptop');
-                }
-            }
-
         });
 
         // *** Add comment
@@ -178,24 +224,35 @@
                 data: datas,
                 success: function(response) {
                     if (response.success) {
-                        $('#wp-annotations--notices').addClass('success').text(response.data.message).show();
+                        $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
                         $('#wp-annotations--dashboard').removeClass('ajax');
                         $('#wp-annotations--refresh-box').html(response.data.comments_content);
 
                         setTimeout(function() {
-                            $('#wp-annotations--notices').fadeOut();
+                            $('#wp-annotations--notices').fadeOut(function(){
+                                $(this).removeClass('error success');
+                            });
                         }, 2000);                        
                     } else {
-                        $('#wp-annotations--notices').addClass('error').text(response.data.message).show();
+                        $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
                         $('#wp-annotations--dashboard').removeClass('ajax');
 
                         setTimeout(function() {
-                            $('#wp-annotations--notices').fadeOut();
+                            $('#wp-annotations--notices').fadeOut(function(){
+                                $(this).removeClass('error success');
+                            });
                         }, 2000);
                     }
                 },
-                error: function() {
-                    alert('Erreur AJAX');
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
+                    $('#wp-annotations--dashboard').removeClass('ajax');
+
+                    setTimeout(function() {
+                        $('#wp-annotations--notices').fadeOut(function(){
+                            $(this).removeClass('error success');
+                        });
+                    }, 2000);
                 }
             });
         });
@@ -204,26 +261,36 @@
         $('#wp-annotation-form').on('submit', function(event) {
             event.preventDefault();
             $('#wp-annotations--dashboard').addClass('ajax');
-            $('html').addClass('screenshot');
+            $modal.find('#wp-annotation-form').hide();
             
             html2canvas(document.body, {
-                scale: 1,
+                scale: 0.7,
                 scrollX: 0,
                 scrollY: 0,
-                width: window.innerWidth - 350,  // Réduit la largeur de 350px
+                width: window.innerWidth,
                 height: window.innerHeight, 
-                x: window.scrollX + 350, // Décale de 350px vers la droite
+                x: window.scrollX, // Décale de 350px vers la droite
                 y: window.scrollY
             }).then(function(canvas) {
-                var screenshot = canvas.toDataURL('image/png'); // Convertir en base64
+                var screenshot = canvas.toDataURL('image/png', 0.5); // Convertir en base64
 
                 $('html').removeClass('screenshot');
+
+                if( $('html').hasClass('tablet') ){
+                    $device = 'tablet';
+                }
+                else if( $('html').hasClass('mobile') ){
+                    $device = 'mobile';
+                }
+                else{
+                    $device = 'laptop';
+                }
                 
                 var datas = [
                     $(event.target).serialize(),
                     $modal.attr('data-position-x'),
                     $modal.attr('data-position-y'),
-                    $modal.attr('data-device'),
+                    $device,
                     $modal.attr('data-page-id'),
                     $modal.attr('data-user-id')
                 ];
@@ -239,24 +306,36 @@
                     success: function(response) {
                         if (response.success) {
                             $('#wp-annotations--modal').hide().find('textarea').val('');
-                            $('#wp-annotations--notices').addClass('success').text(response.data.message).show();
+                            $modal.find('#wp-annotation-form').show();
+                            $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
                             $('#wp-annotations--dashboard').removeClass('ajax');
                             $('#wp-annotations--refresh-box').html(response.data.comments_content);
         
                             setTimeout(function() {
-                                $('#wp-annotations--notices').fadeOut();
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
                             }, 2000);
                         } else {
-                            $('#wp-annotations--notices').addClass('error').text(response.data.message).show();
+                            $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
                             $('#wp-annotations--dashboard').removeClass('ajax');
         
                             setTimeout(function() {
-                                $('#wp-annotations--notices').fadeOut();
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
                             }, 2000);
                         }
                     },
-                    error: function() {
-                        alert('Erreur AJAX');
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
+                        $('#wp-annotations--dashboard').removeClass('ajax');
+    
+                        setTimeout(function() {
+                            $('#wp-annotations--notices').fadeOut(function(){
+                                $(this).removeClass('error success');
+                            });
+                        }, 2000);
                     }
                 });
             });
@@ -293,24 +372,35 @@
                     data: datas,
                     success: function(response) {
                         if (response.success) {
-                            $('#wp-annotations--notices').addClass('success').text(response.data.message).show();
+                            $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
                             $('#wp-annotations--dashboard').removeClass('ajax');
                             $('#wp-annotations--refresh-box').html(response.data.comments_content);
     
                             setTimeout(function() {
-                                $('#wp-annotations--notices').fadeOut();
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
                             }, 2000);                        
                         } else {
-                            $('#wp-annotations--notices').addClass('error').text(response.data.message).show();
+                            $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
                             $('#wp-annotations--dashboard').removeClass('ajax');
     
                             setTimeout(function() {
-                                $('#wp-annotations--notices').fadeOut();
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
                             }, 2000);
                         }
                     },
-                    error: function() {
-                        alert('Erreur AJAX');
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
+                        $('#wp-annotations--dashboard').removeClass('ajax');
+    
+                        setTimeout(function() {
+                            $('#wp-annotations--notices').fadeOut(function(){
+                                $(this).removeClass('error success');
+                            });
+                        }, 2000);
                     }
                 });
             }
@@ -381,24 +471,35 @@
                     data: datas,
                     success: function(response) {
                         if (response.success) {
-                            $('#wp-annotations--notices').addClass('success').text(response.data.message).show();
+                            $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
                             $('#wp-annotations--dashboard').removeClass('ajax');
                             $('#wp-annotations--refresh-box').html(response.data.comments_content);
     
                             setTimeout(function() {
-                                $('#wp-annotations--notices').fadeOut();
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
                             }, 2000);                        
                         } else {
-                            $('#wp-annotations--notices').addClass('error').text(response.data.message).show();
+                            $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
                             $('#wp-annotations--dashboard').removeClass('ajax');
     
                             setTimeout(function() {
-                                $('#wp-annotations--notices').fadeOut();
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
                             }, 2000);
                         }
                     },
-                    error: function() {
-                        alert('Erreur AJAX');
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
+                        $('#wp-annotations--dashboard').removeClass('ajax');
+    
+                        setTimeout(function() {
+                            $('#wp-annotations--notices').fadeOut(function(){
+                                $(this).removeClass('error success');
+                            });
+                        }, 2000);
                     }
                 });
             }

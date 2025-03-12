@@ -3,15 +3,15 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-function wp_annotation_options_update_messages() {
-    add_settings_error(
-        'wp_annotation_messages',
-        'wp_annotation_message',
-        __('Paramètres mis à jour.', 'wp_annotation'),
-        'success'
-    );
-}
-add_action('admin_notices', 'wp_annotation_options_update_messages');
+// function wp_annotation_options_update_messages() {
+//     add_settings_error(
+//         'wp_annotation_messages',
+//         'wp_annotation_message',
+//         __('Paramètres mis à jour.', 'wp_annotation'),
+//         'success'
+//     );
+// }
+// add_action('admin_notices', 'wp_annotation_options_update_messages');
 
 $users = get_users();
 $allowed_users = get_option('wp_annotation_users', []);
@@ -21,13 +21,8 @@ $interface_color = get_option('wp_annotation_color', 'blue');
 
 <div class="wrap">
     <h1>Gestion des annotations</h1>
-    <form method="post" action="options.php">
+    <form id="annotation-form" method="post" action="options.php">
         <?php settings_fields('wp_annotation_options'); ?>
-        <?php if (isset($_GET['settings-updated']) && $_GET['settings-updated']) : ?>
-            <div class="updated notice is-dismissible">
-                <p>Options mises à jour avec succès.</p>
-            </div>
-        <?php endif; ?>
 
         <h2>Activation du plugin</h2>
         <table class="form-table">
@@ -85,11 +80,38 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                 </td>
             </tr>
         </table>
-
+        
+        <h2>Gestion de la base de données</h2>
+        <table class="form-table">
+            <tr>
+                <th scope="row">Supprimer tout</th>
+                <td>
+                    <button type="button" id="flush-button" class="button button-secondary">Supprimer</button>
+                </td>
+            </tr>
+        </table>
 
         <?php submit_button(); ?>
     </form>
 </div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function($) {
+        $('#flush-button').on('click', function() {
+            if (confirm("Êtes-vous sûr de vouloir supprimer tous les commentaires ? Cette action est irréversible.")) {
+                $.post(ajaxurl, {
+                    action: 'flush_reviews'
+                }, function(response) {
+                    if (response.success) {
+                        alert(response.data);
+                    } else {
+                        alert('Une erreur s\'est produite.');
+                    }
+                });
+            }
+        });
+    });
+</script>
 
 <style>
     .switch {

@@ -24,10 +24,10 @@ html{
         // transition: all .5s ease;
     }
 
-    &.review-mode{
-        width: calc(100vw - #{$margin});
-        margin-left: $margin;
-    }
+    // &.review-mode{
+    //     width: calc(100vw - #{$margin});
+    //     margin-left: $margin;
+    // }
 
     &.laptop{
         // width: $laptop;
@@ -81,6 +81,7 @@ html{
         display: none;
         align-items: center;
         justify-content: center;
+        pointer-events: all;
 
         &__wrapper{
             position: relative;
@@ -118,25 +119,26 @@ html{
     }
 
     // Switch bubble
-    &--switch-bubble{
+    &--dash-bubble{
         position: fixed;
-        left: 0;
-        top: 0;
-        width: 60px;
-        height: 60px;
-        border-radius: 0 0 50% 0;
-        background: $main;
+        left: 10px;
+        top: 10px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #FFF;
+        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
         z-index: 999;
         border: none;
         cursor: pointer;
         pointer-events: all;
         transition: transform .5s ease, background .3s ease;
 
-        .review-mode &{
+        .dash-open &{
             transform: translateX($margin);
     
-            .wp-annotations--switch-bubble__wrapper{
-                img{
+            .wp-annotations--dash-bubble__wrapper{
+                svg{
                     &.browse{
                         display: block;
                     }
@@ -160,11 +162,15 @@ html{
             align-items: center;
             justify-content: center;
 
-            img{
-                width: 30px;
-                height: 30px;
+            svg{
+                width: 16px;
+                height: 16px;
                 object-fit: contain;
                 display: block;
+
+                path{
+                    stroke: $main;
+                }
 
                 &.browse{
                     display: none;
@@ -173,7 +179,74 @@ html{
         }
 
         &:hover{
-            background: $alt;
+            background: #DDD;
+        }
+    }
+
+    // Switch bubble
+    &--switch-bubble{
+        position: fixed;
+        left: 10px;
+        top: 60px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #FFF;
+        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
+        z-index: 999;
+        border: none;
+        cursor: pointer;
+        pointer-events: all;
+        transition: transform .5s ease, background .3s ease;
+
+        .review-mode &{    
+            .wp-annotations--switch-bubble__wrapper{
+                svg{
+                    &.browse{
+                        display: block;
+                    }
+    
+                    &.comment{
+                        display: none;
+                    }
+                }
+            }
+        }
+
+        .dash-open &{
+            transform: translateX($margin);
+        }
+
+        .review-mode.screenshot &{
+            display: none;
+        }
+
+        &__wrapper{
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            svg{
+                width: 16px;
+                height: 16px;
+                object-fit: contain;
+                display: block;
+
+                path{
+                    fill: $main;
+                }
+
+                &.browse{
+                    display: none;
+                }
+            }
+        }
+
+        &:hover{
+            background: #DDD;
         }
     }
 
@@ -190,9 +263,11 @@ html{
         transform: translateX(-$margin);        
         border-right: 1px solid rgba($sombre_rgb, 0.3);
         cursor: default;
+        pointer-events: none;
 
-        .review-mode &{
+        .dash-open &{
             transform: translateX(0);
+            pointer-events: all;
         }
 
         &.ajax{
@@ -215,7 +290,7 @@ html{
         }
 
         &__ajax{
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             z-index: 5;
@@ -406,9 +481,8 @@ html{
     // Comments layout
     &--comments-layout{
         position: relative;
-        width: calc(100% - #{$margin});
+        width: 100%;
         height: 100%;
-        margin-left: $margin;
         z-index: 555;
     }
 
@@ -494,20 +568,76 @@ html{
     // Notices
     &--notices{
         position: fixed;
-        top: 24px;
-        right: 24px;
+        top: 10px;
+        right: 10px;
         z-index: 999;
         max-width: 180px;
-        padding: 12px;
-        background: $main;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-        color: $white;
+        background: #FFF;
+        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
+        color: $main;
         border-radius: 8px;
+        overflow: hidden;
         display: none;
 
-        &.error{
-            background: #c53030;
+        &.success{
+            .wp-annotations--notice__success{
+                display: flex;
+            }
+
+            .wp-annotations--notice__error{
+                display: none;
+            }
         }
+
+        &.error{
+            .wp-annotations--notice__success{
+                display: none;
+            }
+
+            .wp-annotations--notice__error{
+                display: flex;
+            }
+        }
+
+        @media screen and (max-width: 550px){
+            max-width: 100%;
+            width: calc(100% - 20px);
+            left: 10px;
+            top: auto;
+            bottom: 10px;            
+        }
+    }
+
+    &--notice{
+        position: relative;
+        display: flex;
+        align-items: stretch;
+
+        span{
+            background: rgba($sombre_rgb, 0.15);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        p{
+            font-size: 12px;
+            color: $main;
+            padding: 16px;
+            flex-grow: 1;
+        }
+
+        svg{
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            flex-shrink: 0;
+
+            path{
+                stroke: $main;
+            }
+        }    
     }
 
     // Comment item (pages)
@@ -619,6 +749,29 @@ html{
                 font-weight: 400;
                 color: $main;
                 font-size: 10px;
+            }
+
+            .device{
+                display: flex;
+                align-items: center;
+
+                svg{
+                    width: 16px;
+                    height: 16px;
+                    object-fit: contain;
+
+                    &:not(.fill){
+                        path{
+                            stroke: $main;
+                        }
+                    }
+
+                    &.fill{
+                        path{
+                            fill: $main;
+                        }
+                    }
+                }
             }
 
             .buttons{
