@@ -66,7 +66,7 @@ $comments_list = getAllDiscussions($comment_data['id']);
 <form class="discussion-box__form" id="discussion-box-form">
     <textarea name="comment" id="comment" placeholder="Répondre" rows="5"></textarea>
     <label>
-        <input type="checkbox" name="email" value="1"> Notifier par courriel
+        <input type="checkbox" name="email" value="1" checked> Notifier par courriel
     </label>
     <button type="submit">Envoyer</button>
 </form>
