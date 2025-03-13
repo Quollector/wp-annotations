@@ -4,6 +4,13 @@ if (!defined('ABSPATH')) {
 }
 ?>
 
+<!-- Discussions box -->
+<?php  
+if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/discussions.php' ) ) {
+    include WP_ANNOTATION_PATH . 'views/frontend/discussions.php';
+}
+?>
+
 <!-- Lightbox -->
 <?php  
 if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/lightbox.php' ) ) {

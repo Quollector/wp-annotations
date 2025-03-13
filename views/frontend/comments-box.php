@@ -75,7 +75,8 @@ $interface_color = get_option('wp_annotation_color', 'blue');
             <div class="accordeon-header">
                 <h5><?= $page_slug ?></h5>
                 <span>(<?= $count_active ?>)</span>
-                <a href="<?= $page_url ?>?review-mode=1" title="Voir la page">
+                <a href="<?= $page_url ?>" title="Voir la page">
+                <?php // <a href="<= $page_url >?review-mode=1" title="Voir la page"> --> ?>
                     <svg width="800px" height="800px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M6 5.914l2.06-2.06v-.708L5.915 1l-.707.707.043.043.25.25 1 1h-3a2.5 2.5 0 0 0 0 5H4V7h-.5a1.5 1.5 0 1 1 0-3h3L5.207 5.293 5.914 6 6 5.914zM11 2H8.328l-1-1H12l.71.29 3 3L16 5v9l-1 1H6l-1-1V6.5l1 .847V14h9V6h-4V2zm1 0v3h3l-3-3z"/>
                     </svg>
@@ -150,11 +151,16 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                         </form>
 
                         <div class="comment-item__screenshot">
-                            <div class="comment-item__screenshot__wrapper">
+                            <div class="comment-item__screenshot--wrapper">
                                 <div class="expend">
                                     <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/expend.svg' ?>" alt="" class="">
                                 </div>
                                 <img src="<?= WP_ANNOTATION_URL . 'assets/images/screenshots/' . $annotation->screenshot_url ?>" alt="" class="src-img">
+                            </div>
+                            <div class="comment-item__screenshot--comments open-add-comments">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M9.5 4c-3.268 0-6 2.419-6 5.5c0 1.222.435 2.347 1.162 3.255l-.644 2.363a.504.504 0 0 0 .674.593l2.8-1.166a.5.5 0 0 0-.385-.923l-1.856.773l.445-1.63a.5.5 0 0 0-.108-.463C4.903 11.528 4.5 10.555 4.5 9.5c0-2.441 2.193-4.5 5-4.5c2.31 0 4.21 1.398 4.805 3.253c-3.18.094-5.805 2.477-5.805 5.497c0 3.081 2.732 5.5 6 5.5a6.5 6.5 0 0 0 2.192-.378l2.616 1.09c.376.156.782-.2.674-.594l-.644-2.363A5.18 5.18 0 0 0 20.5 13.75c0-2.807-2.267-5.064-5.142-5.444C14.758 5.814 12.335 4 9.5 4m0 9.75c0-2.441 2.193-4.5 5-4.5s5 2.059 5 4.5c0 1.055-.403 2.028-1.088 2.802a.5.5 0 0 0-.108.463l.445 1.63l-1.856-.773a.5.5 0 0 0-.377-.003a5.5 5.5 0 0 1-2.016.381c-2.807 0-5-2.058-5-4.5" clip-rule="evenodd"/>
+                                </svg>
                             </div>
                         </div>
                     </div>
