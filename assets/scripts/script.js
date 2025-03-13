@@ -140,12 +140,14 @@
         // *** LIGHTBOX
         $('body').on('click', '.wp-annotations--dashboard .comment-item__screenshot .expend', function() {
             var src = $(this).next().attr('src');
+            $('body').addClass('no-scroll');
 
             $('#wp-annotations--lightbox').fadeIn().find('img.lightbox-img').attr('src', src);
         });
 
         $('body').on('click', '#wp-annotations--lightbox .close-light-button', function() {
             $('#wp-annotations--lightbox').fadeOut();
+            $('body').removeClass('no-scroll');
         });
 
 
@@ -510,6 +512,36 @@
 
         });
 
+        // *** DISCUSSIONS
+        // Open discussion
+        $('body').on('click', '.open-add-comments', function() {            
+            $par = $(this).closest('.comment-item');
+            $commentID = $par.data('comment-id');
+
+            $('body').addClass('no-scroll');
+            $('#wp-annotations--discussions').addClass('ajax').fadeIn(300);    
+    
+            var datas = {
+                action: 'open_discussion_wp_annotation',
+                id: $commentID,
+            };                    
+    
+            $.ajax({
+                url: ajaxurl.url,
+                type: 'POST',
+                data: datas,
+                success: function(response) {
+                    if (response.success) {
+                        $('#wp-annotations--discussions').removeClass('ajax');  
+                        $('#wp-annotations-discussions-display').html(response.data.discussion_content);                     
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
+                    $('#wp-annotations--discussions').removeClass('loading');     
+                }
+            });
+        });
 
         // *** FUNCTIONS
         function switchCommentsBrowse(){

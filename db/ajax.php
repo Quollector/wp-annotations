@@ -3,6 +3,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// *** COMMENTS
+
 // Add new comments
 function wp_annotation_submit_comment() {
     if (!is_user_logged_in()) {
@@ -189,6 +191,29 @@ function wp_annotation_update_comment() {
 }
 
 add_action('wp_ajax_update_wp_annotation', 'wp_annotation_update_comment');
+
+// *** DISCUSSIONS
+function wp_annotation_show_discussion() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reviews';
+
+    $comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", intval($_POST['id'])), ARRAY_A);
+
+    if (!$comment_data) {
+        wp_send_json_error(['message' => 'Commentaire non trouvé.']);
+    }
+
+    ob_start();
+    extract($comment_data);
+    include WP_ANNOTATION_PATH . 'views/frontend/discussions-box.php';
+    $discussion_content = ob_get_clean();
+    
+    wp_send_json_success([
+        'discussion_content' => $discussion_content
+    ]);
+}
+
+add_action('wp_ajax_open_discussion_wp_annotation', 'wp_annotation_show_discussion');
 
 
 // Delete all comments
