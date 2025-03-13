@@ -96,6 +96,7 @@ function wp_annotation_update_comment() {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
+    $table_replies = $wpdb->prefix . 'reviews_discussions';
 
     $variables = [
         $view = sanitize_text_field($_POST['view'])
@@ -132,14 +133,20 @@ function wp_annotation_update_comment() {
     elseif( $_POST['type'] === 'delete' ){
         $id = intval($_POST['id']);
         $screenUrl = sanitize_text_field($_POST['screenUrl']);
+        $delete = array();
 
-        $delete = $wpdb->delete(
+        $delete[] = $wpdb->delete(
             $table_name,
             ['id' => $id],
             ['%d']
         );
 
-        if ($delete !== false) {
+        $delete[] = $wpdb->delete(
+            $table_replies,
+            ['comment_id' => $id]
+        );
+
+        if ($delete[0] !== false && $delete[1] !== false) {
             
             $file_path = WP_ANNOTATION_PATH . 'assets/images/screenshots/' . $screenUrl;
             if (file_exists($file_path)) {
@@ -239,7 +246,6 @@ function wp_annotation_discussions() {
     
         if( $_POST['status'] === 'add' ){
             $datas = $_POST['datas'];
-            $status = sanitize_text_field($_POST['status']);
 
             $insert = $wpdb->insert(
                 $table_name,
@@ -267,38 +273,34 @@ function wp_annotation_discussions() {
                 wp_send_json_error(['message' => 'Une erreur est survenue lors de l\'ajout du commentaire.']);
             }
         }
-        // elseif( $_POST['type'] === 'delete' ){
-        //     $id = intval($_POST['id']);
-        //     $screenUrl = sanitize_text_field($_POST['screenUrl']);
+        elseif( $_POST['status'] === 'delete' ){
+            $datas = $_POST['datas'];
+
+            $id = intval( $datas[0] );
     
-        //     $delete = $wpdb->delete(
-        //         $table_name,
-        //         ['id' => $id],
-        //         ['%d']
-        //     );
+            $delete = $wpdb->delete(
+                $table_name,
+                ['id' => $id],
+                ['%d']
+            );
     
-        //     if ($delete !== false) {
-                
-        //         $file_path = WP_ANNOTATION_PATH . 'assets/images/screenshots/' . $screenUrl;
-        //         if (file_exists($file_path)) {
-        //             unlink($file_path);
-        //         }
+            if ($delete !== false) {              
+                $table_reviews = $wpdb->prefix . 'reviews';
+                $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", intval($datas[1])), ARRAY_A);
+
+                ob_start();
+                extract($new_comment_data);
+                include WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions-box-content.php';
+                $discussion_content = ob_get_clean();
     
-        //         ob_start();
-        //         extract($variables);
-        //         include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
-        //         $comments_content = ob_get_clean();
-        
-        //         wp_send_json_success([
-        //             'message' => 'Commentaire supprimé',
-        //             'comments_content' => $comments_content
-        //         ]);
-        //     } else {
-        //         wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
-        //     }
-    
-    
-        // }
+                wp_send_json_success([
+                    'message' => 'Commentaire supprimé avec succès',
+                    'discussion_content' => $discussion_content
+                ]);
+            } else {
+                wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
+            }  
+        }
         // elseif( $_POST['type'] === 'update' ){
         //     $id = intval($_POST['id']);
         //     $comment = sanitize_text_field($_POST['comment']);
