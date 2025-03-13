@@ -4,8 +4,8 @@
     </div>
     <div class="wp-annotations--discussions__wrapper" id="wp-annotations-discussions-display">        
         <?php  
-        if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/discussions-box.php' ) ) {
-            include WP_ANNOTATION_PATH . 'views/frontend/discussions-box.php';
+        if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions-box.php' ) ) {
+            include WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions-box.php';
         }
         ?>
     </div>

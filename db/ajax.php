@@ -188,11 +188,22 @@ function wp_annotation_update_comment() {
             wp_send_json_error(['message' => 'Une erreur est survenue.']);
         }
     }
+    elseif( $_POST['type'] === 'refresh' ){
+        ob_start();
+        extract($variables);
+        include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
+        $comments_content = ob_get_clean();
+
+        wp_send_json_success([
+            'comments_content' => $comments_content
+        ]);
+    }
 }
 
 add_action('wp_ajax_update_wp_annotation', 'wp_annotation_update_comment');
 
 // *** DISCUSSIONS
+// First display
 function wp_annotation_show_discussion() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
@@ -205,7 +216,7 @@ function wp_annotation_show_discussion() {
 
     ob_start();
     extract($comment_data);
-    include WP_ANNOTATION_PATH . 'views/frontend/discussions-box.php';
+    include WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions-box.php';
     $discussion_content = ob_get_clean();
     
     wp_send_json_success([
@@ -214,6 +225,111 @@ function wp_annotation_show_discussion() {
 }
 
 add_action('wp_ajax_open_discussion_wp_annotation', 'wp_annotation_show_discussion');
+
+// Manage discussions
+function wp_annotation_discussions() {
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message' => 'Vous devez être connecté pour ajouter un commentaire.']);
+        return;
+    }
+
+    if ( isset($_POST['datas']) && is_array($_POST['datas']) ){
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'reviews_discussions';
+    
+        if( $_POST['status'] === 'add' ){
+            $datas = $_POST['datas'];
+            $status = sanitize_text_field($_POST['status']);
+
+            $insert = $wpdb->insert(
+                $table_name,
+                [
+                    'comment_id' => intval($datas[0]),
+                    'user_id' => get_current_user_id(),
+                    'commentaire' => isset($datas[2]) ? stripslashes(sanitize_text_field($datas[2])) : ''
+                ]
+            );    
+        
+            if ($insert) {                
+                $table_reviews = $wpdb->prefix . 'reviews';
+                $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", intval($datas[0])), ARRAY_A);
+
+                ob_start();
+                extract($new_comment_data);
+                include WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions-box-content.php';
+                $discussion_content = ob_get_clean();
+    
+                wp_send_json_success([
+                    'message' => 'Commentaire ajouté avec succès',
+                    'discussion_content' => $discussion_content
+                ]);
+            } else {
+                wp_send_json_error(['message' => 'Une erreur est survenue lors de l\'ajout du commentaire.']);
+            }
+        }
+        // elseif( $_POST['type'] === 'delete' ){
+        //     $id = intval($_POST['id']);
+        //     $screenUrl = sanitize_text_field($_POST['screenUrl']);
+    
+        //     $delete = $wpdb->delete(
+        //         $table_name,
+        //         ['id' => $id],
+        //         ['%d']
+        //     );
+    
+        //     if ($delete !== false) {
+                
+        //         $file_path = WP_ANNOTATION_PATH . 'assets/images/screenshots/' . $screenUrl;
+        //         if (file_exists($file_path)) {
+        //             unlink($file_path);
+        //         }
+    
+        //         ob_start();
+        //         extract($variables);
+        //         include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
+        //         $comments_content = ob_get_clean();
+        
+        //         wp_send_json_success([
+        //             'message' => 'Commentaire supprimé',
+        //             'comments_content' => $comments_content
+        //         ]);
+        //     } else {
+        //         wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
+        //     }
+    
+    
+        // }
+        // elseif( $_POST['type'] === 'update' ){
+        //     $id = intval($_POST['id']);
+        //     $comment = sanitize_text_field($_POST['comment']);
+    
+        //     $update = $wpdb->update(
+        //         $table_name,
+        //         [ 'commentaire' => $comment ],
+        //         [ 'id' => $id ],
+        //         [ '%s' ],
+        //         [ '%d' ]
+        //     );    
+        
+        //     if ($update !== false) {
+        //         ob_start();
+        //         extract($variables);
+        //         include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
+        //         $comments_content = ob_get_clean();
+        
+        //         wp_send_json_success([
+        //             'message' => 'Commentaire mis à jour',
+        //             'comments_content' => $comments_content
+        //         ]);
+        //     } 
+        //     else {
+        //         wp_send_json_error(['message' => 'Une erreur est survenue.']);
+        //     }
+        // }
+    }
+}
+
+add_action('wp_ajax_wp_annotation_discussions', 'wp_annotation_discussions');
 
 
 // Delete all comments
