@@ -96,7 +96,7 @@ function wp_annotation_update_comment() {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
-    $table_replies = $wpdb->prefix . 'reviews_discussions';
+    $table_replies = $wpdb->prefix . 'reviews_replies';
 
     $variables = [
         $view = sanitize_text_field($_POST['view'])
@@ -223,7 +223,7 @@ function wp_annotation_show_discussion() {
 
     ob_start();
     extract($comment_data);
-    include WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions-box.php';
+    include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box.php';
     $discussion_content = ob_get_clean();
     
     wp_send_json_success([
@@ -233,8 +233,8 @@ function wp_annotation_show_discussion() {
 
 add_action('wp_ajax_open_discussion_wp_annotation', 'wp_annotation_show_discussion');
 
-// Manage discussions
-function wp_annotation_discussions() {
+// Manage replies
+function wp_annotation_replies() {
     if (!is_user_logged_in()) {
         wp_send_json_error(['message' => 'Vous devez être connecté pour ajouter un commentaire.']);
         return;
@@ -242,7 +242,7 @@ function wp_annotation_discussions() {
 
     if ( isset($_POST['datas']) && is_array($_POST['datas']) ){
         global $wpdb;
-        $table_name = $wpdb->prefix . 'reviews_discussions';
+        $table_name = $wpdb->prefix . 'reviews_replies';
     
         if( $_POST['status'] === 'add' ){
             $datas = $_POST['datas'];
@@ -260,9 +260,16 @@ function wp_annotation_discussions() {
                 $table_reviews = $wpdb->prefix . 'reviews';
                 $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", intval($datas[0])), ARRAY_A);
 
+                if ( $datas[3] ){
+                    sendNotificationEmail(
+                        $new_comment_data,
+                        stripslashes(sanitize_text_field($datas[2]))
+                    );
+                }
+
                 ob_start();
                 extract($new_comment_data);
-                include WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions-box-content.php';
+                include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box-content.php';
                 $discussion_content = ob_get_clean();
     
                 wp_send_json_success([
@@ -290,7 +297,7 @@ function wp_annotation_discussions() {
 
                 ob_start();
                 extract($new_comment_data);
-                include WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions-box-content.php';
+                include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box-content.php';
                 $discussion_content = ob_get_clean();
     
                 wp_send_json_success([
@@ -331,7 +338,7 @@ function wp_annotation_discussions() {
     }
 }
 
-add_action('wp_ajax_wp_annotation_discussions', 'wp_annotation_discussions');
+add_action('wp_ajax_wp_annotation_replies', 'wp_annotation_replies');
 
 
 // Delete all comments

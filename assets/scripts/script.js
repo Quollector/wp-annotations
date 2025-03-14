@@ -519,7 +519,7 @@
             $commentID = $par.data('comment-id');
 
             $('body').addClass('no-scroll');
-            $('#wp-annotations--discussions').addClass('ajax').fadeIn(300);    
+            $('#wp-annotations--replies').addClass('ajax').fadeIn(300);    
     
             var datas = {
                 action: 'open_discussion_wp_annotation',
@@ -532,13 +532,13 @@
                 data: datas,
                 success: function(response) {
                     if (response.success) {
-                        $('#wp-annotations--discussions').removeClass('ajax');  
-                        $('#wp-annotations-discussions-display').html(response.data.discussion_content);                     
+                        $('#wp-annotations--replies').removeClass('ajax');  
+                        $('#wp-annotations-replies-display').html(response.data.discussion_content);                     
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
-                    $('#wp-annotations--discussions').removeClass('loading');     
+                    $('#wp-annotations--replies').removeClass('loading');     
                 }
             });
         });
@@ -563,7 +563,7 @@
                     url: ajaxurl.url,
                     type: 'POST',
                     data: {
-                        action: 'wp_annotation_discussions',
+                        action: 'wp_annotation_replies',
                         status: 'add',
                         datas: datas
                     },
@@ -610,7 +610,7 @@
         });
 
         // Delete reply
-        $('body').on('click', '#wp-annotations--discussions .delete', function() {            
+        $('body').on('click', '#wp-annotations--replies .delete', function() {            
             var confirmation = confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');
 
             if( confirmation ){
@@ -629,7 +629,7 @@
                     url: ajaxurl.url,
                     type: 'POST',
                     data: {
-                        action: 'wp_annotation_discussions',
+                        action: 'wp_annotation_replies',
                         status: 'delete',
                         datas: datas
                     },
@@ -673,9 +673,9 @@
         
 
         // Close discussion
-        $('body').on('click', '#wp-annotations--discussions .close-discussions', function() {
+        $('body').on('click', '#wp-annotations--replies .close-replies', function() {
             $('body').removeClass('no-scroll');
-            $('#wp-annotations--discussions').fadeOut(300);
+            $('#wp-annotations--replies').fadeOut(300);
         });
 
         // *** FUNCTIONS

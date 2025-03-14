@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Annotations Plugin
  * Description: Plugin d'annotation
- * Version: 1.0
+ * Version: 1.1
  * Author: Quentin Lequenne
  */
 
@@ -116,7 +116,7 @@ if ( file_exists( WP_ANNOTATION_PATH . 'assets/functions.php' )) {
 if ( file_exists( WP_ANNOTATION_PATH . 'db/database.php' )) {
     include WP_ANNOTATION_PATH . 'db/database.php';
 }
-register_activation_hook(__FILE__, 'wp_annotation_install');
+add_action('init', 'wp_annotation_create_tables');
 
 // Dashboard
 if ( file_exists( WP_ANNOTATION_PATH . 'admin/admin.php' )) {

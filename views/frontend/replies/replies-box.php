@@ -5,8 +5,8 @@
     </div>
     <div class="discussion-box__wrapper" id="discussion-box-content">        
         <?php  
-        if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions-box-content.php' ) ) {
-            include WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions-box-content.php';
+        if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box-content.php' ) ) {
+            include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box-content.php';
         }
         ?>
     </div>

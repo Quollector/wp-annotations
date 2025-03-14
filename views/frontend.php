@@ -4,10 +4,10 @@ if (!defined('ABSPATH')) {
 }
 ?>
 
-<!-- Discussions box -->
+<!-- Replies box -->
 <?php  
-if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions.php' ) ) {
-    include WP_ANNOTATION_PATH . 'views/frontend/discussions/discussions.php';
+if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/replies/replies.php' ) ) {
+    include WP_ANNOTATION_PATH . 'views/frontend/replies/replies.php';
 }
 ?>
 

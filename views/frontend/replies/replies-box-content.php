@@ -3,7 +3,7 @@ if( isset($new_comment_data) ){
     $comment_data = $new_comment_data;
 }
 
-$comments_list = getAllDiscussions($comment_data['id']);
+$comments_list = getAllReplies($comment_data['id']);
 
 $interface_color = get_option('wp_annotation_color', 'blue');
 ?>
@@ -30,7 +30,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
         <?php endif; ?>
     </div>
     <div class="buttons">
-        <button class="close-discussions" title="Fermer">
+        <button class="close-replies" title="Fermer">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                 <path d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59L7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12L5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4"/>
             </svg>
