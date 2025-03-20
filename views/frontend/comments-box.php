@@ -75,7 +75,8 @@ $interface_color = get_option('wp_annotation_color', 'blue');
             <div class="accordeon-header">
                 <h5><?= $page_slug ?></h5>
                 <span>(<?= $count_active ?>)</span>
-                <a href="<?= $page_url ?>?review-mode=1" title="Voir la page">
+                <a href="<?= $page_url ?>" title="Voir la page">
+                <?php // <a href="<= $page_url >?review-mode=1" title="Voir la page"> --> ?>
                     <svg width="800px" height="800px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M6 5.914l2.06-2.06v-.708L5.915 1l-.707.707.043.043.25.25 1 1h-3a2.5 2.5 0 0 0 0 5H4V7h-.5a1.5 1.5 0 1 1 0-3h3L5.207 5.293 5.914 6 6 5.914zM11 2H8.328l-1-1H12l.71.29 3 3L16 5v9l-1 1H6l-1-1V6.5l1 .847V14h9V6h-4V2zm1 0v3h3l-3-3z"/>
                     </svg>
@@ -120,6 +121,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                                         <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
                                 </button>
+                                <?php if ($annotation->user_id == get_current_user_id()) : ?>
                                 <button class="edit" title="Éditer">
                                     <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd" clip-rule="evenodd" d="M14.7566 2.62145C16.5852 0.792851 19.55 0.792851 21.3786 2.62145C23.2072 4.45005 23.2072 7.41479 21.3786 9.24339L11.8933 18.7287C11.3514 19.2706 11.0323 19.5897 10.6774 19.8665C10.2592 20.1927 9.80655 20.4725 9.32766 20.7007C8.92136 20.8943 8.49334 21.037 7.76623 21.2793L4.43511 22.3897L3.63303 22.6571C2.98247 22.8739 2.26522 22.7046 1.78032 22.2197C1.29542 21.7348 1.1261 21.0175 1.34296 20.367L2.72068 16.2338C2.96303 15.5067 3.10568 15.0787 3.29932 14.6724C3.52755 14.1935 3.80727 13.7409 4.13354 13.3226C4.41035 12.9677 4.72939 12.6487 5.27137 12.1067L14.7566 2.62145ZM4.40051 20.8201L7.24203 19.8729C8.03314 19.6092 8.36927 19.4958 8.68233 19.3466C9.06287 19.1653 9.42252 18.943 9.75492 18.6837C10.0284 18.4704 10.2801 18.2205 10.8698 17.6308L18.4393 10.0614C17.6506 9.78321 16.6346 9.26763 15.6835 8.31651C14.7324 7.36538 14.2168 6.34939 13.9387 5.56075L6.36917 13.1302C5.77951 13.7199 5.52959 13.9716 5.3163 14.2451C5.05704 14.5775 4.83476 14.9371 4.65341 15.3177C4.50421 15.6307 4.3908 15.9669 4.12709 16.758L3.17992 19.5995L4.40051 20.8201ZM15.1554 4.34404C15.1896 4.519 15.2474 4.75684 15.3438 5.03487C15.561 5.66083 15.9712 6.48288 16.7442 7.25585C17.5171 8.02881 18.3392 8.43903 18.9651 8.6562C19.2432 8.75266 19.481 8.81046 19.656 8.84466L20.3179 8.18272C21.5607 6.93991 21.5607 4.92492 20.3179 3.68211C19.0751 2.4393 17.0601 2.4393 15.8173 3.68211L15.1554 4.34404Z" fill="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>"/>
@@ -134,6 +136,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                                         <path d="M6.5 6C6.55588 6 6.58382 6 6.60915 5.99936C7.43259 5.97849 8.15902 5.45491 8.43922 4.68032C8.44784 4.65649 8.45667 4.62999 8.47434 4.57697L8.57143 4.28571C8.65431 4.03708 8.69575 3.91276 8.75071 3.8072C8.97001 3.38607 9.37574 3.09364 9.84461 3.01877C9.96213 3 10.0932 3 10.3553 3H13.6447C13.9068 3 14.0379 3 14.1554 3.01877C14.6243 3.09364 15.03 3.38607 15.2493 3.8072C15.3043 3.91276 15.3457 4.03708 15.4286 4.28571L15.5257 4.57697C15.5433 4.62992 15.5522 4.65651 15.5608 4.68032C15.841 5.45491 16.5674 5.97849 17.3909 5.99936C17.4162 6 17.4441 6 17.5 6" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="1.5"/>
                                     </svg>
                                 </button>
+                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -150,11 +153,16 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                         </form>
 
                         <div class="comment-item__screenshot">
-                            <div class="comment-item__screenshot__wrapper">
+                            <div class="comment-item__screenshot--wrapper">
                                 <div class="expend">
                                     <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/expend.svg' ?>" alt="" class="">
                                 </div>
                                 <img src="<?= WP_ANNOTATION_URL . 'assets/images/screenshots/' . $annotation->screenshot_url ?>" alt="" class="src-img">
+                            </div>
+                            <div class="comment-item__screenshot--comments open-add-comments<?= !empty( getAllReplies( $annotation->id ) ) ? ' has-comments' : '' ?>">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M9.5 4c-3.268 0-6 2.419-6 5.5c0 1.222.435 2.347 1.162 3.255l-.644 2.363a.504.504 0 0 0 .674.593l2.8-1.166a.5.5 0 0 0-.385-.923l-1.856.773l.445-1.63a.5.5 0 0 0-.108-.463C4.903 11.528 4.5 10.555 4.5 9.5c0-2.441 2.193-4.5 5-4.5c2.31 0 4.21 1.398 4.805 3.253c-3.18.094-5.805 2.477-5.805 5.497c0 3.081 2.732 5.5 6 5.5a6.5 6.5 0 0 0 2.192-.378l2.616 1.09c.376.156.782-.2.674-.594l-.644-2.363A5.18 5.18 0 0 0 20.5 13.75c0-2.807-2.267-5.064-5.142-5.444C14.758 5.814 12.335 4 9.5 4m0 9.75c0-2.441 2.193-4.5 5-4.5s5 2.059 5 4.5c0 1.055-.403 2.028-1.088 2.802a.5.5 0 0 0-.108.463l.445 1.63l-1.856-.773a.5.5 0 0 0-.377-.003a5.5 5.5 0 0 1-2.016.381c-2.807 0-5-2.058-5-4.5" clip-rule="evenodd"/>
+                                </svg>
                             </div>
                         </div>
                     </div>
@@ -222,6 +230,8 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                                         <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
                                 </button>
+                                
+                                <?php if ($annotation->user_id == get_current_user_id()) : ?>
                                 <button class="delete" title="Effacer">
                                     <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M20.5001 6H3.5" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="1.5" stroke-linecap="round"/>
@@ -231,6 +241,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                                         <path d="M6.5 6C6.55588 6 6.58382 6 6.60915 5.99936C7.43259 5.97849 8.15902 5.45491 8.43922 4.68032C8.44784 4.65649 8.45667 4.62999 8.47434 4.57697L8.57143 4.28571C8.65431 4.03708 8.69575 3.91276 8.75071 3.8072C8.97001 3.38607 9.37574 3.09364 9.84461 3.01877C9.96213 3 10.0932 3 10.3553 3H13.6447C13.9068 3 14.0379 3 14.1554 3.01877C14.6243 3.09364 15.03 3.38607 15.2493 3.8072C15.3043 3.91276 15.3457 4.03708 15.4286 4.28571L15.5257 4.57697C15.5433 4.62992 15.5522 4.65651 15.5608 4.68032C15.841 5.45491 16.5674 5.97849 17.3909 5.99936C17.4162 6 17.4441 6 17.5 6" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="1.5"/>
                                     </svg>
                                 </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="comment-item__content">
@@ -238,11 +249,16 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                         </div>
 
                         <div class="comment-item__screenshot">
-                            <div class="comment-item__screenshot__wrapper">
+                            <div class="comment-item__screenshot--wrapper">
                                 <div class="expend">
                                     <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/expend.svg' ?>" alt="" class="">
                                 </div>
                                 <img src="<?= WP_ANNOTATION_URL . 'assets/images/screenshots/' . $annotation->screenshot_url ?>" alt="" class="src-img">
+                            </div>
+                            <div class="comment-item__screenshot--comments open-add-comments">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M9.5 4c-3.268 0-6 2.419-6 5.5c0 1.222.435 2.347 1.162 3.255l-.644 2.363a.504.504 0 0 0 .674.593l2.8-1.166a.5.5 0 0 0-.385-.923l-1.856.773l.445-1.63a.5.5 0 0 0-.108-.463C4.903 11.528 4.5 10.555 4.5 9.5c0-2.441 2.193-4.5 5-4.5c2.31 0 4.21 1.398 4.805 3.253c-3.18.094-5.805 2.477-5.805 5.497c0 3.081 2.732 5.5 6 5.5a6.5 6.5 0 0 0 2.192-.378l2.616 1.09c.376.156.782-.2.674-.594l-.644-2.363A5.18 5.18 0 0 0 20.5 13.75c0-2.807-2.267-5.064-5.142-5.444C14.758 5.814 12.335 4 9.5 4m0 9.75c0-2.441 2.193-4.5 5-4.5s5 2.059 5 4.5c0 1.055-.403 2.028-1.088 2.802a.5.5 0 0 0-.108.463l.445 1.63l-1.856-.773a.5.5 0 0 0-.377-.003a5.5 5.5 0 0 1-2.016.381c-2.807 0-5-2.058-5-4.5" clip-rule="evenodd"/>
+                                </svg>
                             </div>
                         </div>
                     </div>

@@ -26,19 +26,28 @@ function wp_annotation_add_overlay() {
         </div>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var body = document.body;
-            var annotationDiv = document.getElementById("wp-annotations");
-            if (annotationDiv) {
-                body.insertBefore(annotationDiv, body.firstChild);
-                annotationDiv.style.height = body.scrollHeight + "px";
-            }
-        });
 
-        window.addEventListener("resize", function() {
-            var annotationDiv = document.getElementById("wp-annotations");
-            if (annotationDiv) {
-                annotationDiv.style.height = document.body.scrollHeight + "px";
+        jQuery(document).ready(function($) {
+            var $annotationDiv = $("#wp-annotations");
+            if ($annotationDiv.length) {
+                
+                $("body").prepend($annotationDiv);
+
+                setTimeout(() => {
+                    adjustAnnotationHeight();
+                }, 100);
+            }
+
+            $(window).on("resize", function() {
+                adjustAnnotationHeight();
+            });
+
+            function adjustAnnotationHeight() {
+                var $annotationDiv = $("#wp-annotations");                
+                
+                if ($annotationDiv.length) {
+                    $annotationDiv.css("height", $('html').height() + "px");
+                }
             }
         });
     </script>

@@ -140,12 +140,14 @@
         // *** LIGHTBOX
         $('body').on('click', '.wp-annotations--dashboard .comment-item__screenshot .expend', function() {
             var src = $(this).next().attr('src');
+            $('body').addClass('no-scroll');
 
             $('#wp-annotations--lightbox').fadeIn().find('img.lightbox-img').attr('src', src);
         });
 
         $('body').on('click', '#wp-annotations--lightbox .close-light-button', function() {
             $('#wp-annotations--lightbox').fadeOut();
+            $('body').removeClass('no-scroll');
         });
 
 
@@ -510,9 +512,213 @@
 
         });
 
+        // *** DISCUSSIONS
+        // Open discussion
+        $('body').on('click', '.open-add-comments', function() {            
+            $par = $(this).closest('.comment-item');
+            $commentID = $par.data('comment-id');
+
+            $('body').addClass('no-scroll');
+            $('#wp-annotations--replies').addClass('ajax').fadeIn(300);    
+    
+            var datas = {
+                action: 'open_discussion_wp_annotation',
+                id: $commentID,
+            };                    
+    
+            $.ajax({
+                url: ajaxurl.url,
+                type: 'POST',
+                data: datas,
+                success: function(response) {
+                    if (response.success) {
+                        $('#wp-annotations--replies').removeClass('ajax');  
+                        $('#wp-annotations-replies-display').html(response.data.discussion_content);                     
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
+                    $('#wp-annotations--replies').removeClass('loading');     
+                }
+            });
+        });
+        
+        // Add reply
+        $('body').on('submit', '#discussion-box-form', function(event) {
+            event.preventDefault();
+
+            if( $(this).find('textarea').val() != '' ){
+                $par = $(this).closest('.discussion-box');
+                $par.addClass('ajax');
+                $commentID = $par.data('comment-id');
+                    
+                var datas = [
+                    $par.data('comment-id'),
+                    $par.data('user-id'),
+                    $par.find('textarea').val(),
+                    $par.find('input[name="email"]').val()
+                ];
+        
+                $.ajax({
+                    url: ajaxurl.url,
+                    type: 'POST',
+                    data: {
+                        action: 'wp_annotation_replies',
+                        status: 'add',
+                        datas: datas
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $par.find('textarea, input[name="email"]').val('');
+                            $par.removeClass('ajax');
+                            $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
+                            $('#discussion-box-content').html(response.data.discussion_content);
+                            refreshDashboard();
+        
+                            setTimeout(function() {
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
+                            }, 2000);
+                        } else {
+                            $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
+                            $par.removeClass('ajax');
+        
+                            setTimeout(function() {
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
+                            }, 2000);
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
+                        $par.removeClass('ajax');
+    
+                        setTimeout(function() {
+                            $('#wp-annotations--notices').fadeOut(function(){
+                                $(this).removeClass('error success');
+                            });
+                        }, 2000);
+                    }
+                });
+            }
+            else{
+                alert('Veuillez saisir un commentaire');
+            }
+
+        });
+
+        // Delete reply
+        $('body').on('click', '#wp-annotations--replies .delete', function() {            
+            var confirmation = confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');
+
+            if( confirmation ){
+                $par = $(this).closest('.discussion-box');
+                $par.addClass('ajax');
+                $commentID = $par.data('comment-id');
+                $parRep = $(this).closest('.discussion-reply');
+                $replyID = $parRep.data('id');
+                    
+                var datas = [
+                    $replyID,
+                    $commentID
+                ];
+        
+                $.ajax({
+                    url: ajaxurl.url,
+                    type: 'POST',
+                    data: {
+                        action: 'wp_annotation_replies',
+                        status: 'delete',
+                        datas: datas
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $par.find('textarea, input[name="email"]').val('');
+                            $par.removeClass('ajax');
+                            $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
+                            $('#discussion-box-content').html(response.data.discussion_content);
+                            refreshDashboard();
+        
+                            setTimeout(function() {
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
+                            }, 2000);
+                        } else {
+                            $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
+                            $par.removeClass('ajax');
+        
+                            setTimeout(function() {
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
+                            }, 2000);
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
+                        $par.removeClass('ajax');
+    
+                        setTimeout(function() {
+                            $('#wp-annotations--notices').fadeOut(function(){
+                                $(this).removeClass('error success');
+                            });
+                        }, 2000);
+                    }
+                });
+            }
+        });
+        
+
+        // Close discussion
+        $('body').on('click', '#wp-annotations--replies .close-replies', function() {
+            $('body').removeClass('no-scroll');
+            $('#wp-annotations--replies').fadeOut(300);
+        });
 
         // *** FUNCTIONS
-        function switchCommentsBrowse(){
+        function refreshDashboard(){
+            $('#wp-annotations--dashboard').addClass('ajax');
+    
+            var datas = {
+                action: 'update_wp_annotation',
+                type: 'refresh',
+                view: 'active'
+            };                       
+
+            $.ajax({
+                url: ajaxurl.url,
+                type: 'POST',
+                data: datas,
+                success: function(response) {
+                    if (response.success) {
+                        $('#wp-annotations--dashboard').removeClass('ajax');
+                        $('#wp-annotations--refresh-box').html(response.data.comments_content);                        
+                    } else {
+                        $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
+                        $('#wp-annotations--dashboard').removeClass('ajax');
+
+                        setTimeout(function() {
+                            $('#wp-annotations--notices').fadeOut(function(){
+                                $(this).removeClass('error success');
+                            });
+                        }, 2000);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
+                    $('#wp-annotations--dashboard').removeClass('ajax');
+
+                    setTimeout(function() {
+                        $('#wp-annotations--notices').fadeOut(function(){
+                            $(this).removeClass('error success');
+                        });
+                    }, 2000);
+                }
+            });
+
         }
     });
 })(jQuery);

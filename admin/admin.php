@@ -1,8 +1,4 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 // Ajout d'une page d'options dans l'admin
 function wp_annotation_admin_menu() {
     add_submenu_page(
