@@ -34,7 +34,7 @@ function wp_annotation_submit_comment() {
         // Gérer le screenshot
         $screenshot_path = '';
         if (!empty($_POST['screenshot'])) {
-            $upload_dir = WP_PLUGIN_DIR . '/wp-annotations/assets/images/screenshots/';
+            $upload_dir = WP_ANNOTATION_PATH . '/assets/images/screenshots/';
             if (!file_exists($upload_dir)) {
                 mkdir($upload_dir, 0755, true);
             }
@@ -348,7 +348,7 @@ function flush_reviews_callback() {
     $wpdb->query("DELETE FROM $table_name");
 
     
-    $directory_path = WP_PLUGIN_DIR . '/wp-annotations/assets/images/screenshots/';
+    $directory_path = WP_ANNOTATION_PATH . '/assets/images/screenshots/';
 
     if (is_dir($directory_path)) {
         if ($dir = opendir($directory_path)) {
