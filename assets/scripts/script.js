@@ -672,7 +672,7 @@
         });
         
 
-        // Close discussion
+        // Close reply
         $('body').on('click', '#wp-annotations--replies .close-replies', function() {
             $('body').removeClass('no-scroll');
             $('#wp-annotations--replies').fadeOut(300);

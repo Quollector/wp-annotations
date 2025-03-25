@@ -12,6 +12,18 @@ function is_user_allowed_for_annotations() {
     return in_array($current_user->ID, (array) $allowed_users);
 }
 
+function get_wp_annotations_users_by_name() {
+    $users = get_option('wp_annotation_users', []);
+    $users_array = array();
+
+    foreach ($users as $user) {
+        $userdata = get_userdata($user);
+        $users_array[] = array('id' => $userdata->ID, 'display_name' => $userdata->display_name);
+    }
+
+    return $users_array;
+}
+
 // Get all comment replies
 function getAllReplies($comment_id) {
     global $wpdb;

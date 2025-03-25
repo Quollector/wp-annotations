@@ -80,9 +80,136 @@ $interface_color = get_option('wp_annotation_color', 'blue');
     </div>
 <?php endif; ?>
 <form class="discussion-box__form" id="discussion-box-form">
+    <div id="text-output" class="text-output" contenteditable="true"></div> <!-- Affichage du texte formaté -->
     <textarea name="comment" id="comment" placeholder="Répondre" rows="5"></textarea>
+    <div id="mention-list" class="mention-list"></div>
     <label>
         <input type="checkbox" name="email" value="1" checked> Notifier par courriel
     </label>
     <button type="submit">Envoyer</button>
 </form>
+
+<style>
+    .mention-list {
+        position: absolute;
+        background: white;
+        border: 1px solid #ccc;
+        width: 200px;
+        max-height: 150px;
+        overflow-y: auto;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+    }
+    .mention-list div {
+        padding: 8px;
+        cursor: pointer;
+    }
+    .mention-list div:hover {
+        background: #0075A2;
+        color: white;
+    }
+
+    #text-output {
+        min-height: 30px;
+        border: 1px solid #ccc;
+        padding: 5px;
+        margin-bottom: 10px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        background-color: #f9f9f9;
+    }
+
+    textarea {
+        width: 100%;
+        height: 100px;
+        padding: 5px;
+    }
+</style>
+
+<script>
+(function($) {
+    $(document).ready(function () {
+        let users = <?= json_encode(get_wp_annotations_users_by_name()) ?>;
+        let $textarea = $("#comment");
+        let $textOutput = $("#text-output");
+        let $mentionList = $("#mention-list");
+
+        console.log(users);
+
+        $textarea.on("keyup", function (e) {
+            let cursorPos = this.selectionStart;
+            let text = $(this).val();
+            let lastAtIndex = text.lastIndexOf("@", cursorPos - 1);
+
+            if (lastAtIndex !== -1 && (lastAtIndex === 0 || text.charAt(lastAtIndex - 1) === " ")) {
+                let searchTerm = text.substring(lastAtIndex + 1, cursorPos).toLowerCase();
+                let filteredUsers = users.filter(user => user.display_name.toLowerCase().includes(searchTerm));
+
+                if (filteredUsers.length > 0) {
+                    $mentionList.html(filteredUsers.map(user => `<div data-user-id="${user.id}">${user.display_name}</div>`).join(""));
+                    $mentionList.show();
+
+                    let textareaOffset = $textarea.offset();
+                    let lineHeight = 20;
+                    let topPos = textareaOffset.top + ($textarea.outerHeight() / 2) + lineHeight;
+                    let leftPos = textareaOffset.left;
+
+                    $mentionList.css({
+                        left: leftPos + "px",
+                        top: topPos + "px"
+                    });
+                } else {
+                    $mentionList.hide();
+                }
+            } else {
+                $mentionList.hide();
+            }
+        });
+
+        $(document).on("click", "#mention-list div", function () {
+            let selectedUser = $(this).text();
+            let text = $textarea.val();
+            let cursorPos = $textarea[0].selectionStart;
+            let lastAtIndex = text.lastIndexOf("@", cursorPos - 1);
+
+            if (lastAtIndex !== -1) {
+                let newText = text.substring(0, lastAtIndex + 1) + selectedUser + " " + text.substring(cursorPos);
+                $textarea.val(newText).focus();
+
+                // Met à jour l'affichage dans le div
+                updateTextOutput();
+            }
+
+            $mentionList.hide();
+        });
+
+        $(document).click(function (e) {
+            if (!$(e.target).closest("#mention-list, #comment").length) {
+                $mentionList.hide();
+            }
+        });
+
+        // Met à jour le contenu dans le div avec les mentions stylisées
+        function updateTextOutput() {
+            let text = $textarea.val();
+            let mentionPattern = /@([a-zA-Z0-9_]+)/g;  // Utilise une expression régulière pour trouver les mentions
+
+            let formattedText = text.replace(mentionPattern, function(match, username) {
+                return `<span style="color: blue;">${match}</span>`;  // Colorie la mention en bleu
+            });
+
+            $textOutput.html(formattedText);
+        }
+
+        // Synchroniser le div et le textarea lors de la saisie
+        $textarea.on('input', function() {
+            updateTextOutput();
+        });
+
+        // Initialiser l'affichage
+        updateTextOutput();
+    });
+})(jQuery);
+</script>
