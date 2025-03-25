@@ -18,7 +18,7 @@ function get_wp_annotations_users_by_name() {
 
     foreach ($users as $user) {
         $userdata = get_userdata($user);
-        $users_array[] = array('id' => $userdata->ID, 'display_name' => $userdata->display_name);
+        $users_array[$userdata->ID] = $userdata->display_name;
     }
 
     return $users_array;
@@ -35,7 +35,7 @@ function getAllReplies($comment_id) {
 }
 
 // Extract users Emails
-function extractUsersEmails($datas){
+function extractUsersEmails($datas, $comment, $notifications){
     $users_array_raw = array();
     $replies = getAllReplies($datas['id']);
 
@@ -47,8 +47,21 @@ function extractUsersEmails($datas){
         }
     }
 
+    if(!empty($notifications)){
+        foreach($notifications as $not_id){
+            $username = get_userdata($not_id)->display_name;
+            $pattern = '/@' . preg_quote($username, '/') . '/';
+
+            if(preg_match($pattern, $comment)){
+                $users_array_raw[] = $not_id;
+            }
+        }
+    }
+
     $users_array = array_unique($users_array_raw);
     $users_array = array_values($users_array);
+
+    error_log(print_r($users_array, true));
 
     foreach($users_array as $user_id){
         if($user_id != get_current_user_id()){
@@ -61,8 +74,8 @@ function extractUsersEmails($datas){
 }
 
 // Send notification email to user
-function sendNotificationEmail($datas, $comment){
-    $emails = extractUsersEmails($datas);
+function sendNotificationEmail($datas, $comment, $notifications){
+    $emails = extractUsersEmails($datas, $comment, $notifications);
     $current_user_name = get_userdata(get_current_user_id())->display_name;
     $interface_color = get_option('wp_annotation_color', 'blue');
     
@@ -101,4 +114,15 @@ function sendNotificationEmail($datas, $comment){
             error_log( "Échec de l'envoi d'e-mail.");
         }
     }
+}
+
+// Format notifications comment
+function formatNotificationsComment($comment){
+    $pattern = '/@([a-zA-Z0-9_]+)/';
+
+    $formattedComment = preg_replace_callback($pattern, function($matches) {
+        return '<span class="mention">@' . $matches[1] . '</span>';
+    }, $comment);
+
+    return $formattedComment;
 }

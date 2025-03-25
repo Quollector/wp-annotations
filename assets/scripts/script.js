@@ -512,8 +512,8 @@
 
         });
 
-        // *** DISCUSSIONS
-        // Open discussion
+        // *** REPLIES
+        // Open reply
         $('body').on('click', '.open-add-comments', function() {            
             $par = $(this).closest('.comment-item');
             $commentID = $par.data('comment-id');
@@ -522,7 +522,7 @@
             $('#wp-annotations--replies').addClass('ajax').fadeIn(300);    
     
             var datas = {
-                action: 'open_discussion_wp_annotation',
+                action: 'open_reply_wp_annotation',
                 id: $commentID,
             };                    
     
@@ -533,7 +533,7 @@
                 success: function(response) {
                     if (response.success) {
                         $('#wp-annotations--replies').removeClass('ajax');  
-                        $('#wp-annotations-replies-display').html(response.data.discussion_content);                     
+                        $('#wp-annotations-replies-display').html(response.data.reply_content);                     
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
@@ -544,19 +544,27 @@
         });
         
         // Add reply
-        $('body').on('submit', '#discussion-box-form', function(event) {
+        $('body').on('submit', '#reply-box-form', function(event) {
             event.preventDefault();
 
             if( $(this).find('textarea').val() != '' ){
-                $par = $(this).closest('.discussion-box');
+                $par = $(this).closest('.reply-box');
                 $par.addClass('ajax');
                 $commentID = $par.data('comment-id');
+
+                var targetsEmail = [];
+                $(this).find('input[name="targets_email[]"]').each(function() {
+                    targetsEmail.push($(this).val());
+                });
+
+                targetsEmail = [...new Set(targetsEmail)];
                     
                 var datas = [
                     $par.data('comment-id'),
                     $par.data('user-id'),
                     $par.find('textarea').val(),
-                    $par.find('input[name="email"]').val()
+                    $par.find('input[name="email"]').val(),
+                    targetsEmail
                 ];
         
                 $.ajax({
@@ -572,7 +580,7 @@
                             $par.find('textarea, input[name="email"]').val('');
                             $par.removeClass('ajax');
                             $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
-                            $('#discussion-box-content').html(response.data.discussion_content);
+                            $('#reply-box-content').html(response.data.reply_content);
                             refreshDashboard();
         
                             setTimeout(function() {
@@ -614,10 +622,10 @@
             var confirmation = confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');
 
             if( confirmation ){
-                $par = $(this).closest('.discussion-box');
+                $par = $(this).closest('.reply-box');
                 $par.addClass('ajax');
                 $commentID = $par.data('comment-id');
-                $parRep = $(this).closest('.discussion-reply');
+                $parRep = $(this).closest('.reply-item');
                 $replyID = $parRep.data('id');
                     
                 var datas = [
@@ -638,7 +646,7 @@
                             $par.find('textarea, input[name="email"]').val('');
                             $par.removeClass('ajax');
                             $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
-                            $('#discussion-box-content').html(response.data.discussion_content);
+                            $('#reply-box-content').html(response.data.reply_content);
                             refreshDashboard();
         
                             setTimeout(function() {
@@ -671,11 +679,55 @@
             }
         });
         
-
         // Close reply
         $('body').on('click', '#wp-annotations--replies .close-replies', function() {
             $('body').removeClass('no-scroll');
             $('#wp-annotations--replies').fadeOut(300);
+        });
+
+        // Replies notifications
+        $('body').on('keyup', '#reply-box-form textarea', function(event) {
+            $textarea = $(this);
+            $mentionList = $textarea.closest('form').find('#mention-list');
+            var cursorPos = this.selectionStart;
+            var text = $textarea.val().substring(0, cursorPos);
+            var match = text.match(/@(\w*)$/); // Recherche le dernier '@' suivi d'un texte
+    
+            if (match) {
+                $mentionList.slideDown(250);
+            } else {
+                $mentionList.slideUp(250);
+            }
+        });        
+        
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#mention-list, #reply-box-form textarea').length) {
+                $(this).closest('form').find('#mention-list').slideUp(250);
+            }
+        });
+
+        $(document).on('click', '.mention-list__item', function() {
+            $this = $(this);
+            $textarea = $this.closest('form').find('textarea');
+            $mentionList = $this.closest('form').find('#mention-list');
+            var username = $this.data('user-name');            
+            var text = $textarea.val();
+            var cursorPos = $textarea[0].selectionStart;
+            var beforeCursor = text.substring(0, cursorPos);
+            var afterCursor = text.substring(cursorPos);            
+            
+            let $input = $('<input>', {
+                type: 'hidden',
+                name: 'targets_email[]',
+                value: $this.data('user-id')
+            });
+
+            $(this).closest('form').append($input);
+            
+            var newText = beforeCursor.replace(/@(\w*)$/, '@' + username + ' ') + afterCursor;
+            $textarea.val(newText);
+            $mentionList.slideUp(250);
+            $textarea.focus();
         });
 
         // *** FUNCTIONS

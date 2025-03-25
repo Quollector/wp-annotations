@@ -209,9 +209,9 @@ function wp_annotation_update_comment() {
 
 add_action('wp_ajax_update_wp_annotation', 'wp_annotation_update_comment');
 
-// *** DISCUSSIONS
+// *** REPLIES
 // First display
-function wp_annotation_show_discussion() {
+function wp_annotation_show_reply() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
 
@@ -224,14 +224,14 @@ function wp_annotation_show_discussion() {
     ob_start();
     extract($comment_data);
     include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box.php';
-    $discussion_content = ob_get_clean();
+    $reply_content = ob_get_clean();
     
     wp_send_json_success([
-        'discussion_content' => $discussion_content
+        'reply_content' => $reply_content
     ]);
 }
 
-add_action('wp_ajax_open_discussion_wp_annotation', 'wp_annotation_show_discussion');
+add_action('wp_ajax_open_reply_wp_annotation', 'wp_annotation_show_reply');
 
 // Manage replies
 function wp_annotation_replies() {
@@ -259,22 +259,24 @@ function wp_annotation_replies() {
             if ($insert) {                
                 $table_reviews = $wpdb->prefix . 'reviews';
                 $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", intval($datas[0])), ARRAY_A);
+                $notifications = $datas[4];
 
                 if ( $datas[3] ){
                     sendNotificationEmail(
                         $new_comment_data,
-                        stripslashes(sanitize_text_field($datas[2]))
+                        stripslashes(sanitize_text_field($datas[2])),
+                        $notifications
                     );
                 }
 
                 ob_start();
                 extract($new_comment_data);
                 include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box-content.php';
-                $discussion_content = ob_get_clean();
+                $reply_content = ob_get_clean();
     
                 wp_send_json_success([
                     'message' => 'Commentaire ajouté avec succès',
-                    'discussion_content' => $discussion_content
+                    'reply_content' => $reply_content
                 ]);
             } else {
                 wp_send_json_error(['message' => 'Une erreur est survenue lors de l\'ajout du commentaire.']);
@@ -298,11 +300,11 @@ function wp_annotation_replies() {
                 ob_start();
                 extract($new_comment_data);
                 include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box-content.php';
-                $discussion_content = ob_get_clean();
+                $reply_content = ob_get_clean();
     
                 wp_send_json_success([
                     'message' => 'Commentaire supprimé avec succès',
-                    'discussion_content' => $discussion_content
+                    'reply_content' => $reply_content
                 ]);
             } else {
                 wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);

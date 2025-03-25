@@ -6,8 +6,11 @@ if( isset($new_comment_data) ){
 $comments_list = getAllReplies($comment_data['id']);
 
 $interface_color = get_option('wp_annotation_color', 'blue');
+
+$targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_data['user_id'] : ''];
+
 ?>
-<div class="discussion-box__header">
+<div class="reply-box__header">
     <div class="dot">
         <?= $comment_data['id'] ?>
     </div>
@@ -37,22 +40,26 @@ $interface_color = get_option('wp_annotation_color', 'blue');
         </button>
     </div>
 </div>
-<div class="discussion-box__comment">
+<div class="reply-box__comment">
     <?= $comment_data['commentaire'] ?>
 </div>
 <?php if( !empty( $comments_list ) ): ?>
-    <div class="discussion-box__replies">
-        <?php foreach( $comments_list as $comment ): ?>
-            <div class="discussion-reply" data-id="<?= $comment->id ?>">
-                <div class="discussion-reply__header">
-                    <div class="discussion-reply__header--user">
+    <div class="reply-box__replies">
+        <?php foreach( $comments_list as $comment ): 
+                if ($comment->user_id != get_current_user_id() && !in_array($comment->user_id, $targets_email)):
+                    $targets_email[] =  $comment->user_id; 
+                endif;
+            ?>
+            <div class="reply-item" data-id="<?= $comment->id ?>">
+                <div class="reply-item__header">
+                    <div class="reply-item__header--user">
                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16">
                             <path d="M6 12.5a.47.47 0 0 1-.35-.15l-4.5-4.5C1.06 7.76 1 7.63 1 7.5s.05-.26.15-.35l4.5-4.5c.2-.2.51-.2.71 0s.2.51 0 .71L2.21 7.5l4.15 4.15c.2.2.2.51 0 .71c-.1.1-.23.15-.35.15Z"/>
                             <path d="M13.5 14c-.28 0-.5-.22-.5-.5v-3A2.5 2.5 0 0 0 10.5 8H2.7c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h7.8c1.93 0 3.5 1.57 3.5 3.5v3c0 .28-.22.5-.5.5"/>
                         </svg>
                         <h6><?= get_userdata($comment->user_id)->display_name ?></h6>
                     </div>
-                    <div class="discussion-reply__header--infos">
+                    <div class="reply-item__header--infos">
                         <span>
                             <?= date('d.m.Y', strtotime($comment->timestamp)) ?>
                         </span>
@@ -72,144 +79,27 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                         <?php endif; ?>
                     </div>
                 </div>
-                <div class="discussion-reply__content">
-                    <?= $comment->commentaire ?>
+                <div class="reply-item__content">
+                    <?= formatNotificationsComment($comment->commentaire) ?>
                 </div>
             </div>
         <?php endforeach; ?>
     </div>
 <?php endif; ?>
-<form class="discussion-box__form" id="discussion-box-form">
-    <div id="text-output" class="text-output" contenteditable="true"></div> <!-- Affichage du texte formaté -->
+<form class="reply-box__form" id="reply-box-form">
+    <?php foreach($targets_email as $email_id): ?>
+        <input type="hidden" name="targets_email[]" value="<?= $email_id ?>">
+    <?php endforeach; ?>
     <textarea name="comment" id="comment" placeholder="Répondre" rows="5"></textarea>
-    <div id="mention-list" class="mention-list"></div>
+    <div id="mention-list" class="mention-list">
+        <div class="mention-list__wrapper">
+            <?php foreach(get_wp_annotations_users_by_name() as $id => $user): if($id != get_current_user_id()): ?>
+                <div class="mention-list__item" data-user-id="<?= $id ?>" data-user-name="<?= $user ?>">@<?= $user ?></div>        
+            <?php endif; endforeach; ?>
+        </div>
+    </div>
     <label>
         <input type="checkbox" name="email" value="1" checked> Notifier par courriel
     </label>
     <button type="submit">Envoyer</button>
 </form>
-
-<style>
-    .mention-list {
-        position: absolute;
-        background: white;
-        border: 1px solid #ccc;
-        width: 200px;
-        max-height: 150px;
-        overflow-y: auto;
-        display: none;
-        z-index: 1000;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        border-radius: 5px;
-    }
-    .mention-list div {
-        padding: 8px;
-        cursor: pointer;
-    }
-    .mention-list div:hover {
-        background: #0075A2;
-        color: white;
-    }
-
-    #text-output {
-        min-height: 30px;
-        border: 1px solid #ccc;
-        padding: 5px;
-        margin-bottom: 10px;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        background-color: #f9f9f9;
-    }
-
-    textarea {
-        width: 100%;
-        height: 100px;
-        padding: 5px;
-    }
-</style>
-
-<script>
-(function($) {
-    $(document).ready(function () {
-        let users = <?= json_encode(get_wp_annotations_users_by_name()) ?>;
-        let $textarea = $("#comment");
-        let $textOutput = $("#text-output");
-        let $mentionList = $("#mention-list");
-
-        console.log(users);
-
-        $textarea.on("keyup", function (e) {
-            let cursorPos = this.selectionStart;
-            let text = $(this).val();
-            let lastAtIndex = text.lastIndexOf("@", cursorPos - 1);
-
-            if (lastAtIndex !== -1 && (lastAtIndex === 0 || text.charAt(lastAtIndex - 1) === " ")) {
-                let searchTerm = text.substring(lastAtIndex + 1, cursorPos).toLowerCase();
-                let filteredUsers = users.filter(user => user.display_name.toLowerCase().includes(searchTerm));
-
-                if (filteredUsers.length > 0) {
-                    $mentionList.html(filteredUsers.map(user => `<div data-user-id="${user.id}">${user.display_name}</div>`).join(""));
-                    $mentionList.show();
-
-                    let textareaOffset = $textarea.offset();
-                    let lineHeight = 20;
-                    let topPos = textareaOffset.top + ($textarea.outerHeight() / 2) + lineHeight;
-                    let leftPos = textareaOffset.left;
-
-                    $mentionList.css({
-                        left: leftPos + "px",
-                        top: topPos + "px"
-                    });
-                } else {
-                    $mentionList.hide();
-                }
-            } else {
-                $mentionList.hide();
-            }
-        });
-
-        $(document).on("click", "#mention-list div", function () {
-            let selectedUser = $(this).text();
-            let text = $textarea.val();
-            let cursorPos = $textarea[0].selectionStart;
-            let lastAtIndex = text.lastIndexOf("@", cursorPos - 1);
-
-            if (lastAtIndex !== -1) {
-                let newText = text.substring(0, lastAtIndex + 1) + selectedUser + " " + text.substring(cursorPos);
-                $textarea.val(newText).focus();
-
-                // Met à jour l'affichage dans le div
-                updateTextOutput();
-            }
-
-            $mentionList.hide();
-        });
-
-        $(document).click(function (e) {
-            if (!$(e.target).closest("#mention-list, #comment").length) {
-                $mentionList.hide();
-            }
-        });
-
-        // Met à jour le contenu dans le div avec les mentions stylisées
-        function updateTextOutput() {
-            let text = $textarea.val();
-            let mentionPattern = /@([a-zA-Z0-9_]+)/g;  // Utilise une expression régulière pour trouver les mentions
-
-            let formattedText = text.replace(mentionPattern, function(match, username) {
-                return `<span style="color: blue;">${match}</span>`;  // Colorie la mention en bleu
-            });
-
-            $textOutput.html(formattedText);
-        }
-
-        // Synchroniser le div et le textarea lors de la saisie
-        $textarea.on('input', function() {
-            updateTextOutput();
-        });
-
-        // Initialiser l'affichage
-        updateTextOutput();
-    });
-})(jQuery);
-</script>
