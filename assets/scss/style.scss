@@ -1036,7 +1036,7 @@ html{
         }
     }
 
-    .discussion-box{
+    .reply-box{
         background: #FFF;
         width: 650px;
         max-width: calc(100% - 48px);
@@ -1046,7 +1046,7 @@ html{
         margin: 0 auto;
 
         &.ajax{
-            .discussion-box__ajax{
+            .reply-box__ajax{
                 opacity: 1;
                 visibility: visible;
             }
@@ -1195,7 +1195,7 @@ html{
             padding-bottom: 12px;
             border-bottom: 1px solid rgba($sombre_rgb, 0.3);
 
-            .discussion-reply{
+            .reply-item{
                 padding: 8px 8px 8px 12px;
                 border-left: 2px solid rgba($clair_rgb, 0.5);
                 background: rgba($clair_rgb, 0.05);
@@ -1288,9 +1288,69 @@ html{
                     margin-top: 12px;
                     font-size: 16px;
                     color: $sombre;
+
+                    p{
+                        & + p{
+                            margin-top: 8px;
+                        }
+                    }
+
+                    span{
+                        &.mention{
+                            color: $main;
+                            font-weight: 700;
+                        }
+                    }
                 }
 
-                & + .discussion-reply{
+                &__image{
+                    margin-top: 12px;
+                    width: 80px;
+                    aspect-ratio: 4/3;
+                    border-radius: 12px;
+                    object-fit: cover;
+                    border: 1px solid rgba($sombre_rgb, 0.3);
+                    overflow: hidden;
+                    cursor: pointer;
+                    position: relative;
+    
+                    .expend{
+                        position: absolute;
+                        z-index: 2;
+                        top: 0;
+                        right: 0;
+                        width: 100%;
+                        height: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: rgba(0, 0, 0, 0.5);
+                        opacity: 0;
+                        transition: all .5s ease;
+    
+                        img{
+                            width: 30px;
+                            height: 30px;
+                            object-fit: contain;
+                        }
+                    }
+    
+                    & > img{
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        position: relative;
+                        z-index: 1;
+                    }
+    
+                    &:hover{
+                        .expend{
+                            opacity: 1;
+                        }
+                    }
+                }
+
+                & + .reply-item{
                     margin-top: 16px;
                 }
             }
@@ -1311,6 +1371,33 @@ html{
             justify-content: space-between;
             gap: 12px;
             flex-wrap: wrap;
+
+            .mention-list{
+                display: none;
+                width: 100%;
+
+                &__wrapper{
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+
+                &__item{
+                    padding: 3px 6px;
+                    border: 1px solid $clair;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    transition: background .5s ease;
+
+                    &:hover{
+                        background: rgba($clair_rgb, 0.5);
+                    }
+                }
+            }
 
             textarea{
                 width: 100%;
@@ -1335,6 +1422,85 @@ html{
                 display: flex;
                 align-items: center;
                 gap: 5px;
+            }
+
+            .file-input{
+                width: 100%;
+                display: flex;
+                align-items: center;
+
+                .reply-file{
+                    width: 100%;
+                }
+
+                input{
+                    display: none;
+                }
+
+                &__front{
+                    font-size: 12px;
+                    width: 100%;
+
+                    iconify-icon{
+                        font-size: 14px;
+                    }
+
+                    .unfiled{                            
+                        &__wrap{
+                            width: fit-content;
+                            color: $sombre;
+                            transition: all .5s ease;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 4px;
+                            padding: 4px 6px;
+                            border: 1px solid $sombre;
+                            border-radius: 5px;
+
+                            &:hover{
+                                background: rgba($main_rgb, 0.1);
+                            }
+                        }
+                    }
+
+                    .filed{
+                        display: none;
+
+                        &__wrap{
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            width: fit-content;
+                            max-width: 100%;
+                            overflow: hidden;
+
+                            .text{
+                                color: $sombre;
+                                flex-grow: 1;
+                                display: inline-block;
+                                max-width: 100%;
+                                overflow: hidden;
+                                white-space: nowrap;
+                                text-overflow: ellipsis;
+                                vertical-align: middle;
+                            }
+
+                            .clear{
+                                color: $sombre;
+                                transition: all .5s ease;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                flex-shrink: 0;
+
+                                &:hover{
+                                    color: $clair;
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             button{

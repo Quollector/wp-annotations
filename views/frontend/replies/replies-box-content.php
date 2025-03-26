@@ -6,8 +6,11 @@ if( isset($new_comment_data) ){
 $comments_list = getAllReplies($comment_data['id']);
 
 $interface_color = get_option('wp_annotation_color', 'blue');
+
+$targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_data['user_id'] : ''];
+
 ?>
-<div class="discussion-box__header">
+<div class="reply-box__header">
     <div class="dot">
         <?= $comment_data['id'] ?>
     </div>
@@ -37,22 +40,26 @@ $interface_color = get_option('wp_annotation_color', 'blue');
         </button>
     </div>
 </div>
-<div class="discussion-box__comment">
+<div class="reply-box__comment">
     <?= $comment_data['commentaire'] ?>
 </div>
 <?php if( !empty( $comments_list ) ): ?>
-    <div class="discussion-box__replies">
-        <?php foreach( $comments_list as $comment ): ?>
-            <div class="discussion-reply" data-id="<?= $comment->id ?>">
-                <div class="discussion-reply__header">
-                    <div class="discussion-reply__header--user">
+    <div class="reply-box__replies">
+        <?php foreach( $comments_list as $comment ): 
+                if ($comment->user_id != get_current_user_id() && !in_array($comment->user_id, $targets_email)):
+                    $targets_email[] =  $comment->user_id; 
+                endif;
+            ?>
+            <div class="reply-item" data-id="<?= $comment->id ?>">
+                <div class="reply-item__header">
+                    <div class="reply-item__header--user">
                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16">
                             <path d="M6 12.5a.47.47 0 0 1-.35-.15l-4.5-4.5C1.06 7.76 1 7.63 1 7.5s.05-.26.15-.35l4.5-4.5c.2-.2.51-.2.71 0s.2.51 0 .71L2.21 7.5l4.15 4.15c.2.2.2.51 0 .71c-.1.1-.23.15-.35.15Z"/>
                             <path d="M13.5 14c-.28 0-.5-.22-.5-.5v-3A2.5 2.5 0 0 0 10.5 8H2.7c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h7.8c1.93 0 3.5 1.57 3.5 3.5v3c0 .28-.22.5-.5.5"/>
                         </svg>
                         <h6><?= get_userdata($comment->user_id)->display_name ?></h6>
                     </div>
-                    <div class="discussion-reply__header--infos">
+                    <div class="reply-item__header--infos">
                         <span>
                             <?= date('d.m.Y', strtotime($comment->timestamp)) ?>
                         </span>
@@ -72,15 +79,49 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                         <?php endif; ?>
                     </div>
                 </div>
-                <div class="discussion-reply__content">
-                    <?= $comment->commentaire ?>
+                <div class="reply-item__content">
+                    <?= formatNotificationsComment($comment->commentaire) ?>
+                </div>
+                <div class="reply-item__image">
+                    <div class="expend">
+                        <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/expend.svg' ?>" alt="" class="">
+                    </div>
+                    <img src="<?= WP_ANNOTATION_URL . 'assets/images/replies/' . $comment->file_path ?>" alt="" class="src-img">
                 </div>
             </div>
         <?php endforeach; ?>
     </div>
 <?php endif; ?>
-<form class="discussion-box__form" id="discussion-box-form">
+<form class="reply-box__form" id="reply-box-form">
+    <?php foreach($targets_email as $email_id): ?>
+        <input type="hidden" name="targets_email[]" value="<?= $email_id ?>">
+    <?php endforeach; ?>
     <textarea name="comment" id="comment" placeholder="Répondre" rows="5"></textarea>
+    <div id="mention-list" class="mention-list">
+        <div class="mention-list__wrapper">
+            <?php foreach(get_wp_annotations_users_by_name() as $id => $user): if($id != get_current_user_id()): ?>
+                <div class="mention-list__item" data-user-id="<?= $id ?>" data-user-name="<?= $user ?>">@<?= $user ?></div>        
+            <?php endif; endforeach; ?>
+        </div>
+    </div>
+    
+    <div class="file-input">
+        <input type="file" name="reply-file" accept="image/*">
+        <div class="file-input__front">
+            <div class="unfiled">
+                <div class="unfiled__wrap">
+                    Ajouter une image <iconify-icon icon="iconamoon:file-add-light"></iconify-icon>
+                </div>
+            </div>
+            <div class="filed">
+                <div class="filed__wrap">
+                    <div class="text">test.jpeg</div>
+                    <div class="clear"><iconify-icon icon="ph:file-x-duotone"></iconify-icon></iconify-icon></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <label>
         <input type="checkbox" name="email" value="1" checked> Notifier par courriel
     </label>

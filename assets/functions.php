@@ -12,6 +12,18 @@ function is_user_allowed_for_annotations() {
     return in_array($current_user->ID, (array) $allowed_users);
 }
 
+function get_wp_annotations_users_by_name() {
+    $users = get_option('wp_annotation_users', []);
+    $users_array = array();
+
+    foreach ($users as $user) {
+        $userdata = get_userdata($user);
+        $users_array[$userdata->ID] = $userdata->display_name;
+    }
+
+    return $users_array;
+}
+
 // Get all comment replies
 function getAllReplies($comment_id) {
     global $wpdb;
@@ -23,7 +35,7 @@ function getAllReplies($comment_id) {
 }
 
 // Extract users Emails
-function extractUsersEmails($datas){
+function extractUsersEmails($datas, $comment, $notifications){
     $users_array_raw = array();
     $replies = getAllReplies($datas['id']);
 
@@ -32,6 +44,17 @@ function extractUsersEmails($datas){
     if(!empty($replies)){
         foreach($replies as $reply){
             $users_array_raw[] = $reply->user_id;
+        }
+    }
+
+    if(!empty($notifications)){
+        foreach($notifications as $not_id){
+            $username = get_userdata($not_id)->display_name;
+            $pattern = '/@' . preg_quote($username, '/') . '/';
+
+            if(preg_match($pattern, $comment)){
+                $users_array_raw[] = $not_id;
+            }
         }
     }
 
@@ -49,8 +72,8 @@ function extractUsersEmails($datas){
 }
 
 // Send notification email to user
-function sendNotificationEmail($datas, $comment){
-    $emails = extractUsersEmails($datas);
+function sendNotificationEmail($datas, $comment, $notifications){
+    $emails = extractUsersEmails($datas, $comment, $notifications);
     $current_user_name = get_userdata(get_current_user_id())->display_name;
     $interface_color = get_option('wp_annotation_color', 'blue');
     
@@ -89,4 +112,19 @@ function sendNotificationEmail($datas, $comment){
             error_log( "Échec de l'envoi d'e-mail.");
         }
     }
+}
+
+// Format notifications comment
+function formatNotificationsComment($comment) {
+    $comment = esc_html($comment);
+
+    $paragraphs = explode("\n", trim($comment));
+    $comment = '<p>' . implode('</p><p>', array_filter($paragraphs)) . '</p>';
+
+    $pattern = '/@([a-zA-Z0-9_]+)/';
+    $formattedComment = preg_replace_callback($pattern, function($matches) {
+        return '<span class="mention">@' . esc_html($matches[1]) . '</span>';
+    }, $comment);
+
+    return $formattedComment;
 }

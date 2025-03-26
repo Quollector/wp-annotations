@@ -138,7 +138,7 @@
         });
 
         // *** LIGHTBOX
-        $('body').on('click', '.wp-annotations--dashboard .comment-item__screenshot .expend', function() {
+        $('body').on('click', '.wp-annotations .expend', function() {
             var src = $(this).next().attr('src');
             $('body').addClass('no-scroll');
 
@@ -512,8 +512,8 @@
 
         });
 
-        // *** DISCUSSIONS
-        // Open discussion
+        // *** REPLIES
+        // Open reply
         $('body').on('click', '.open-add-comments', function() {            
             $par = $(this).closest('.comment-item');
             $commentID = $par.data('comment-id');
@@ -522,7 +522,7 @@
             $('#wp-annotations--replies').addClass('ajax').fadeIn(300);    
     
             var datas = {
-                action: 'open_discussion_wp_annotation',
+                action: 'open_reply_wp_annotation',
                 id: $commentID,
             };                    
     
@@ -533,7 +533,7 @@
                 success: function(response) {
                     if (response.success) {
                         $('#wp-annotations--replies').removeClass('ajax');  
-                        $('#wp-annotations-replies-display').html(response.data.discussion_content);                     
+                        $('#wp-annotations-replies-display').html(response.data.reply_content);                     
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
@@ -544,35 +544,71 @@
         });
         
         // Add reply
-        $('body').on('submit', '#discussion-box-form', function(event) {
+        $('body').on('submit', '#reply-box-form', function(event) {
             event.preventDefault();
+            $this = $(this);
 
             if( $(this).find('textarea').val() != '' ){
-                $par = $(this).closest('.discussion-box');
+                $par = $(this).closest('.reply-box');
                 $par.addClass('ajax');
-                $commentID = $par.data('comment-id');
+
+                var commentID = $par.data('comment-id');
+                var userID = $par.data('user-id');
+                var commentText = $this.find('textarea').val();
+                var notifyEmail = $this.find('input[name="email"]').is(':checked') ? 1 : 0;
+
+                var targetsEmail = [];
+                $(this).find('input[name="targets_email[]"]').each(function() {
+                    targetsEmail.push($(this).val());
+                });
+
+                targetsEmail = [...new Set(targetsEmail)];
+
+                console.log(targetsEmail);                
+
+                var formData = new FormData();
+                formData.append('action', 'wp_annotation_replies');
+                formData.append('status', 'add');
+                formData.append('comment_id', commentID);
+                formData.append('user_id', userID);
+                formData.append('comment_text', commentText);
+                formData.append('notify_email', notifyEmail);
+        
+                // Ajouter les emails
+                if( targetsEmail.length < 0 ){
+                    targetsEmail.forEach((email, index) => {
+                        formData.append(`targets_email[${index}]`, email);
+                    });
+                } else {
+                    formData.append('targets_email', '');
+                }
+        
+                // Ajouter le fichier si un fichier est sélectionné
+                var fileInput = $this.find('input[type="file"]')[0];
+                if (fileInput.files.length > 0) {
+                    formData.append('reply_file', fileInput.files[0]);
+                }
                     
-                var datas = [
-                    $par.data('comment-id'),
-                    $par.data('user-id'),
-                    $par.find('textarea').val(),
-                    $par.find('input[name="email"]').val()
-                ];
+                // var datas = [
+                //     $par.data('comment-id'),
+                //     $par.data('user-id'),
+                //     $par.find('textarea').val(),
+                //     $par.find('input[name="email"]').val(),
+                //     targetsEmail
+                // ];
         
                 $.ajax({
                     url: ajaxurl.url,
                     type: 'POST',
-                    data: {
-                        action: 'wp_annotation_replies',
-                        status: 'add',
-                        datas: datas
-                    },
+                    data: formData,
+                    processData: false,  // Important pour envoyer `FormData`
+                    contentType: false,  // Empêche jQuery de définir un content-type incorrect
                     success: function(response) {
                         if (response.success) {
                             $par.find('textarea, input[name="email"]').val('');
                             $par.removeClass('ajax');
                             $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
-                            $('#discussion-box-content').html(response.data.discussion_content);
+                            $('#reply-box-content').html(response.data.reply_content);
                             refreshDashboard();
         
                             setTimeout(function() {
@@ -614,10 +650,10 @@
             var confirmation = confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');
 
             if( confirmation ){
-                $par = $(this).closest('.discussion-box');
+                $par = $(this).closest('.reply-box');
                 $par.addClass('ajax');
                 $commentID = $par.data('comment-id');
-                $parRep = $(this).closest('.discussion-reply');
+                $parRep = $(this).closest('.reply-item');
                 $replyID = $parRep.data('id');
                     
                 var datas = [
@@ -638,7 +674,7 @@
                             $par.find('textarea, input[name="email"]').val('');
                             $par.removeClass('ajax');
                             $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
-                            $('#discussion-box-content').html(response.data.discussion_content);
+                            $('#reply-box-content').html(response.data.reply_content);
                             refreshDashboard();
         
                             setTimeout(function() {
@@ -671,11 +707,102 @@
             }
         });
         
-
-        // Close discussion
+        // Close reply
         $('body').on('click', '#wp-annotations--replies .close-replies', function() {
             $('body').removeClass('no-scroll');
             $('#wp-annotations--replies').fadeOut(300);
+        });
+
+        // Replies mentions
+        $('body').on('keyup', '#reply-box-form textarea', function(event) {
+            $textarea = $(this);
+            $mentionList = $textarea.closest('form').find('#mention-list');
+            var cursorPos = this.selectionStart;
+            var text = $textarea.val().substring(0, cursorPos);
+            var match = text.match(/@(\w*)$/); // Recherche le dernier '@' suivi d'un texte
+    
+            if (match) {
+                $mentionList.slideDown(250);
+            } else {
+                $mentionList.slideUp(250);
+            }
+        });        
+        
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#mention-list, #reply-box-form textarea').length) {
+                $(this).closest('form').find('#mention-list').slideUp(250);
+            }
+        });
+
+        $(document).on('click', '.mention-list__item', function() {
+            $this = $(this);
+            $textarea = $this.closest('form').find('textarea');
+            $mentionList = $this.closest('form').find('#mention-list');
+            var username = $this.data('user-name');            
+            var text = $textarea.val();
+            var cursorPos = $textarea[0].selectionStart;
+            var beforeCursor = text.substring(0, cursorPos);
+            var afterCursor = text.substring(cursorPos);            
+            
+            let $input = $('<input>', {
+                type: 'hidden',
+                name: 'targets_email[]',
+                value: $this.data('user-id')
+            });
+
+            $(this).closest('form').append($input);
+            
+            var newText = beforeCursor.replace(/@(\w*)$/, '@' + username + ' ') + afterCursor;
+            $textarea.val(newText);
+            $mentionList.slideUp(250);
+            $textarea.focus();
+        });
+
+        // Replies input file
+        $('body').on('click', '#reply-box-form .file-input .unfiled', function() {
+            console.log('click');
+            
+            $par = $(this).closest('.file-input');
+            $par.find('input').click();
+        });
+
+        $('body').on('change', '#reply-box-form .file-input input', function() {
+            if($(this).attr('name') == 'mulfiles'){
+                $par = $(this).closest('.file-input');
+                var files = $(this)[0].files;
+                selectedFiles = Array.from(files);
+                updateFileDisplay();
+            }
+            else{
+                $par = $(this).closest('.file-input');
+                var fileName = $(this).val().split('\\').pop();  
+        
+                $par.find('.filed .text').text(fileName);
+                $par.find('.unfiled').fadeOut(150, function(){
+                    $par.find('.filed').fadeIn(150);
+                });
+            }
+        });
+
+        $('body').on('click', '#reply-box-form .file-input .filed .clear', function() {
+            $par = $(this).closest('.file-input');
+            $par.find('.filed').fadeOut(150, function(){
+                $par.find('.unfiled').fadeIn(150);
+            });
+            $par.find('input').val('');
+        });
+
+        $('body').on('click', '#reply-box-form .file-input .filed .clear', function() {
+            var $fileItem = $(this).closest('.file-item');
+            var fileName = $fileItem.find('.text').text();
+            $fileItem.fadeOut(150, function() {
+                $fileItem.remove();
+                selectedFiles = selectedFiles.filter(file => file.name !== fileName);
+                updateFileInput();
+                if ($('.filed-files').children().length === 0) {
+                    $('.unfiled').fadeIn(150);
+                }
+            });
         });
 
         // *** FUNCTIONS
