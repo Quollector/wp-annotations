@@ -4,7 +4,6 @@ if (!defined('ABSPATH')) {
 }
 
 // *** COMMENTS
-
 // Add new comments
 function wp_annotation_submit_comment() {
     if (!is_user_logged_in()) {
@@ -310,44 +309,18 @@ function wp_annotation_replies() {
                 wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
             }  
         }
-        // elseif( $_POST['type'] === 'update' ){
-        //     $id = intval($_POST['id']);
-        //     $comment = sanitize_text_field($_POST['comment']);
-    
-        //     $update = $wpdb->update(
-        //         $table_name,
-        //         [ 'commentaire' => $comment ],
-        //         [ 'id' => $id ],
-        //         [ '%s' ],
-        //         [ '%d' ]
-        //     );    
-        
-        //     if ($update !== false) {
-        //         ob_start();
-        //         extract($variables);
-        //         include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
-        //         $comments_content = ob_get_clean();
-        
-        //         wp_send_json_success([
-        //             'message' => 'Commentaire mis à jour',
-        //             'comments_content' => $comments_content
-        //         ]);
-        //     } 
-        //     else {
-        //         wp_send_json_error(['message' => 'Une erreur est survenue.']);
-        //     }
-        // }
     }
 }
 
 add_action('wp_ajax_wp_annotation_replies', 'wp_annotation_replies');
-
 
 // Delete all comments
 function flush_reviews_callback() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
     $wpdb->query("DELETE FROM $table_name");
+    $table_replies = $wpdb->prefix . 'reviews_replies';
+    $wpdb->query("DELETE FROM $table_replies");
 
     
     $directory_path = WP_ANNOTATION_PATH . '/assets/images/screenshots/';

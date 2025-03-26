@@ -24,10 +24,10 @@ $interface_color = get_option('wp_annotation_color', 'blue');
     <form id="annotation-form" method="post" action="options.php">
         <?php settings_fields('wp_annotation_options'); ?>
 
-        <h2>Activation du plugin</h2>
+        <h2>Affichage</h2>
         <table class="form-table">
             <tr>
-                <th scope="row">Activer le plugin</th>
+                <th scope="row">Afficher les commentaires</th>
                 <td>
                     <label class="switch">
                         <input type="checkbox" name="wp_annotation_enabled" value="1" <?= checked(1, $plugin_enabled, false) ?>>
@@ -98,7 +98,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
 <script type="text/javascript">
     jQuery(document).ready(function($) {
         $('#flush-button').on('click', function() {
-            if (confirm("Êtes-vous sûr de vouloir supprimer tous les commentaires ? Cette action est irréversible.")) {
+            if (confirm("Êtes-vous sûr de tout vouloir supprimer ? Cette action est irréversible et supprimera les commentaires, les réponses et les médias associés.")) {
                 $.post(ajaxurl, {
                     action: 'flush_reviews'
                 }, function(response) {
