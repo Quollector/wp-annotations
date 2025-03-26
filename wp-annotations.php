@@ -78,11 +78,6 @@ define('WP_ANNOTATION_COLORS', [
 // Styles / scripts
 function wp_annotations_enqueue_assets() {
     wp_enqueue_style(
-        'select2-style', 
-        WP_ANNOTATION_URL . 'https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css'
-    );
-
-    wp_enqueue_style(
         'wp-annotations-style', 
         WP_ANNOTATION_URL . 'assets/css/style.min.css', 
         [],
@@ -101,14 +96,6 @@ function wp_annotations_enqueue_assets() {
         'html2canvas', 
         'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 
         [], 
-        '1.4.1', 
-        true
-    );
-
-    wp_enqueue_script(
-        'select2-js', 
-        'https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js', 
-        ['jquery'], 
         '1.4.1', 
         true
     );

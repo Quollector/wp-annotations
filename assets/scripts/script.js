@@ -558,13 +558,12 @@
                 var notifyEmail = $this.find('input[name="email"]').is(':checked') ? 1 : 0;
 
                 var targetsEmail = [];
-                $(this).find('input[name="targets_email[]"]').each(function() {
+
+                $(this).find('input[name="targets_email[]"]').each(function() {                    
                     targetsEmail.push($(this).val());
                 });
 
-                targetsEmail = [...new Set(targetsEmail)];
-
-                console.log(targetsEmail);                
+                targetsEmail = [...new Set(targetsEmail)];              
 
                 var formData = new FormData();
                 formData.append('action', 'wp_annotation_replies');
@@ -574,8 +573,7 @@
                 formData.append('comment_text', commentText);
                 formData.append('notify_email', notifyEmail);
         
-                // Ajouter les emails
-                if( targetsEmail.length < 0 ){
+                if( targetsEmail.length > 0 ){
                     targetsEmail.forEach((email, index) => {
                         formData.append(`targets_email[${index}]`, email);
                     });
@@ -583,26 +581,17 @@
                     formData.append('targets_email', '');
                 }
         
-                // Ajouter le fichier si un fichier est sélectionné
                 var fileInput = $this.find('input[type="file"]')[0];
                 if (fileInput.files.length > 0) {
                     formData.append('reply_file', fileInput.files[0]);
                 }
-                    
-                // var datas = [
-                //     $par.data('comment-id'),
-                //     $par.data('user-id'),
-                //     $par.find('textarea').val(),
-                //     $par.find('input[name="email"]').val(),
-                //     targetsEmail
-                // ];
         
                 $.ajax({
                     url: ajaxurl.url,
                     type: 'POST',
                     data: formData,
-                    processData: false,  // Important pour envoyer `FormData`
-                    contentType: false,  // Empêche jQuery de définir un content-type incorrect
+                    processData: false, 
+                    contentType: false,  
                     success: function(response) {
                         if (response.success) {
                             $par.find('textarea, input[name="email"]').val('');
@@ -628,7 +617,7 @@
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
+                        $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
                         $par.removeClass('ajax');
     
                         setTimeout(function() {
@@ -694,7 +683,7 @@
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
+                        $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
                         $par.removeClass('ajax');
     
                         setTimeout(function() {
@@ -719,7 +708,7 @@
             $mentionList = $textarea.closest('form').find('#mention-list');
             var cursorPos = this.selectionStart;
             var text = $textarea.val().substring(0, cursorPos);
-            var match = text.match(/@(\w*)$/); // Recherche le dernier '@' suivi d'un texte
+            var match = text.match(/@(\w*)$/);
     
             if (match) {
                 $mentionList.slideDown(250);
@@ -759,9 +748,7 @@
         });
 
         // Replies input file
-        $('body').on('click', '#reply-box-form .file-input .unfiled', function() {
-            console.log('click');
-            
+        $('body').on('click', '#reply-box-form .file-input .unfiled', function() {            
             $par = $(this).closest('.file-input');
             $par.find('input').click();
         });

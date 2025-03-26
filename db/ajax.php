@@ -332,9 +332,6 @@ function wp_annotation_replies() {
                 $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", $commentID), ARRAY_A);
 
                 if ($notifyEmail && !empty($targetsEmail) && $new_comment_data['user_id'] !== get_current_user_id()) {
-                    error_log(print_r($new_comment_data, true));
-                    error_log(print_r($targetsEmail, true));
-
                     sendNotificationEmail(
                         $new_comment_data,
                         stripslashes(sanitize_text_field($commentText)),
@@ -361,11 +358,14 @@ function wp_annotation_replies() {
             $id = intval( $datas[0] );
 
             $filename = $wpdb->get_row($wpdb->prepare("SELECT file_path FROM $table_name WHERE id = %d", $id), ARRAY_A);
-            $screenUrl = $filename['file_path'];
-            
-            $file_path = WP_ANNOTATION_PATH . 'assets/images/replies/' . $screenUrl;
-            if (file_exists($file_path)) {
-                    unlink($file_path);
+
+            if(!empty($filename['file_path'])){
+                $screenUrl = $filename['file_path'];
+
+                $file_path = WP_ANNOTATION_PATH . 'assets/images/replies/' . $screenUrl;
+                if (file_exists($file_path)) {
+                        unlink($file_path);
+                }
             }
     
             $delete = $wpdb->delete(
