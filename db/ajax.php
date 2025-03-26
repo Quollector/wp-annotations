@@ -252,7 +252,7 @@ function wp_annotation_replies() {
                 [
                     'comment_id' => intval($datas[0]),
                     'user_id' => get_current_user_id(),
-                    'commentaire' => isset($datas[2]) ? stripslashes(sanitize_text_field($datas[2])) : ''
+                    'commentaire' => isset($datas[2]) ? wp_kses_post(stripslashes($datas[2])) : ''
                 ]
             );    
         

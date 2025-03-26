@@ -1289,6 +1289,12 @@ html{
                     font-size: 16px;
                     color: $sombre;
 
+                    p{
+                        & + p{
+                            margin-top: 8px;
+                        }
+                    }
+
                     span{
                         &.mention{
                             color: $main;

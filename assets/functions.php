@@ -117,11 +117,15 @@ function sendNotificationEmail($datas, $comment, $notifications){
 }
 
 // Format notifications comment
-function formatNotificationsComment($comment){
-    $pattern = '/@([a-zA-Z0-9_]+)/';
+function formatNotificationsComment($comment) {
+    $comment = esc_html($comment);
 
+    $paragraphs = explode("\n", trim($comment));
+    $comment = '<p>' . implode('</p><p>', array_filter($paragraphs)) . '</p>';
+
+    $pattern = '/@([a-zA-Z0-9_]+)/';
     $formattedComment = preg_replace_callback($pattern, function($matches) {
-        return '<span class="mention">@' . $matches[1] . '</span>';
+        return '<span class="mention">@' . esc_html($matches[1]) . '</span>';
     }, $comment);
 
     return $formattedComment;
