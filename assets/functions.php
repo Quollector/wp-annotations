@@ -61,8 +61,6 @@ function extractUsersEmails($datas, $comment, $notifications){
     $users_array = array_unique($users_array_raw);
     $users_array = array_values($users_array);
 
-    error_log(print_r($users_array, true));
-
     foreach($users_array as $user_id){
         if($user_id != get_current_user_id()){
             $user = get_userdata($user_id);

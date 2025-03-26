@@ -25,9 +25,9 @@ else {
 foreach ($datas as $annotation) {
     $grouped_annotations[$annotation->page_id][] = $annotation;
 
-    if ($annotation->statut === 'non résolu') {
+    if ($annotation->statut === 'non résolu' && get_post($annotation->page_id)) {
         $count_non_resolu++;
-    } elseif ($annotation->statut === 'résolu') {
+    } elseif ($annotation->statut === 'résolu' && get_post($annotation->page_id)) {
         $count_resolu++;
     }
 }
@@ -56,20 +56,22 @@ $interface_color = get_option('wp_annotation_color', 'blue');
         <?php
         foreach ($grouped_annotations as $page_id => $annotations) :
             $page = get_post($page_id);
-            $page_title = $page->post_title;
-            $page_url = get_permalink($page_id);
-            $page_slug = wp_make_link_relative(get_permalink($page_id));
 
-            $count_active = 0;
-            $has_active = false;
-            foreach ($annotations as $annotation) {
-                if ($annotation->statut === 'non résolu') {
-                    $has_active = true;
-                    $count_active++;
+            if ($page):
+                $page_title = $page->post_title;
+                $page_url = get_permalink($page_id);
+                $page_slug = wp_make_link_relative(get_permalink($page_id));
+
+                $count_active = 0;
+                $has_active = false;
+                foreach ($annotations as $annotation) {
+                    if ($annotation->statut === 'non résolu') {
+                        $has_active = true;
+                        $count_active++;
+                    }
                 }
-            }
 
-            if ($has_active):
+                if ($has_active):
         ?>
         <div class="comment-page-item">
             <div class="accordeon-header">
@@ -169,7 +171,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                 <?php endif; endforeach; ?>
             </div>
         </div>
-        <?php endif; endforeach; ?>
+        <?php endif; endif; endforeach; ?>
     <?php else: ?>
         <div class="no-comment">
             <p>Aucun commentaire.</p>
@@ -182,6 +184,8 @@ $interface_color = get_option('wp_annotation_color', 'blue');
         <?php
         foreach ($grouped_annotations as $page_id => $annotations) :
             $page = get_post($page_id);
+
+            if ($page):
             $page_title = $page->post_title;
             $page_url = get_permalink($page_id);
             $page_slug = wp_make_link_relative(get_permalink($page_id));
@@ -265,7 +269,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                 <?php endif; endforeach; ?>
             </div>
         </div>
-        <?php endif; endforeach; ?>
+        <?php endif; endif; endforeach; ?>
     <?php else: ?>
         <div class="no-comment">
             <p>Aucun commentaire.</p>

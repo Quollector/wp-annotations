@@ -82,6 +82,12 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
                 <div class="reply-item__content">
                     <?= formatNotificationsComment($comment->commentaire) ?>
                 </div>
+                <div class="reply-item__image">
+                    <div class="expend">
+                        <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/expend.svg' ?>" alt="" class="">
+                    </div>
+                    <img src="<?= WP_ANNOTATION_URL . 'assets/images/replies/' . $comment->file_path ?>" alt="" class="src-img">
+                </div>
             </div>
         <?php endforeach; ?>
     </div>
@@ -98,6 +104,24 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
             <?php endif; endforeach; ?>
         </div>
     </div>
+    
+    <div class="file-input">
+        <input type="file" name="reply-file" accept="image/*">
+        <div class="file-input__front">
+            <div class="unfiled">
+                <div class="unfiled__wrap">
+                    Ajouter une image <iconify-icon icon="iconamoon:file-add-light"></iconify-icon>
+                </div>
+            </div>
+            <div class="filed">
+                <div class="filed__wrap">
+                    <div class="text">test.jpeg</div>
+                    <div class="clear"><iconify-icon icon="ph:file-x-duotone"></iconify-icon></iconify-icon></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <label>
         <input type="checkbox" name="email" value="1" checked> Notifier par courriel
     </label>

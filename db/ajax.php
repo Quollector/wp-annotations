@@ -134,11 +134,31 @@ function wp_annotation_update_comment() {
         $screenUrl = sanitize_text_field($_POST['screenUrl']);
         $delete = array();
 
+        $filename = $wpdb->get_row($wpdb->prepare("SELECT screenshot_url FROM $table_name WHERE id = %d", $id), ARRAY_A);
+        $screenUrl = $filename['screenshot_url'];
+        
+        $file_path = WP_ANNOTATION_PATH . 'assets/images/screenshots/' . $screenUrl;
+        if (file_exists($file_path)) {
+                unlink($file_path);
+        }
+
         $delete[] = $wpdb->delete(
             $table_name,
             ['id' => $id],
             ['%d']
         );
+
+        $repliesFiles = $wpdb->get_results($wpdb->prepare("SELECT file_path FROM $table_replies WHERE comment_id = %d", $id), ARRAY_A);
+       
+        if( !empty($repliesFiles) ){
+            foreach($repliesFiles as $repliesFile){
+                $screenUrl = $repliesFile['file_path'];
+                $file_path = WP_ANNOTATION_PATH . 'assets/images/replies/' . $screenUrl;
+                if (file_exists($file_path)) {
+                    unlink($file_path);
+                }
+            }
+        }
 
         $delete[] = $wpdb->delete(
             $table_replies,
@@ -164,8 +184,6 @@ function wp_annotation_update_comment() {
         } else {
             wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
         }
-
-
     }
     elseif( $_POST['type'] === 'update' ){
         $id = intval($_POST['id']);
@@ -239,32 +257,88 @@ function wp_annotation_replies() {
         return;
     }
 
-    if ( isset($_POST['datas']) && is_array($_POST['datas']) ){
+    if ( isset($_POST['status'])){
         global $wpdb;
         $table_name = $wpdb->prefix . 'reviews_replies';
     
         if( $_POST['status'] === 'add' ){
-            $datas = $_POST['datas'];
+            $commentID = isset($_POST['comment_id']) ? intval($_POST['comment_id']) : 0;
+            $userID = get_current_user_id();
+            $commentText = isset($_POST['comment_text']) ? wp_kses_post(stripslashes($_POST['comment_text'])) : '';
+            $notifyEmail = isset($_POST['notify_email']) ? intval($_POST['notify_email']) : 0;
+            $targetsEmail = isset($_POST['targets_email']) ? $_POST['targets_email'] : [];
+
+            if (isset($_FILES['reply_file']) && !empty($_FILES['reply_file']['name'])) {
+                $file = $_FILES['reply_file'];
+    
+                $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+                if (!in_array(strtolower($file['type']), $allowed_types)) {
+                    wp_send_json_error(['message' => 'Type de fichier non autorisé.']);
+                    return;
+                }
+    
+                if ($file['error'] !== UPLOAD_ERR_OK) {
+                    $upload_errors = [
+                        UPLOAD_ERR_INI_SIZE   => 'Le fichier est trop grand (dépassant la limite de php.ini).',
+                        UPLOAD_ERR_FORM_SIZE  => 'Le fichier est trop grand (dépassant la limite de formulaire).',
+                        UPLOAD_ERR_PARTIAL    => 'Le fichier n\'a été que partiellement téléchargé.',
+                        UPLOAD_ERR_NO_FILE    => 'Aucun fichier n\'a été téléchargé.',
+                        UPLOAD_ERR_NO_TMP_DIR => 'Dossier temporaire manquant.',
+                        UPLOAD_ERR_CANT_WRITE => 'Impossible d\'écrire sur le disque.',
+                        UPLOAD_ERR_EXTENSION  => 'Une extension PHP a arrêté le téléchargement du fichier.'
+                    ];
+                    
+                    $error_message = isset($upload_errors[$file['error']]) ? $upload_errors[$file['error']] : 'Une erreur inconnue est survenue.';
+                    wp_send_json_error(['message' => $error_message]);
+                    return;
+                }
+    
+                $upload_dir = WP_ANNOTATION_PATH . 'assets/images/replies/';
+                
+                if (!file_exists($upload_dir)) {
+                    if (!mkdir($upload_dir, 0777, true)) {
+                        wp_send_json_error(['message' => 'Impossible de créer le répertoire de destination.']);
+                        return;
+                    }
+                }
+
+                $unique_id = uniqid();
+                $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+
+                $new_file_name = "reply_{$unique_id}.{$file_extension}"; 
+
+                $file_path = $upload_dir . $new_file_name;
+
+                if (!move_uploaded_file($file['tmp_name'], $file_path)) {
+                    wp_send_json_error(['message' => 'Une erreur est survenue lors du traitement du fichier.']);
+                    return;
+                }    
+            } else {
+                $new_file_name = '';
+            }
 
             $insert = $wpdb->insert(
                 $table_name,
                 [
-                    'comment_id' => intval($datas[0]),
-                    'user_id' => get_current_user_id(),
-                    'commentaire' => isset($datas[2]) ? wp_kses_post(stripslashes($datas[2])) : ''
+                    'comment_id' => $commentID,
+                    'user_id' => $userID,
+                    'commentaire' => $commentText,
+                    'file_path' => $new_file_name
                 ]
             );    
         
             if ($insert) {                
                 $table_reviews = $wpdb->prefix . 'reviews';
-                $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", intval($datas[0])), ARRAY_A);
-                $notifications = $datas[4];
+                $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", $commentID), ARRAY_A);
 
-                if ( $datas[3] ){
+                if ($notifyEmail && !empty($targetsEmail) && $new_comment_data['user_id'] !== get_current_user_id()) {
+                    error_log(print_r($new_comment_data, true));
+                    error_log(print_r($targetsEmail, true));
+
                     sendNotificationEmail(
                         $new_comment_data,
-                        stripslashes(sanitize_text_field($datas[2])),
-                        $notifications
+                        stripslashes(sanitize_text_field($commentText)),
+                        $targetsEmail
                     );
                 }
 
@@ -283,8 +357,16 @@ function wp_annotation_replies() {
         }
         elseif( $_POST['status'] === 'delete' ){
             $datas = $_POST['datas'];
-
+                
             $id = intval( $datas[0] );
+
+            $filename = $wpdb->get_row($wpdb->prepare("SELECT file_path FROM $table_name WHERE id = %d", $id), ARRAY_A);
+            $screenUrl = $filename['file_path'];
+            
+            $file_path = WP_ANNOTATION_PATH . 'assets/images/replies/' . $screenUrl;
+            if (file_exists($file_path)) {
+                    unlink($file_path);
+            }
     
             $delete = $wpdb->delete(
                 $table_name,
@@ -309,7 +391,9 @@ function wp_annotation_replies() {
                 wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
             }  
         }
-    }
+    } else {
+        wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
+    } 
 }
 
 add_action('wp_ajax_wp_annotation_replies', 'wp_annotation_replies');

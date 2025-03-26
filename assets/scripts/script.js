@@ -138,7 +138,7 @@
         });
 
         // *** LIGHTBOX
-        $('body').on('click', '.wp-annotations--dashboard .comment-item__screenshot .expend', function() {
+        $('body').on('click', '.wp-annotations .expend', function() {
             var src = $(this).next().attr('src');
             $('body').addClass('no-scroll');
 
@@ -546,11 +546,16 @@
         // Add reply
         $('body').on('submit', '#reply-box-form', function(event) {
             event.preventDefault();
+            $this = $(this);
 
             if( $(this).find('textarea').val() != '' ){
                 $par = $(this).closest('.reply-box');
                 $par.addClass('ajax');
-                $commentID = $par.data('comment-id');
+
+                var commentID = $par.data('comment-id');
+                var userID = $par.data('user-id');
+                var commentText = $this.find('textarea').val();
+                var notifyEmail = $this.find('input[name="email"]').is(':checked') ? 1 : 0;
 
                 var targetsEmail = [];
                 $(this).find('input[name="targets_email[]"]').each(function() {
@@ -558,23 +563,46 @@
                 });
 
                 targetsEmail = [...new Set(targetsEmail)];
+
+                console.log(targetsEmail);                
+
+                var formData = new FormData();
+                formData.append('action', 'wp_annotation_replies');
+                formData.append('status', 'add');
+                formData.append('comment_id', commentID);
+                formData.append('user_id', userID);
+                formData.append('comment_text', commentText);
+                formData.append('notify_email', notifyEmail);
+        
+                // Ajouter les emails
+                if( targetsEmail.length < 0 ){
+                    targetsEmail.forEach((email, index) => {
+                        formData.append(`targets_email[${index}]`, email);
+                    });
+                } else {
+                    formData.append('targets_email', '');
+                }
+        
+                // Ajouter le fichier si un fichier est sélectionné
+                var fileInput = $this.find('input[type="file"]')[0];
+                if (fileInput.files.length > 0) {
+                    formData.append('reply_file', fileInput.files[0]);
+                }
                     
-                var datas = [
-                    $par.data('comment-id'),
-                    $par.data('user-id'),
-                    $par.find('textarea').val(),
-                    $par.find('input[name="email"]').val(),
-                    targetsEmail
-                ];
+                // var datas = [
+                //     $par.data('comment-id'),
+                //     $par.data('user-id'),
+                //     $par.find('textarea').val(),
+                //     $par.find('input[name="email"]').val(),
+                //     targetsEmail
+                // ];
         
                 $.ajax({
                     url: ajaxurl.url,
                     type: 'POST',
-                    data: {
-                        action: 'wp_annotation_replies',
-                        status: 'add',
-                        datas: datas
-                    },
+                    data: formData,
+                    processData: false,  // Important pour envoyer `FormData`
+                    contentType: false,  // Empêche jQuery de définir un content-type incorrect
                     success: function(response) {
                         if (response.success) {
                             $par.find('textarea, input[name="email"]').val('');
@@ -685,7 +713,7 @@
             $('#wp-annotations--replies').fadeOut(300);
         });
 
-        // Replies notifications
+        // Replies mentions
         $('body').on('keyup', '#reply-box-form textarea', function(event) {
             $textarea = $(this);
             $mentionList = $textarea.closest('form').find('#mention-list');
@@ -728,6 +756,53 @@
             $textarea.val(newText);
             $mentionList.slideUp(250);
             $textarea.focus();
+        });
+
+        // Replies input file
+        $('body').on('click', '#reply-box-form .file-input .unfiled', function() {
+            console.log('click');
+            
+            $par = $(this).closest('.file-input');
+            $par.find('input').click();
+        });
+
+        $('body').on('change', '#reply-box-form .file-input input', function() {
+            if($(this).attr('name') == 'mulfiles'){
+                $par = $(this).closest('.file-input');
+                var files = $(this)[0].files;
+                selectedFiles = Array.from(files);
+                updateFileDisplay();
+            }
+            else{
+                $par = $(this).closest('.file-input');
+                var fileName = $(this).val().split('\\').pop();  
+        
+                $par.find('.filed .text').text(fileName);
+                $par.find('.unfiled').fadeOut(150, function(){
+                    $par.find('.filed').fadeIn(150);
+                });
+            }
+        });
+
+        $('body').on('click', '#reply-box-form .file-input .filed .clear', function() {
+            $par = $(this).closest('.file-input');
+            $par.find('.filed').fadeOut(150, function(){
+                $par.find('.unfiled').fadeIn(150);
+            });
+            $par.find('input').val('');
+        });
+
+        $('body').on('click', '#reply-box-form .file-input .filed .clear', function() {
+            var $fileItem = $(this).closest('.file-item');
+            var fileName = $fileItem.find('.text').text();
+            $fileItem.fadeOut(150, function() {
+                $fileItem.remove();
+                selectedFiles = selectedFiles.filter(file => file.name !== fileName);
+                updateFileInput();
+                if ($('.filed-files').children().length === 0) {
+                    $('.unfiled').fadeIn(150);
+                }
+            });
         });
 
         // *** FUNCTIONS
