@@ -82,12 +82,14 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
                 <div class="reply-item__content">
                     <?= formatNotificationsComment($comment->commentaire) ?>
                 </div>
-                <div class="reply-item__image">
-                    <div class="expend">
-                        <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/expend.svg' ?>" alt="" class="">
+                <?php if(!empty($comment->file_path)): ?>
+                    <div class="reply-item__image">
+                        <div class="expend">
+                            <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/expend.svg' ?>" alt="" class="">
+                        </div>
+                        <img src="<?= WP_ANNOTATION_URL . 'assets/images/replies/' . $comment->file_path ?>" alt="" class="src-img">
                     </div>
-                    <img src="<?= WP_ANNOTATION_URL . 'assets/images/replies/' . $comment->file_path ?>" alt="" class="src-img">
-                </div>
+                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     </div>
