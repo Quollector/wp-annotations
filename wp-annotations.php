@@ -6,11 +6,6 @@
  * Author: Quentin Lequenne
  */
 
-// Sécurité
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 // Enregistrement des paramètres
 function wp_annotation_register_settings() {
     register_setting('wp_annotation_options', 'wp_annotation_users');

@@ -1,9 +1,3 @@
-<?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-?>
-
 <!-- Replies box -->
 <?php  
 if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/replies/replies.php' ) ) {

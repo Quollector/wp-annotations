@@ -1,9 +1,3 @@
-<?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-?>
-
 <div class="wp-annotations--dashboard" id="wp-annotations--dashboard">
     <div class="wp-annotations--dashboard__wrapper">
         <div class="wp-annotations--dashboard__ajax">

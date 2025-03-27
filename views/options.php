@@ -1,8 +1,4 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 $users = get_users();
 $allowed_users = get_option('wp_annotation_users', []);
 $plugin_enabled = get_option('wp_annotation_enabled', '1');

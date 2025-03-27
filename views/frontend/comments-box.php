@@ -1,8 +1,4 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 global $wpdb;
 $table_name = $wpdb->prefix . 'reviews';
 $query = "SELECT * FROM $table_name";

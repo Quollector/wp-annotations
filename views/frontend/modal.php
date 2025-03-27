@@ -1,9 +1,3 @@
-<?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-?>
-
 <div 
 id="wp-annotations--modal" 
 class="wp-annotations--modal" 
