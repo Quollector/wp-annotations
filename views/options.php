@@ -129,7 +129,8 @@ $smtp_email = get_option('wp_annotation_smtp_from_email', '');
         $('#flush-button').on('click', function() {
             if (confirm("Êtes-vous sûr de tout vouloir supprimer ? Cette action est irréversible et supprimera les commentaires, les réponses et les médias associés.")) {
                 $.post(ajaxurl, {
-                    action: 'flush_reviews'
+                    action: 'flush_reviews',
+                    context: 'flush'
                 }, function(response) {
                     if (response.success) {
                         alert(response.data);

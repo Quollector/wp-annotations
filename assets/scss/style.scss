@@ -59,7 +59,10 @@ html{
     z-index: 99999;
     overflow: hidden;
     pointer-events: none;
-    font-family: "Open Sans", serif;
+
+    &, & *{
+        font-family: "Open Sans", serif !important;
+    }
 
     .review-mode &{
         pointer-events: all;
@@ -1295,7 +1298,7 @@ html{
                         }
                     }
 
-                    span{
+                    strong{
                         &.mention{
                             color: $main;
                             font-weight: 700;

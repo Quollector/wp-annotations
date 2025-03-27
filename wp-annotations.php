@@ -138,3 +138,14 @@ if ( file_exists( WP_ANNOTATION_PATH . 'public/public.php' )) {
 if ( file_exists( WP_ANNOTATION_PATH . 'db/ajax.php' ) ) {
     include WP_ANNOTATION_PATH . 'db/ajax.php';
 }
+
+// OPTIONS LINK
+function wp_annotations_plugin_action_links($links, $file){
+    if ($file == plugin_basename(__FILE__)) {
+        $link = '<a href="'.esc_url(get_admin_url()).'options-general.php?page=wp-annotations">Réglages</a>';
+        array_unshift($links, $link);
+    }
+
+    return $links;
+}
+add_filter('plugin_action_links', 'wp_annotations_plugin_action_links', 10, 2);
