@@ -3,6 +3,8 @@ if( isset($new_comment_data) ){
     $comment_data = $new_comment_data;
 }
 
+$smtp = get_option('wp_annotation_smtp_valid', false);
+
 $comments_list = getAllReplies($comment_data['id']);
 
 $interface_color = get_option('wp_annotation_color', 'blue');
@@ -125,7 +127,9 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
     </div>
 
     <label>
-        <input type="checkbox" name="email" value="1" checked> Notifier par courriel
+        <?php if($smtp): ?>
+            <input type="checkbox" name="email" value="1" checked> Notifier par courriel
+        <?php endif; ?>
     </label>
     <button type="submit">Envoyer</button>
 </form>
