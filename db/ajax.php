@@ -260,6 +260,7 @@ function wp_annotation_replies() {
     if ( isset($_POST['status'])){
         global $wpdb;
         $table_name = $wpdb->prefix . 'reviews_replies';
+        $smtp = get_option('wp_annotation_smtp_valid', false);
     
         if( $_POST['status'] === 'add' ){
             $commentID = isset($_POST['comment_id']) ? intval($_POST['comment_id']) : 0;
@@ -331,7 +332,7 @@ function wp_annotation_replies() {
                 $table_reviews = $wpdb->prefix . 'reviews';
                 $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", $commentID), ARRAY_A);
 
-                if ($notifyEmail && !empty($targetsEmail) && $new_comment_data['user_id'] !== get_current_user_id()) {
+                if ($notifyEmail && !empty($targetsEmail) && $new_comment_data['user_id'] !== get_current_user_id() && $smtp) {
                     sendNotificationEmail(
                         $new_comment_data,
                         stripslashes(sanitize_text_field($commentText)),

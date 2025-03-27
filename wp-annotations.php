@@ -16,6 +16,12 @@ function wp_annotation_register_settings() {
     register_setting('wp_annotation_options', 'wp_annotation_users');
     register_setting('wp_annotation_options', 'wp_annotation_enabled');
     register_setting('wp_annotation_options', 'wp_annotation_color');
+    register_setting('wp_annotation_options', 'wp_annotation_smtp_mail');
+    register_setting('wp_annotation_options', 'wp_annotation_smtp_user');
+    register_setting('wp_annotation_options', 'wp_annotation_smtp_password');
+    register_setting('wp_annotation_options', 'wp_annotation_smtp_from_name');
+    register_setting('wp_annotation_options', 'wp_annotation_smtp_from_email');
+    register_setting('wp_annotation_options', 'wp_annotation_smtp_valid');
 }
 add_action('admin_init', 'wp_annotation_register_settings');
 

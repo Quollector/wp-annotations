@@ -3,20 +3,15 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// function wp_annotation_options_update_messages() {
-//     add_settings_error(
-//         'wp_annotation_messages',
-//         'wp_annotation_message',
-//         __('Paramètres mis à jour.', 'wp_annotation'),
-//         'success'
-//     );
-// }
-// add_action('admin_notices', 'wp_annotation_options_update_messages');
-
 $users = get_users();
 $allowed_users = get_option('wp_annotation_users', []);
 $plugin_enabled = get_option('wp_annotation_enabled', '1');
 $interface_color = get_option('wp_annotation_color', 'blue');
+$smtp_mail = get_option('wp_annotation_smtp_mail', '');
+$smtp_user = get_option('wp_annotation_smtp_user', '');
+$smtp_password = get_option('wp_annotation_smtp_password', '');
+$smtp_name = get_option('wp_annotation_smtp_from_name', '');
+$smtp_email = get_option('wp_annotation_smtp_from_email', '');
 ?>
 
 <div class="wrap">
@@ -77,6 +72,40 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                         <input type="radio" name="wp_annotation_color" value="purple" <?= checked('purple', $interface_color, false) ?>>
                         <span></span>
                     </label>
+                </td>
+            </tr>
+        </table>
+        
+        <h2>SMTP</h2>
+        <table class="form-table">
+            <tr>
+                <th scope="row">Serveur</th>
+                <td>
+                    <input type="text" name="wp_annotation_smtp_mail" value="<?= $smtp_mail ?>" />
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Nom d'utilisateur</th>
+                <td>
+                    <input type="text" name="wp_annotation_smtp_user" value="<?= $smtp_user ?>" />
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Mot de passe</th>
+                <td>
+                    <input type="password" name="wp_annotation_smtp_password" value="<?= $smtp_password ?>" />
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Nom de l'expéditeur</th>
+                <td>
+                    <input type="text" name="wp_annotation_smtp_from_name" value="<?= $smtp_name ?>" />
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Adresse e-mail de l'expéditeur</th>
+                <td>
+                    <input type="email" name="wp_annotation_smtp_from_email" value="<?= $smtp_email ?>" />
                 </td>
             </tr>
         </table>

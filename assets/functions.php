@@ -3,6 +3,13 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
+require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
+require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 // Check if user is allowed to see annotations
 function is_user_allowed_for_annotations() {
     $current_user = wp_get_current_user();
@@ -72,45 +79,53 @@ function extractUsersEmails($datas, $comment, $notifications){
 function sendNotificationEmail($datas, $comment, $notifications){
     $emails = extractUsersEmails($datas, $comment, $notifications);
     $current_user_name = get_userdata(get_current_user_id())->display_name;
-
+    $smtp = get_option('wp_annotation_smtp_valid', false);
+    $mail = new PHPMailer(true);
     $site_url = get_site_url();
 
-    // $headers = "From: no-reply@" . parse_url($site_url, PHP_URL_HOST) . "\r\n";
-    // $headers .= "Reply-To: no-reply@" . parse_url($site_url, PHP_URL_HOST) . "\r\n";
-    $headers = "From: webmaster@equipelebleu.com\r\n";
-    $headers .= "Reply-To: webmaster@equipelebleu.com\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-
-    foreach($emails as $email){    
-        if( $email[1] ){
-            $subject = 'Mention de commentaire - ' . get_bloginfo('name'); 
-        }
-        else{
-            $subject = 'Réponse à votre commentaire - ' . get_bloginfo('name'); 
-        }
-
-        // mail($email, $subject, $message, $headers);
-        if(wp_mail($email[0], $subject, createNotificationsMessage( $datas, $email[1], $current_user_name, $comment ), $headers)) {
-            error_log( "E-mail envoyé avec succès !");
-        } else {
-            error_log( "Échec de l'envoi d'e-mail.");
-        }
+    if(!$smtp){
+        error_log('❌ SMTP non configuré.');
+        return;
     }
-}
 
-// Format notifications comment
-function formatNotificationsComment($comment) {
-    $comment = esc_html($comment);
+    $smtp_mail = get_option('wp_annotation_smtp_mail', '');
+    $smtp_user = get_option('wp_annotation_smtp_user', '');
+    $smtp_password = get_option('wp_annotation_smtp_password', '');
+    $smtp_name = get_option('wp_annotation_smtp_from_name', '');
+    $smtp_email = get_option('wp_annotation_smtp_from_email', '');
 
-    $paragraphs = explode("\n", trim($comment));
-    $comment = '<p>' . implode('</p><p>', array_filter($paragraphs)) . '</p>';
+    try {
+        $mail->isSMTP();
+        $mail->Host       = $smtp_mail;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $smtp_user;
+        $mail->Password   = $smtp_password;
+        $mail->SMTPSecure = 'tls';
+        $mail->Port       = 587;
+        $mail->CharSet = 'UTF-8';
+        $mail->Encoding = 'base64';
+        $mail->isHTML(true);
 
-    $pattern = '/@([a-zA-Z0-9_]+)/';
-    $formattedComment = preg_replace_callback($pattern, function($matches) {
-        return '<span class="mention">@' . esc_html($matches[1]) . '</span>';
-    }, $comment);
+        $mail->setFrom($smtp_email, $smtp_name);
 
-    return $formattedComment;
+        foreach($emails as $email){
+            $mail->addAddress($email[0]);
+
+            if( $email[1] ){
+                $mail->Subject = 'Mention de commentaire - ' . get_bloginfo('name'); 
+            }
+            else{
+                $mail->Subject = 'Réponse à votre commentaire - ' . get_bloginfo('name'); 
+            }
+    
+            $mail->Body = createNotificationsMessage( $datas, $email[1], $current_user_name, $comment );
+    
+            $mail->send();
+            error_log('✅ Email envoyé avec succès !');
+        }
+    } catch (Exception $e) {
+        error_log('❌ Erreur d\'envoi : ' . $mail->ErrorInfo);
+    }
 }
 
 // Email message
@@ -144,7 +159,35 @@ function createNotificationsMessage( $datas, $notif, $current_user_name, $commen
     return $message;
 }
 
-// Debug courriels
-add_action('phpmailer_init', function($phpmailer) {
-    error_log('PHPMailer Debug: ' . print_r($phpmailer, true));
-});
+// Format notifications comment
+function formatNotificationsComment($comment) {
+    $comment = esc_html($comment);
+
+    $paragraphs = explode("\n", trim($comment));
+    $comment = '<p>' . implode('</p><p>', array_filter($paragraphs)) . '</p>';
+
+    $pattern = '/@([a-zA-Z0-9_]+)/';
+    $formattedComment = preg_replace_callback($pattern, function($matches) {
+        return '<span class="mention">@' . esc_html($matches[1]) . '</span>';
+    }, $comment);
+
+    return $formattedComment;
+}
+
+// Check if SMTP is filled
+function checkSMTPSettings(){
+    $smtp_mail = get_option('wp_annotation_smtp_mail', '');
+    $smtp_user = get_option('wp_annotation_smtp_user', '');
+    $smtp_password = get_option('wp_annotation_smtp_password', '');
+    $smtp_name = get_option('wp_annotation_smtp_from_name', '');
+    $smtp_email = get_option('wp_annotation_smtp_from_email', '');
+
+    if ( empty($smtp_mail) || empty($smtp_user) || empty($smtp_password) || empty($smtp_name) || empty($smtp_email) ) {
+        update_option('wp_annotation_smtp_valid', false);
+        return;
+    }
+
+    update_option('wp_annotation_smtp_valid', true);
+}
+
+add_action('init', 'checkSMTPSettings');
