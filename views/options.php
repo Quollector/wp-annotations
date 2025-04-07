@@ -3,6 +3,7 @@ $users = get_users();
 $allowed_users = get_option('wp_annotation_users', []);
 $plugin_enabled = get_option('wp_annotation_enabled', '1');
 $interface_color = get_option('wp_annotation_color', 'blue');
+$screen_quality = get_option('wp_annotation_quality', 0.7);
 $smtp_mail = get_option('wp_annotation_smtp_mail', '');
 $smtp_user = get_option('wp_annotation_smtp_user', '');
 $smtp_password = get_option('wp_annotation_smtp_password', '');
