@@ -1,8 +1,4 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 // *** COMMENTS
 // Add new comments
 function wp_annotation_submit_comment() {

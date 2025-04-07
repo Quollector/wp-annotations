@@ -1,8 +1,4 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 // Création des tables
 function wp_annotation_create_tables() {
     global $wpdb;
