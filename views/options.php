@@ -3,7 +3,7 @@ $users = get_users();
 $allowed_users = get_option('wp_annotation_users', []);
 $plugin_enabled = get_option('wp_annotation_enabled', '1');
 $interface_color = get_option('wp_annotation_color', 'blue');
-$screen_quality = get_option('wp_annotation_quality', 0.7);
+$screen_quality = get_option('wp_annotation_quality', "0.7");
 $smtp_mail = get_option('wp_annotation_smtp_mail', '');
 $smtp_user = get_option('wp_annotation_smtp_user', '');
 $smtp_password = get_option('wp_annotation_smtp_password', '');
@@ -69,6 +69,29 @@ $smtp_email = get_option('wp_annotation_smtp_from_email', '');
                         <input type="radio" name="wp_annotation_color" value="purple" <?= checked('purple', $interface_color, false) ?>>
                         <span></span>
                     </label>
+                </td>
+            </tr>
+        </table>
+
+        <h2>Copies écran</h2>
+        <table class="form-table">
+            <tr>
+                <th scope="row">Qualité des copies écran</th>
+                <td>
+                    <label class="switch">
+                        <select name="wp_annotation_quality">
+                            <option value="0.1" <?= selected("0.1", $screen_quality, false) ?>>10%</option>
+                            <option value="0.2" <?= selected("0.2", $screen_quality, false) ?>>20%</option>
+                            <option value="0.3" <?= selected("0.3", $screen_quality, false) ?>>30%</option>
+                            <option value="0.4" <?= selected("0.4", $screen_quality, false) ?>>40%</option>
+                            <option value="0.5" <?= selected("0.5", $screen_quality, false) ?>>50%</option>
+                            <option value="0.6" <?= selected("0.6", $screen_quality, false) ?>>60%</option>
+                            <option value="0.7" <?= selected("0.7", $screen_quality, false) ?>>70%</option>
+                            <option value="0.8" <?= selected("0.8", $screen_quality, false) ?>>80%</option>
+                            <option value="0.9" <?= selected("0.9", $screen_quality, false) ?>>90%</option>
+                            <option value="1" <?= selected("1", $screen_quality, false) ?>>100%</option>
+                        </select>
+                    </label>                    
                 </td>
             </tr>
         </table>
