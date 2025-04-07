@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Annotations Plugin
  * Description: Plugin d'annotation
- * Version: 1.2.4
+ * Version: 1.2.5
  * Author: Quentin Lequenne
  */
 
