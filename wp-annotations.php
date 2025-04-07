@@ -11,6 +11,7 @@ function wp_annotation_register_settings() {
     register_setting('wp_annotation_options', 'wp_annotation_users');
     register_setting('wp_annotation_options', 'wp_annotation_enabled');
     register_setting('wp_annotation_options', 'wp_annotation_color');
+    register_setting('wp_annotation_options', 'wp_annotation_quality');
     register_setting('wp_annotation_options', 'wp_annotation_smtp_mail');
     register_setting('wp_annotation_options', 'wp_annotation_smtp_user');
     register_setting('wp_annotation_options', 'wp_annotation_smtp_password');
@@ -104,6 +105,10 @@ function wp_annotations_enqueue_assets() {
     // Assure-toi que tu transmets un tableau
     wp_localize_script('wp-annotations-script', 'ajaxurl', array(
         'url' => admin_url('admin-ajax.php')
+    ));
+    
+    wp_localize_script('wp-annotations-script', 'datas', array(
+        'quality' => get_option('wp_annotation_quality', '0.7')
     ));
 }
 add_action('wp_enqueue_scripts', 'wp_annotations_enqueue_assets');

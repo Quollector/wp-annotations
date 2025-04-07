@@ -1,8 +1,4 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
 require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
 require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
@@ -109,19 +105,21 @@ function sendNotificationEmail($datas, $comment, $notifications){
         $mail->setFrom($smtp_email, $smtp_name);
 
         foreach($emails as $email){
-            $mail->clearAddresses();
-            $mail->addAddress($email[0]);
-
-            if( $email[1] ){
-                $mail->Subject = 'Mention de commentaire - ' . get_bloginfo('name'); 
-            }
-            else{
-                $mail->Subject = 'Réponse à votre commentaire - ' . get_bloginfo('name'); 
-            }
+            if(!empty($email[0])){
+                $mail->clearAddresses();
+                $mail->addAddress($email[0]);
     
-            $mail->Body = createNotificationsMessage( $datas, $email[1], $current_user_name, $comment );
-            $mail->send();
-            error_log('✅ Email envoyé avec succès !');
+                if( $email[1] ){
+                    $mail->Subject = 'Mention de commentaire - ' . get_bloginfo('name'); 
+                }
+                else{
+                    $mail->Subject = 'Réponse à votre commentaire - ' . get_bloginfo('name'); 
+                }
+        
+                $mail->Body = createNotificationsMessage( $datas, $email[1], $current_user_name, $comment );
+                $mail->send();
+                error_log('✅ Email envoyé avec succès !');
+            }
         }
     } catch (Exception $e) {
         error_log('❌ Erreur d\'envoi : ' . $mail->ErrorInfo);

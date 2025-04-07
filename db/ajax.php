@@ -1,8 +1,4 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 // *** COMMENTS
 // Add new comments
 function wp_annotation_submit_comment() {
@@ -417,6 +413,7 @@ function flush_reviews_callback() {
         delete_option( 'wp_annotation_users' );
         delete_option( 'wp_annotation_enabled' );
         delete_option( 'wp_annotation_color' );
+        delete_option( 'wp_annotation_quality' );
         delete_option( 'wp_annotation_smtp_mail' );
         delete_option( 'wp_annotation_smtp_user' );
         delete_option( 'wp_annotation_smtp_password' );
