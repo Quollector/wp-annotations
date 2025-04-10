@@ -4,7 +4,9 @@
         $laptop = 1280;
         $tablet = 1024;
         $mobile = 768; 
-        $modal = $('#wp-annotations--modal');        
+        $modal = $('#wp-annotations--modal');    
+        var quality = parseFloat(datas.quality);
+        
 
         // *** Switch comment / browse
         $('body').on('click', '#wp-annotations--switch-bubble', function() {
@@ -126,9 +128,17 @@
                 .attr('data-position-y', yPercent.toFixed(2) + '%')
                 .find('textarea').focus();
         
-            if ($(window).width() - event.pageX < 300) {
+            if($(window).width() - event.pageX < 300 && $(window).height() - event.pageY < 200){
+                $modal.find('form').css('transform', 'translate(-270px, calc(-100% - 55px))');
+            }
+            else if ($(window).width() - event.pageX < 300) {
                 $modal.find('form').css('transform', 'translateX(-270px)');
-            } else {
+            } 
+            else if($(window).height() - event.pageY < 200){
+                console.log('height');
+                $modal.find('form').css('transform', 'translateY(calc(-100% - 55px))');
+            }
+            else {
                 $modal.find('form').css('transform', 'none');
             }
         });        
@@ -266,7 +276,7 @@
             $modal.find('#wp-annotation-form').hide();
             
             html2canvas(document.body, {
-                scale: parseFloat(datas.quality),
+                scale: quality,
                 scrollX: 0,
                 scrollY: 0,
                 width: window.innerWidth,
@@ -274,7 +284,7 @@
                 x: window.scrollX,
                 y: window.scrollY
             }).then(function(canvas) {
-                var screenshot = canvas.toDataURL('image/png', parseFloat(datas.quality)); // Convertir en base64
+                var screenshot = canvas.toDataURL('image/png', quality); // Convertir en base64
 
                 $('html').removeClass('screenshot');
 
@@ -343,11 +353,63 @@
             });
         });
 
+        $('#wp-annotation-form').on('reset', function(event) {
+            $('#wp-annotations--modal').hide().find('textarea').val('').siblings('.mention-list-main').hide();
+        })
+
         $('#wp-annotation-form textarea').on('keydown', function(event) {
-            if (event.key === "Enter") { 
-                event.preventDefault();
-                $('#wp-annotation-form').submit();
+            // if (event.key === "Enter") { 
+            //     event.preventDefault();
+            //     $('#wp-annotation-form').submit();
+            // }
+            // else 
+            if( event.key === "Escape" ){
+                $('#wp-annotations--modal').hide().find('textarea').val('').siblings('.mention-list-main').hide();
             }
+        });
+
+        $('body').on('keyup', '#wp-annotation-form textarea', function(event) {
+            $textarea = $(this);
+            $mentionList = $textarea.closest('form').find('#mention-list-main');
+            var cursorPos = this.selectionStart;
+            var text = $textarea.val().substring(0, cursorPos);
+            var match = text.match(/@(\w*)$/);
+    
+            if (match) {
+                $mentionList.slideDown(250);
+            } else {
+                $mentionList.slideUp(250);
+            }
+        });
+
+        $('body').on('click', function(e) {
+            if (!$(e.target).closest('#mention-list-main, #wp-annotation-form textarea').length) {
+                $(this).closest('form').find('#mention-list-main').slideUp(250);
+            }
+        });
+
+        $('body').on('click', '.mention-list-main__item', function() {            
+            $this = $(this);
+            $textarea = $this.closest('form').find('textarea');
+            $mentionList = $this.closest('form').find('#mention-list-main');
+            var username = $this.data('user-name');            
+            var text = $textarea.val();
+            var cursorPos = $textarea[0].selectionStart;
+            var beforeCursor = text.substring(0, cursorPos);
+            var afterCursor = text.substring(cursorPos);            
+            
+            let $input = $('<input>', {
+                type: 'hidden',
+                name: 'targets_email[]',
+                value: $this.data('user-id')
+            });
+
+            $(this).closest('form').append($input);
+            
+            var newText = beforeCursor.replace(/@(\w*)$/, '@' + username + ' ') + afterCursor;
+            $textarea.val(newText);
+            $mentionList.slideUp(250);
+            $textarea.focus();
         });
 
         // *** DELETE COMMENT

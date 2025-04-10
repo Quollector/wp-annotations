@@ -14,7 +14,9 @@ function wp_annotation_submit_comment() {
 
         parse_str($datas[0], $form_data);
 
-        $commentaire = isset($form_data['comment']) ? stripslashes(sanitize_text_field($form_data['comment'])) : '';
+        error_log(print_r($form_data, true)); // Debugging line
+
+        $commentaire = isset($form_data['comment']) ? wp_kses_post(stripslashes($form_data['comment'])) : '';
         $position_x = isset($datas[1]) ? intval($datas[1]) : 0;
         $position_y = isset($datas[2]) ? intval($datas[2]) : 0;
         $device = isset($datas[3]) ? sanitize_text_field($datas[3]) : '';
@@ -183,7 +185,7 @@ function wp_annotation_update_comment() {
     }
     elseif( $_POST['type'] === 'update' ){
         $id = intval($_POST['id']);
-        $comment = sanitize_text_field($_POST['comment']);
+        $comment = wp_kses_post(stripslashes($_POST['comment']));
 
         $update = $wpdb->update(
             $table_name,

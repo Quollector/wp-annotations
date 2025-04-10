@@ -139,7 +139,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                         </div>
 
                         <div class="comment-item__content">
-                            <p><?= $annotation->commentaire ?></p>
+                            <?= formatNotificationsComment($annotation->commentaire) ?>
                         </div>
 
                         <form class="comment-item__content-form">
@@ -245,7 +245,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                             </div>
                         </div>
                         <div class="comment-item__content">
-                            <p><?= $annotation->commentaire ?></p>
+                            <?= formatNotificationsComment($annotation->commentaire) ?>
                         </div>
 
                         <div class="comment-item__screenshot">

@@ -546,10 +546,39 @@ html{
                     outline: none;
                 }
             }
+
+            .mention-list-main{
+                display: none;
+                width: 100%;
+                padding: 0 8px 8px;
+
+                &__wrapper{
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+
+                &__item{
+                    padding: 3px 6px;
+                    border: 1px solid $clair;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    transition: background .5s ease;
+
+                    &:hover{
+                        background: rgba($clair_rgb, 0.5);
+                    }
+                }
+            }
     
             .submit-box{
                 display: flex;
-                justify-content: flex-end;
+                align-items: center;
+                justify-content: space-between;
                 padding: 0 8px 8px;
     
                 button{
@@ -834,6 +863,12 @@ html{
             margin-top: 12px;
             font-size: 16px;
             color: $sombre;
+
+            p{
+                & + p{
+                    margin-top: 8px;
+                }
+            }
         }
 
         &__content-form{
@@ -1365,6 +1400,12 @@ html{
             color: $sombre;
             padding-bottom: 12px;
             border-bottom: 1px solid rgba($sombre_rgb, 0.3);
+
+            p{
+                & + p{
+                    margin-top: 8px;
+                }
+            }
         }
 
         &__form{
