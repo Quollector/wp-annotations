@@ -64,20 +64,17 @@
         });
 
         $(window).resize(function() {
-            $winWidth = $(window).width();
+            $winWidth = $(window).width();    
 
-            if( $('html').hasClass('review-mode') ){
-                if( $winWidth <= $tablet && $winWidth > $mobile ){
-                    $('html').removeClass('laptop mobile').addClass('tablet');
-                }
-                else if( $winWidth <= $mobile ){
-                    $('html').removeClass('laptop tablet').addClass('mobile');
-                }
-                else{
-                    $('html').removeClass('tablet mobile').addClass('laptop');
-                }
+            if( $winWidth <= $tablet && $winWidth > $mobile ){
+                $('html').removeClass('laptop mobile').addClass('tablet');
             }
-
+            else if( $winWidth <= $mobile ){
+                $('html').removeClass('laptop tablet').addClass('mobile');
+            }
+            else{
+                $('html').removeClass('tablet mobile').addClass('laptop');
+            }
         });
 
         // *** Open/Close dashboard 
@@ -254,6 +251,7 @@
                 type: 'status',
                 id: $commentID,
                 status: $(this).hasClass('true') ? 'Résolu' : 'Non résolu',
+                device: $('.wp-annotations--dashboard__devices').data('device'),
                 view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved'
             };
 

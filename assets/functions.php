@@ -230,3 +230,33 @@ function wp_annotations_dehactivation_warning() {
     </script>
 <?php
 }
+
+// CHECK DEVICES POSTS
+function get_devices_comments(){
+    
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reviews';
+    $query = "SELECT * FROM $table_name";
+    $datas = $wpdb->get_results($query);
+    $count_laptop = 0;
+    $count_tablet = 0;
+    $count_mobile = 0;
+
+    foreach ($datas as $annotation) {
+        if( $annotation->device === 'laptop' ){
+            $count_laptop++;
+        }
+        elseif( $annotation->device === 'tablet' ){
+            $count_tablet++;
+        }
+        elseif( $annotation->device === 'mobile' ){
+            $count_mobile++;
+        }
+    }
+
+    return [
+        'laptop' => $count_laptop,
+        'tablet' => $count_tablet,
+        'mobile' => $count_mobile
+    ];
+}

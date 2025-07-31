@@ -25,25 +25,9 @@ function wp_annotation_add_overlay() {
 
         jQuery(document).ready(function($) {
             var $annotationDiv = $("#wp-annotations");
-            if ($annotationDiv.length) {
-                
+
+            if ($annotationDiv.length) {                
                 $("body").prepend($annotationDiv);
-
-                setTimeout(() => {
-                    adjustAnnotationHeight();
-                }, 100);
-            }
-
-            $(window).on("resize", function() {
-                adjustAnnotationHeight();
-            });
-
-            function adjustAnnotationHeight() {
-                var $annotationDiv = $("#wp-annotations");                
-                
-                if ($annotationDiv.length) {
-                    $annotationDiv.css("height", $('html').height() + "px");
-                }
             }
         });
     </script>

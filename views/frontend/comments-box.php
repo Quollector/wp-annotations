@@ -44,7 +44,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
 
 ?>
 <?php // DEVICES ?>
-<div class="wp-annotations--dashboard__devices <?= $device ?>">
+<div class="wp-annotations--dashboard__devices <?= $device ?>" data-device="<?= $device ?>">
     <div class="devices-wrapper">
         <button class="device all" data-device="all">
             <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/multidevices.svg' ?>" alt="All Devices" >

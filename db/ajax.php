@@ -94,10 +94,17 @@ function wp_annotation_update_comment() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
     $table_replies = $wpdb->prefix . 'reviews_replies';
+    $devices = get_devices_comments();
 
     $variables = [
-        $view = sanitize_text_field($_POST['view'])
+        $view = sanitize_text_field($_POST['view']),
+        $device = sanitize_text_field($_POST['device']),
+        $count_laptop = $devices['laptop'],
+        $count_tablet = $devices['tablet'],
+        $count_mobile = $devices['mobile']
     ];
+    
+    error_log(print_r($variables, true)); // Debugging line
 
     if( $_POST['type'] === 'status' ){
         $id = intval($_POST['id']);
@@ -402,35 +409,15 @@ add_action('wp_ajax_wp_annotation_replies', 'wp_annotation_replies');
 
 // Update comments
 function wp_annotation_device() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'reviews';
-    $query = "SELECT * FROM $table_name";
-    $datas = $wpdb->get_results($query);
-    $count_laptop = 0;
-    $count_tablet = 0;
-    $count_mobile = 0;
-
-    foreach ($datas as $annotation) {
-        if( $annotation->device === 'laptop' ){
-            $count_laptop++;
-        }
-        elseif( $annotation->device === 'tablet' ){
-            $count_tablet++;
-        }
-        elseif( $annotation->device === 'mobile' ){
-            $count_mobile++;
-        }
-    }
+    $devices = get_devices_comments();
 
     $variables = [
         $device = sanitize_text_field($_POST['device']),
         $view = sanitize_text_field($_POST['view']),
-        $count_laptop,
-        $count_tablet,
-        $count_mobile
+        $count_laptop = $devices['laptop'],
+        $count_tablet = $devices['tablet'],
+        $count_mobile = $devices['mobile']
     ];
-
-    error_log(print_r($variables, true)); // Debugging line
 
     ob_start();
     extract($variables);
@@ -519,3 +506,5 @@ function flush_reviews_callback() {
     }
 }
 add_action('wp_ajax_flush_reviews', 'flush_reviews_callback');
+
+// Check devices
