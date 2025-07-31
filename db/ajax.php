@@ -23,7 +23,7 @@ function wp_annotation_submit_comment() {
         $page_id = isset($datas[4]) ? intval($datas[4]) : get_the_ID();
         $user_id = isset($datas[5]) ? intval($datas[5]) : get_current_user_id();
 
-        if (empty($commentaire)) {
+        if (empty(trim($commentaire))) {
             wp_send_json_error(['message' => 'Le commentaire ne peut pas être vide.']);
             return;
         }
@@ -396,6 +396,53 @@ function wp_annotation_replies() {
 }
 
 add_action('wp_ajax_wp_annotation_replies', 'wp_annotation_replies');
+
+/*** DEVICES */
+
+
+// Update comments
+function wp_annotation_device() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reviews';
+    $query = "SELECT * FROM $table_name";
+    $datas = $wpdb->get_results($query);
+    $count_laptop = 0;
+    $count_tablet = 0;
+    $count_mobile = 0;
+
+    foreach ($datas as $annotation) {
+        if( $annotation->device === 'laptop' ){
+            $count_laptop++;
+        }
+        elseif( $annotation->device === 'tablet' ){
+            $count_tablet++;
+        }
+        elseif( $annotation->device === 'mobile' ){
+            $count_mobile++;
+        }
+    }
+
+    $variables = [
+        $device = sanitize_text_field($_POST['device']),
+        $view = sanitize_text_field($_POST['view']),
+        $count_laptop,
+        $count_tablet,
+        $count_mobile
+    ];
+
+    error_log(print_r($variables, true)); // Debugging line
+
+    ob_start();
+    extract($variables);
+    include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
+    $comments_content = ob_get_clean();
+
+    wp_send_json_success([
+        'comments_content' => $comments_content
+    ]);
+}
+
+add_action('wp_ajax_wp_annotation_device', 'wp_annotation_device');
 
 // Delete all comments
 function flush_reviews_callback() {

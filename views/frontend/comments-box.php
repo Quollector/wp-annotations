@@ -1,22 +1,24 @@
 <?php
 global $wpdb;
 $table_name = $wpdb->prefix . 'reviews';
-$query = "SELECT * FROM $table_name";
+
+if( isset( $device ) && $device !== 'all' ) {
+    $query = "SELECT * FROM $table_name WHERE device = '$device'";
+}
+else {
+    $query = "SELECT * FROM $table_name";
+}
+
 $datas = $wpdb->get_results($query);
 
 $grouped_annotations = [];
 $count_non_resolu = 0;
 $count_resolu = 0;
-
-if( isset($view) ){
-    $view = $view;
-} 
-elseif( isset($_GET['view']) && $_GET['view'] === 'resolved' ){
-    $view = 'resolved';
-}
-else {
-    $view = 'active';
-}
+$count_laptop = isset( $count_laptop ) ? $count_laptop : 0;
+$count_tablet = isset( $count_tablet ) ? $count_tablet : 0;
+$count_mobile = isset( $count_mobile ) ? $count_mobile : 0;
+$view = isset($view) ? $view : 'active';
+$device = isset($device) ? $device : 'all';
 
 foreach ($datas as $annotation) {
     $grouped_annotations[$annotation->page_id][] = $annotation;
@@ -26,27 +28,45 @@ foreach ($datas as $annotation) {
     } elseif ($annotation->statut === 'résolu' && get_post($annotation->page_id)) {
         $count_resolu++;
     }
+
+    if( $annotation->device === 'laptop' ){
+        $count_laptop++;
+    }
+    elseif( $annotation->device === 'tablet' ){
+        $count_tablet++;
+    }
+    elseif( $annotation->device === 'mobile' ){
+        $count_mobile++;
+    }
 }
 
 $interface_color = get_option('wp_annotation_color', 'blue');
 
 ?>
-<!-- <div class="wp-annotations--dashboard__devices laptop">
-    <button class="device laptop">
-        <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/laptop.svg' ?>" alt="Laptop">
-    </button>
-    <button class="device tablet">
-        <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/tablet.svg' ?>" alt="Tablet">
-    </button>
-    <button class="device mobile">
-        <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/mobile.svg' ?>" alt="Mobile">
-    </button>
-</div> -->
+<?php // DEVICES ?>
+<div class="wp-annotations--dashboard__devices <?= $device ?>">
+    <div class="devices-wrapper">
+        <button class="device all" data-device="all">
+            <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/multidevices.svg' ?>" alt="All Devices" >
+        </button>
+        <button class="device laptop<?= $count_laptop > 0 ? '' : ' disabled' ?>" data-device="laptop">
+            <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/laptop.svg' ?>" alt="Laptop">
+        </button>
+        <button class="device tablet<?= $count_tablet > 0 ? '' : ' disabled' ?>" data-device="tablet">
+            <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/tablet.svg' ?>" alt="Tablet">
+        </button>
+        <button class="device mobile<?= $count_mobile > 0 ? '' : ' disabled' ?>" data-device="mobile">
+            <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/mobile.svg' ?>" alt="Mobile">
+        </button>
+    </div>
+</div>
+
 <div class="wp-annotations--dashboard__comments<?= $view === 'active' ? ' active' : '' ?>">
     <button class="comments-actives">Actifs (<?= $count_non_resolu ?>)</button>
     <button class="comments-resolved">Résolus (<?= $count_resolu ?>)</button>
 </div>
 
+<?php // COMMENTS ?>
 <div class="wp-annotations--dashboard__comments-list active-comments<?= $view === 'active' ? '' : ' display-none' ?>">
     <?php if( $count_non_resolu > 0 ): ?>
         <?php
@@ -87,7 +107,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
             </div>
             <div class="accordeon-content">
                 <?php foreach ($annotations as $annotation) : if( $annotation->statut === 'non résolu' ) : ?>
-                    <div class="comment-item" data-comment-id="<?= $annotation->id ?>" data-screen-url="<?= $annotation->screenshot_url ?>">
+                    <div class="comment-item <?= $annotation->device ?>" data-comment-id="<?= $annotation->id ?>" data-screen-url="<?= $annotation->screenshot_url ?>">
                         <div class="comment-item__header">
                             <div class="dot">
                                 <?= $annotation->id ?>
