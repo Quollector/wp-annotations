@@ -444,9 +444,23 @@ html{
                 justify-content: center;
                 transition: color .5s ease;
                 
-                img{
-                    height: 30px;
+                svg{
+                    height: 28px;
                     width: auto;
+
+                    &.fill{
+                        fill: $sombre;
+                    }
+
+                    &:not(.fill){
+                        stroke: $sombre;
+                    }
+                }
+
+                &.mobile{
+                    svg{
+                        height: 24px;
+                    }
                 }
 
                 &.disabled{

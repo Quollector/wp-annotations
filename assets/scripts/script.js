@@ -454,6 +454,7 @@
                     type: 'delete',
                     id: $commentID,
                     screenUrl: $screenUrl,
+                    device: $('.wp-annotations--dashboard__devices').data('device'),
                     view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved'
                 };                       
     
@@ -553,6 +554,7 @@
                     type: 'update',
                     id: $commentID,
                     comment: $textarea,
+                    device: $('.wp-annotations--dashboard__devices').data('device'),
                     view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved'
                 };                       
     
