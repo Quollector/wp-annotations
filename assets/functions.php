@@ -40,9 +40,11 @@ function getAllReplies($comment_id) {
 // Extract users Emails
 function extractUsersEmails($datas, $comment, $notifications){
     $users_array = array();
-    $replies = getAllReplies($datas['id']);
+    $replies = isset($datas['id']) ? getAllReplies($datas['id']) : [];
 
     $users_array[$datas['user_id']] = false;
+
+    $users_emails = array();
 
     if(!empty($replies)){
         foreach($replies as $reply){
@@ -50,16 +52,22 @@ function extractUsersEmails($datas, $comment, $notifications){
         }
     }
 
+    error_log('notifications: ' . print_r($notifications, true));
+
     if(!empty($notifications)){
         foreach($notifications as $not_id){
-            $username = get_userdata($not_id)->display_name;
-            $pattern = '/@' . preg_quote($username, '/') . '/';
-
-            if(preg_match($pattern, $comment)){
-                $users_array[$not_id] = true;
+            if(get_userdata($not_id)){
+                $username = get_userdata($not_id)->display_name;
+                $pattern = '/@' . preg_quote($username, '/') . '/';
+    
+                if(preg_match($pattern, $comment)){
+                    $users_array[$not_id] = true;
+                }
             }
         }
     }
+
+    error_log('users_array: ' . print_r($users_array, true));
 
     foreach($users_array as $id => $notified){
         if($id != get_current_user_id()){
@@ -72,7 +80,7 @@ function extractUsersEmails($datas, $comment, $notifications){
 }
 
 // Send notification email to user
-function sendNotificationEmail($datas, $comment, $notifications){
+function sendNotificationEmail($datas, $comment, $notifications, $highLvl = false) {
     $emails = extractUsersEmails($datas, $comment[0], $notifications);
     $current_user_name = get_userdata(get_current_user_id())->display_name;
     $smtp = get_option('wp_annotation_smtp_valid', false);
@@ -86,44 +94,46 @@ function sendNotificationEmail($datas, $comment, $notifications){
 
     $smtp_mail = get_option('wp_annotation_smtp_mail', '');
     $smtp_user = get_option('wp_annotation_smtp_user', '');
-    $smtp_password = get_option('wp_annotation_smtp_password', '');
+    $smtp_password = trim(get_option('wp_annotation_smtp_password', ''));
     $smtp_name = get_option('wp_annotation_smtp_from_name', '');
     $smtp_email = get_option('wp_annotation_smtp_from_email', '');
 
-    try {
-        $mail->isSMTP();
-        $mail->Host       = $smtp_mail;
-        $mail->SMTPAuth   = true;
-        $mail->Username   = $smtp_user;
-        $mail->Password   = $smtp_password;
-        $mail->SMTPSecure = 'tls';
-        $mail->Port       = 587;
-        $mail->CharSet = 'UTF-8';
-        $mail->Encoding = 'base64';
-        $mail->isHTML(true);
+    error_log(print_r($emails, true));
 
-        $mail->setFrom($smtp_email, $smtp_name);
+    // try {
+    //     $mail->isSMTP();
+    //     $mail->Host       = $smtp_mail;
+    //     $mail->SMTPAuth   = true;
+    //     $mail->Username   = $smtp_user;
+    //     $mail->Password   = $smtp_password;
+    //     $mail->SMTPSecure = 'tls';
+    //     $mail->Port       = 587;
+    //     $mail->CharSet = 'UTF-8';
+    //     $mail->Encoding = 'base64';
+    //     $mail->isHTML(true);
 
-        foreach($emails as $email){
-            if(!empty($email[0])){
-                $mail->clearAddresses();
-                $mail->addAddress($email[0]);
+    //     $mail->setFrom($smtp_email, $smtp_name);
+
+    //     foreach($emails as $email){
+    //         if(!empty($email[0])){
+    //             $mail->clearAddresses();
+    //             $mail->addAddress($email[0]);
     
-                if( $email[1] ){
-                    $mail->Subject = 'Mention de commentaire - ' . get_bloginfo('name'); 
-                }
-                else{
-                    $mail->Subject = 'Réponse à votre commentaire - ' . get_bloginfo('name'); 
-                }
+    //             if( $email[1] ){
+    //                 $mail->Subject = 'Mention de commentaire - ' . get_bloginfo('name'); 
+    //             }
+    //             else{
+    //                 $mail->Subject = 'Réponse à votre commentaire - ' . get_bloginfo('name'); 
+    //             }
         
-                $mail->Body = createNotificationsMessage( $datas, $email[1], $current_user_name, $comment );
-                $mail->send();
-                error_log('✅ Email envoyé avec succès !');
-            }
-        }
-    } catch (Exception $e) {
-        error_log('❌ Erreur d\'envoi : ' . $mail->ErrorInfo);
-    }
+    //             $mail->Body = createNotificationsMessage( $datas, $email[1], $current_user_name, $comment );
+    //             $mail->send();
+    //             error_log('✅ Email envoyé avec succès !');
+    //         }
+    //     }
+    // } catch (Exception $e) {
+    //     error_log('❌ Erreur d\'envoi : ' . $mail->ErrorInfo);
+    // }
 }
 
 // Email message

@@ -63,18 +63,11 @@
             }
         });
 
-        $(window).resize(function() {
-            $winWidth = $(window).width();    
+        // *** Update device class on resize
+        updateDeviceClass();
 
-            if( $winWidth <= $tablet && $winWidth > $mobile ){
-                $('html').removeClass('laptop mobile').addClass('tablet');
-            }
-            else if( $winWidth <= $mobile ){
-                $('html').removeClass('laptop tablet').addClass('mobile');
-            }
-            else{
-                $('html').removeClass('tablet mobile').addClass('laptop');
-            }
+        $(window).resize(function() {
+            updateDeviceClass();
         });
 
         // *** Open/Close dashboard 
@@ -338,11 +331,14 @@
                     data: {
                         action: 'submit_wp_annotation',
                         datas: datas,
+                        device: $device,
+                        view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved',
                         screenshot: screenshot // Ajouter l'image en base64
                     },
                     success: function(response) {
                         if (response.success) {
                             $('#wp-annotations--modal').hide().find('textarea').val('');
+                            $('#wp-annotations--modal').find('input[type=hidden]').remove();
                             $modal.find('#wp-annotation-form').show();
                             $('#wp-annotations--dashboard').removeClass('ajax');
                             $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
@@ -356,6 +352,7 @@
                         } else {
                             $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
                             $('#wp-annotations--modal').hide().find('textarea').val('');
+                            $('#wp-annotations--modal').find('input[type=hidden]').remove();
                             $modal.find('#wp-annotation-form').show();
                             $('#wp-annotations--dashboard').removeClass('ajax');
         
@@ -382,6 +379,7 @@
 
         $('#wp-annotation-form').on('reset', function(event) {
             $('#wp-annotations--modal').hide().find('textarea').val('').siblings('.mention-list-main').hide();
+            $('#wp-annotations--modal').find('input[type=hidden]').remove();
         })
 
         $('#wp-annotation-form textarea').on('keydown', function(event) {
@@ -392,6 +390,7 @@
             // else 
             if( event.key === "Escape" ){
                 $('#wp-annotations--modal').hide().find('textarea').val('').siblings('.mention-list-main').hide();
+                $('#wp-annotations--modal').find('input[type=hidden]').remove();
             }
         });
 
@@ -663,7 +662,7 @@
                 formData.append('user_id', userID);
                 formData.append('comment_text', commentText);
                 formData.append('notify_email', notifyEmail);
-        
+
                 if( targetsEmail.length > 0 ){
                     targetsEmail.forEach((email, index) => {
                         formData.append(`targets_email[${index}]`, email);
@@ -890,7 +889,8 @@
             var datas = {
                 action: 'update_wp_annotation',
                 type: 'refresh',
-                view: 'active'
+                device: $('.wp-annotations--dashboard__devices').data('device'),
+                view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved'
             };                       
 
             $.ajax({
@@ -924,6 +924,20 @@
                 }
             });
 
+        }
+
+        function updateDeviceClass() {            
+            $winWidth = $(window).width();    
+
+            if( $winWidth <= $tablet && $winWidth > $mobile ){
+                $('html').removeClass('laptop mobile').addClass('tablet');
+            }
+            else if( $winWidth <= $mobile ){
+                $('html').removeClass('laptop tablet').addClass('mobile');
+            }
+            else{
+                $('html').removeClass('tablet mobile').addClass('laptop');
+            }
         }
     });
 })(jQuery);

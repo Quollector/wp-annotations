@@ -746,8 +746,7 @@ html{
             max-width: 100%;
             width: calc(100% - 20px);
             left: 10px;
-            top: auto;
-            bottom: 10px;            
+            top: auto;           
         }
     }
 
@@ -1663,6 +1662,15 @@ html{
                 }
             }
 
+            & > label{
+                input{
+                    height: 16px;
+                    position: relative;
+                    width: auto;
+                    opacity: 1;
+                }
+            }
+
             button{
                 padding: 4px 8px;
                 background: $main;
@@ -1672,7 +1680,8 @@ html{
                 cursor: pointer;
                 transition: background .5s ease;
                 font-size: 10px;
-    
+                width: fit-content;
+
                 &:hover{                        
                     background: $sombre;
                 }
