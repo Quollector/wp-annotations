@@ -351,6 +351,7 @@ html{
         left: 0;
         top: 0;
         width: $margin;
+        max-width: calc(100% - 60px);
         height: 100vh;
         background: $white;
         z-index: 666;
@@ -1186,6 +1187,12 @@ html{
             padding: 90px 45px;
             overflow: auto;
             transition: all .2s ease;
+        }
+
+        @media screen and (max-width: 500px) {
+            &__wrapper{
+                padding: 60px 0;
+            }
         }
     }
 
