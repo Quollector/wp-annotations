@@ -52,8 +52,6 @@ function extractUsersEmails($datas, $comment, $notifications){
         }
     }
 
-    error_log('notifications: ' . print_r($notifications, true));
-
     if(!empty($notifications)){
         foreach($notifications as $not_id){
             if(get_userdata($not_id)){
@@ -67,8 +65,6 @@ function extractUsersEmails($datas, $comment, $notifications){
         }
     }
 
-    error_log('users_array: ' . print_r($users_array, true));
-
     foreach($users_array as $id => $notified){
         if($id != get_current_user_id()){
             $user = get_userdata($id);
@@ -81,7 +77,7 @@ function extractUsersEmails($datas, $comment, $notifications){
 
 // Send notification email to user
 function sendNotificationEmail($datas, $comment, $notifications, $highLvl = false) {
-    $emails = extractUsersEmails($datas, $comment[0], $notifications);
+    $emails = extractUsersEmails($datas, $highLvl ? $comment : $comment[0], $notifications);
     $current_user_name = get_userdata(get_current_user_id())->display_name;
     $smtp = get_option('wp_annotation_smtp_valid', false);
     $mail = new PHPMailer(true);
@@ -98,46 +94,44 @@ function sendNotificationEmail($datas, $comment, $notifications, $highLvl = fals
     $smtp_name = get_option('wp_annotation_smtp_from_name', '');
     $smtp_email = get_option('wp_annotation_smtp_from_email', '');
 
-    error_log(print_r($emails, true));
+    try {
+        $mail->isSMTP();
+        $mail->Host       = $smtp_mail;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $smtp_user;
+        $mail->Password   = $smtp_password;
+        $mail->SMTPSecure = 'tls';
+        $mail->Port       = 587;
+        $mail->CharSet = 'UTF-8';
+        $mail->Encoding = 'base64';
+        $mail->isHTML(true);
 
-    // try {
-    //     $mail->isSMTP();
-    //     $mail->Host       = $smtp_mail;
-    //     $mail->SMTPAuth   = true;
-    //     $mail->Username   = $smtp_user;
-    //     $mail->Password   = $smtp_password;
-    //     $mail->SMTPSecure = 'tls';
-    //     $mail->Port       = 587;
-    //     $mail->CharSet = 'UTF-8';
-    //     $mail->Encoding = 'base64';
-    //     $mail->isHTML(true);
+        $mail->setFrom($smtp_email, $smtp_name);
 
-    //     $mail->setFrom($smtp_email, $smtp_name);
-
-    //     foreach($emails as $email){
-    //         if(!empty($email[0])){
-    //             $mail->clearAddresses();
-    //             $mail->addAddress($email[0]);
+        foreach($emails as $email){
+            if(!empty($email[0])){
+                $mail->clearAddresses();
+                $mail->addAddress($email[0]);
     
-    //             if( $email[1] ){
-    //                 $mail->Subject = 'Mention de commentaire - ' . get_bloginfo('name'); 
-    //             }
-    //             else{
-    //                 $mail->Subject = 'Réponse à votre commentaire - ' . get_bloginfo('name'); 
-    //             }
+                if( $email[1] ){
+                    $mail->Subject = 'Mention de commentaire - ' . get_bloginfo('name'); 
+                }
+                else{
+                    $mail->Subject = 'Réponse à votre commentaire - ' . get_bloginfo('name'); 
+                }
         
-    //             $mail->Body = createNotificationsMessage( $datas, $email[1], $current_user_name, $comment );
-    //             $mail->send();
-    //             error_log('✅ Email envoyé avec succès !');
-    //         }
-    //     }
-    // } catch (Exception $e) {
-    //     error_log('❌ Erreur d\'envoi : ' . $mail->ErrorInfo);
-    // }
+                $mail->Body = createNotificationsMessage( $datas, $email[1], $current_user_name, $comment, $highLvl );
+                $mail->send();
+                error_log('✅ Email envoyé avec succès !');
+            }
+        }
+    } catch (Exception $e) {
+        error_log('❌ Erreur d\'envoi : ' . $mail->ErrorInfo);
+    }
 }
 
 // Email message
-function createNotificationsMessage( $datas, $notif, $current_user_name, $comment ){
+function createNotificationsMessage( $datas, $notif, $current_user_name, $comment, $highLvl = false ) {
     $interface_color = get_option('wp_annotation_color', 'blue');
 
     $message = '<html><body>';
@@ -148,23 +142,28 @@ function createNotificationsMessage( $datas, $notif, $current_user_name, $commen
     $message .= '</th></tr>';
     $message .= '<tr style="background-color: #f2f2f2;"><td style="padding: 0 16px">';
     $message .= '<p style="font-size: 16px; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . ';">Bonjour,</p>';
-    if($notif){
+    if($notif || $highLvl){
         $message .= '<p style="font-size: 16px; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . ';"><strong>' . $current_user_name . '</strong> vous a mentionné sous un commentaire sur le site <strong>' . get_bloginfo('name') . '</strong> :</p>';
     }
     else{
         $message .= '<p style="font-size: 16px; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . ';"><strong>' . $current_user_name . '</strong> a ajouté une réponse sous un de vos commentaires sur le site <strong>' . get_bloginfo('name') . '</strong> :</p>';
     }
     $message .= '<blockquote style="font-size: 16px; background-color: #f7f7f7; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . '; border-left: 4px solid ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . '; padding: 6px 10px; margin-left: 0; font-style: italic;">';
-    $message .= formatNotificationsComment($comment[0]);
+    $message .= formatNotificationsComment($highLvl ? $comment : $comment[0]);
 
-    if(!empty($comment[1])){
+    if($highLvl){
+        $message .= '<img src="' . WP_ANNOTATION_URL . 'assets/images/screenshots/' . $datas['screenshot_url'] . '" alt="Image" style="width: 100%; max-width: 600px; height: auto; margin: 0 auto;">';
+    }
+    elseif(!empty($comment[1])){
         $message .= '<img src="' . WP_ANNOTATION_URL . 'assets/images/replies/' . $comment[1] . '" alt="Image" style="width: 100%; max-width: 600px; height: auto; margin: 0 auto;">';
     }
-
     $message .= '</blockquote>';
-    $message .= '<p style="font-size: 16px; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . ';">Voici le commentaire original :</p>';
-    $message .= '<blockquote style="font-size: 16px; background-color: #f7f7f7; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . '; border-left: 4px solid ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . '; padding: 6px 10px; margin-left: 0; font-style: italic;">' . nl2br(esc_html($datas['commentaire'])) . '</blockquote>';
-    $message .= '<p style="font-size: 16px; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . ';">Vous pouvez consulter la réponse en vous connectant à votre <a href="' . get_admin_url() . '" style="color: #0075A2;">espace administrateur</a>.</p>';
+
+    if ( !$highLvl ) {
+        $message .= '<p style="font-size: 16px; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . ';">Voici le commentaire original :</p>';
+        $message .= '<blockquote style="font-size: 16px; background-color: #f7f7f7; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . '; border-left: 4px solid ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . '; padding: 6px 10px; margin-left: 0; font-style: italic;">' . nl2br(esc_html($datas['commentaire'])) . '</blockquote>';
+    }
+    $message .= '<p style="font-size: 16px; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . ';">Vous pouvez consulter le commentaire en vous connectant à votre <a href="' . get_admin_url() . '" style="color: #0075A2;">espace administrateur</a>.</p>';
     $message .= '<br>';
     $message .= '<p style="font-size: 16px; color: ' . WP_ANNOTATION_COLORS[$interface_color]['sombre'] . ';">Bonne journée !</p>';
     $message .= '</td></tr>';
