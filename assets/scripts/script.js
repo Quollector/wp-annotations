@@ -4,7 +4,8 @@
         $laptop = 1280;
         $tablet = 1024;
         $mobile = 768; 
-        $modal = $('#wp-annotations--modal');      
+        $modal = $('#wp-annotations--modal');    
+        var quality = parseFloat(datas.quality);
 
         // *** Switch comment / browse
         $('body').on('click', '#wp-annotations--switch-bubble', function() {
@@ -61,21 +62,11 @@
             }
         });
 
+        // *** Update device class on resize
+        updateDeviceClass();
+
         $(window).resize(function() {
-            $winWidth = $(window).width();
-
-            if( $('html').hasClass('review-mode') ){
-                if( $winWidth <= $tablet && $winWidth > $mobile ){
-                    $('html').removeClass('laptop mobile').addClass('tablet');
-                }
-                else if( $winWidth <= $mobile ){
-                    $('html').removeClass('laptop tablet').addClass('mobile');
-                }
-                else{
-                    $('html').removeClass('tablet mobile').addClass('laptop');
-                }
-            }
-
+            updateDeviceClass();
         });
 
         // *** Open/Close dashboard 
@@ -126,9 +117,17 @@
                 .attr('data-position-y', yPercent.toFixed(2) + '%')
                 .find('textarea').focus();
         
-            if ($(window).width() - event.pageX < 300) {
+            if($(window).width() - event.pageX < 300 && $(window).height() - event.pageY < 200){
+                $modal.find('form').css('transform', 'translate(-270px, calc(-100% - 55px))');
+            }
+            else if ($(window).width() - event.pageX < 300) {
                 $modal.find('form').css('transform', 'translateX(-270px)');
-            } else {
+            } 
+            else if($(window).height() - event.pageY < 200){
+                console.log('height');
+                $modal.find('form').css('transform', 'translateY(calc(-100% - 55px))');
+            }
+            else {
                 $modal.find('form').css('transform', 'none');
             }
         });        
@@ -151,27 +150,54 @@
         });
 
 
-        // *** DASHBOARD
-
-        // DEVICES
-        // $('body').on('click', '.wp-annotations--dashboard__devices button', function() { 
-        //     $par = $(this).closest('.wp-annotations--dashboard__devices');
-        //     $winWidth = $(window).width();
-
-        //     if( $(this).hasClass('laptop') ){
-        //         $par.removeClass('tablet mobile').addClass('laptop');
-        //         $('html').removeClass('tablet mobile').addClass('laptop');
-        //         $('body').css('transform', 'scale(' + $laptop / $winWidth + ')');
-        //     }
-        //     else if( $(this).hasClass('tablet') ){
-        //         $par.removeClass('laptop mobile').addClass('tablet');
-        //         $('html').removeClass('laptop mobile').addClass('tablet');
-        //     }
-        //     else if( $(this).hasClass('mobile') ){
-        //         $par.removeClass('laptop tablet').addClass('mobile');
-        //         $('html').removeClass('laptop tablet').addClass('mobile');
-        //     }
-        // });
+        // *** DASHBOARD ***
+        // Switch device
+        $('body').on('click', '.wp-annotations--dashboard__devices button', function() { 
+            if( !$(this).hasClass('disabled') ){
+                $device = $(this).data('device');
+                $('#wp-annotations--dashboard').addClass('ajax');
+        
+                $.ajax({
+                    url: ajaxurl.url,
+                    type: 'POST',
+                    data: {
+                        action: 'wp_annotation_device',
+                        device: $device,
+                        view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved'
+                    },
+                    success: function(response) {
+                        if (response.success) {                        
+                            $('#wp-annotations--dashboard').removeClass('ajax');
+                            $('#wp-annotations--refresh-box').html(response.data.comments_content);
+        
+                            setTimeout(function() {
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
+                            }, 2000);
+                        } else {
+                            $('#wp-annotations--dashboard').removeClass('ajax');
+        
+                            setTimeout(function() {
+                                $('#wp-annotations--notices').fadeOut(function(){
+                                    $(this).removeClass('error success');
+                                });
+                            }, 2000);
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
+                        $('#wp-annotations--dashboard').removeClass('ajax');
+    
+                        setTimeout(function() {
+                            $('#wp-annotations--notices').fadeOut(function(){
+                                $(this).removeClass('error success');
+                            });
+                        }, 2000);
+                    }
+                });
+            }
+        });
         
         // Switch active / resolved display
         $('body').on('click', '.wp-annotations--dashboard__comments button', function() { 
@@ -217,6 +243,7 @@
                 type: 'status',
                 id: $commentID,
                 status: $(this).hasClass('true') ? 'Résolu' : 'Non résolu',
+                device: $('.wp-annotations--dashboard__devices').data('device'),
                 view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved'
             };
 
@@ -267,7 +294,7 @@
             $screenQuality = parseFloat(datas.quality);             
             
             html2canvas(document.body, {
-                scale: $screenQuality,
+                scale: quality,
                 scrollX: 0,
                 scrollY: 0,
                 width: window.innerWidth,
@@ -275,7 +302,7 @@
                 x: window.scrollX,
                 y: window.scrollY
             }).then(function(canvas) {
-                var screenshot = canvas.toDataURL('image/png', $screenQuality); // Convertir en base64
+                var screenshot = canvas.toDataURL('image/png', quality);
 
                 $('html').removeClass('screenshot');
 
@@ -304,14 +331,17 @@
                     data: {
                         action: 'submit_wp_annotation',
                         datas: datas,
+                        device: $device,
+                        view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved',
                         screenshot: screenshot // Ajouter l'image en base64
                     },
                     success: function(response) {
                         if (response.success) {
                             $('#wp-annotations--modal').hide().find('textarea').val('');
+                            $('#wp-annotations--modal').find('input[type=hidden]').remove();
                             $modal.find('#wp-annotation-form').show();
-                            $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
                             $('#wp-annotations--dashboard').removeClass('ajax');
+                            $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
                             $('#wp-annotations--refresh-box').html(response.data.comments_content);
         
                             setTimeout(function() {
@@ -321,6 +351,9 @@
                             }, 2000);
                         } else {
                             $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
+                            $('#wp-annotations--modal').hide().find('textarea').val('');
+                            $('#wp-annotations--modal').find('input[type=hidden]').remove();
+                            $modal.find('#wp-annotation-form').show();
                             $('#wp-annotations--dashboard').removeClass('ajax');
         
                             setTimeout(function() {
@@ -344,11 +377,65 @@
             });
         });
 
+        $('#wp-annotation-form').on('reset', function(event) {
+            $('#wp-annotations--modal').hide().find('textarea').val('').siblings('.mention-list-main').hide();
+            $('#wp-annotations--modal').find('input[type=hidden]').remove();
+        })
+
         $('#wp-annotation-form textarea').on('keydown', function(event) {
-            if (event.key === "Enter") { 
-                event.preventDefault();
-                $('#wp-annotation-form').submit();
+            // if (event.key === "Enter") { 
+            //     event.preventDefault();
+            //     $('#wp-annotation-form').submit();
+            // }
+            // else 
+            if( event.key === "Escape" ){
+                $('#wp-annotations--modal').hide().find('textarea').val('').siblings('.mention-list-main').hide();
+                $('#wp-annotations--modal').find('input[type=hidden]').remove();
             }
+        });
+
+        $('body').on('keyup', '#wp-annotation-form textarea', function(event) {
+            $textarea = $(this);
+            $mentionList = $textarea.closest('form').find('#mention-list-main');
+            var cursorPos = this.selectionStart;
+            var text = $textarea.val().substring(0, cursorPos);
+            var match = text.match(/@(\w*)$/);
+    
+            if (match) {
+                $mentionList.slideDown(250);
+            } else {
+                $mentionList.slideUp(250);
+            }
+        });
+
+        $('body').on('click', function(e) {
+            if (!$(e.target).closest('#mention-list-main, #wp-annotation-form textarea').length) {
+                $(this).closest('form').find('#mention-list-main').slideUp(250);
+            }
+        });
+
+        $('body').on('click', '.mention-list-main__item', function() {            
+            $this = $(this);
+            $textarea = $this.closest('form').find('textarea');
+            $mentionList = $this.closest('form').find('#mention-list-main');
+            var username = $this.data('user-name');            
+            var text = $textarea.val();
+            var cursorPos = $textarea[0].selectionStart;
+            var beforeCursor = text.substring(0, cursorPos);
+            var afterCursor = text.substring(cursorPos);            
+            
+            let $input = $('<input>', {
+                type: 'hidden',
+                name: 'targets_email[]',
+                value: $this.data('user-id')
+            });
+
+            $(this).closest('form').append($input);
+            
+            var newText = beforeCursor.replace(/@(\w*)$/, '@' + username + ' ') + afterCursor;
+            $textarea.val(newText);
+            $mentionList.slideUp(250);
+            $textarea.focus();
         });
 
         // *** DELETE COMMENT
@@ -366,6 +453,7 @@
                     type: 'delete',
                     id: $commentID,
                     screenUrl: $screenUrl,
+                    device: $('.wp-annotations--dashboard__devices').data('device'),
                     view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved'
                 };                       
     
@@ -465,6 +553,7 @@
                     type: 'update',
                     id: $commentID,
                     comment: $textarea,
+                    device: $('.wp-annotations--dashboard__devices').data('device'),
                     view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved'
                 };                       
     
@@ -573,7 +662,7 @@
                 formData.append('user_id', userID);
                 formData.append('comment_text', commentText);
                 formData.append('notify_email', notifyEmail);
-        
+
                 if( targetsEmail.length > 0 ){
                     targetsEmail.forEach((email, index) => {
                         formData.append(`targets_email[${index}]`, email);
@@ -800,7 +889,8 @@
             var datas = {
                 action: 'update_wp_annotation',
                 type: 'refresh',
-                view: 'active'
+                device: $('.wp-annotations--dashboard__devices').data('device'),
+                view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved'
             };                       
 
             $.ajax({
@@ -834,6 +924,20 @@
                 }
             });
 
+        }
+
+        function updateDeviceClass() {            
+            $winWidth = $(window).width();    
+
+            if( $winWidth <= $tablet && $winWidth > $mobile ){
+                $('html').removeClass('laptop mobile').addClass('tablet');
+            }
+            else if( $winWidth <= $mobile ){
+                $('html').removeClass('laptop tablet').addClass('mobile');
+            }
+            else{
+                $('html').removeClass('tablet mobile').addClass('laptop');
+            }
         }
     });
 })(jQuery);

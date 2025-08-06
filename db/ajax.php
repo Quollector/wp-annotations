@@ -11,17 +11,24 @@ function wp_annotation_submit_comment() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'reviews';
         $datas = $_POST['datas'];
+        $devices = get_devices_comments();
+
+        $variables = [
+            $device = isset($_POST['device']) ? sanitize_text_field($_POST['device']) : '',
+            $view = sanitize_text_field($_POST['view']),
+        ];
 
         parse_str($datas[0], $form_data);
 
-        $commentaire = isset($form_data['comment']) ? stripslashes(sanitize_text_field($form_data['comment'])) : '';
+        $commentaire = isset($form_data['comment']) ? wp_kses_post(stripslashes($form_data['comment'])) : '';
         $position_x = isset($datas[1]) ? intval($datas[1]) : 0;
         $position_y = isset($datas[2]) ? intval($datas[2]) : 0;
         $device = isset($datas[3]) ? sanitize_text_field($datas[3]) : '';
         $page_id = isset($datas[4]) ? intval($datas[4]) : get_the_ID();
         $user_id = isset($datas[5]) ? intval($datas[5]) : get_current_user_id();
+        $targetsEmail = isset($form_data['targets_email']) ? $form_data['targets_email'] : [];
 
-        if (empty($commentaire)) {
+        if (empty(trim($commentaire))) {
             wp_send_json_error(['message' => 'Le commentaire ne peut pas être vide.']);
             return;
         }
@@ -46,26 +53,33 @@ function wp_annotation_submit_comment() {
             $screenshot_path = $file_name;
         }
 
+        $table_datas = [
+            'commentaire' => $commentaire,
+            'position_x' => $position_x,
+            'position_y' => $position_y,
+            'device' => $device,
+            'page_id' => $page_id,
+            'user_id' => $user_id,
+            'timestamp' => current_time('mysql'),
+            'statut' => 'non résolu',
+            'screenshot_url' => $screenshot_path
+        ];
+
         // Insérer le commentaire dans la DB
         $insert = $wpdb->insert(
             $table_name,
-            [
-                'commentaire' => $commentaire,
-                'position_x' => $position_x,
-                'position_y' => $position_y,
-                'device' => $device,
-                'page_id' => $page_id,
-                'user_id' => $user_id,
-                'timestamp' => current_time('mysql'),
-                'statut' => 'non résolu',
-                'screenshot_url' => $screenshot_path
-            ]
+            $table_datas
         );
 
         if ($insert) {
-            ob_start();
+            ob_start();            
+            extract($variables);
             include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
-            $comments_content = ob_get_clean();
+            $comments_content = ob_get_clean(); 
+            
+            if ( !empty($targetsEmail) ) {
+                sendNotificationEmail( $table_datas, $table_datas['commentaire'], $targetsEmail, true );
+            }
 
             wp_send_json_success([
                 'message' => 'Commentaire ajouté avec succès',
@@ -92,11 +106,16 @@ function wp_annotation_update_comment() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
     $table_replies = $wpdb->prefix . 'reviews_replies';
+    $devices = get_devices_comments();
 
     $variables = [
-        $view = sanitize_text_field($_POST['view'])
+        $view = sanitize_text_field($_POST['view']),
+        $device = isset($_POST['device']) ? sanitize_text_field($_POST['device']) : '',
+        $count_laptop = $devices['laptop'],
+        $count_tablet = $devices['tablet'],
+        $count_mobile = $devices['mobile']
     ];
-
+    
     if( $_POST['type'] === 'status' ){
         $id = intval($_POST['id']);
         $status = sanitize_text_field($_POST['status']);
@@ -183,7 +202,16 @@ function wp_annotation_update_comment() {
     }
     elseif( $_POST['type'] === 'update' ){
         $id = intval($_POST['id']);
-        $comment = sanitize_text_field($_POST['comment']);
+        $comment = wp_kses_post(stripslashes($_POST['comment']));
+        $devices = get_devices_comments();
+
+        $variables = [
+            $view = sanitize_text_field($_POST['view']),
+            $device = isset($_POST['device']) ? sanitize_text_field($_POST['device']) : '',
+            $count_laptop = $devices['laptop'],
+            $count_tablet = $devices['tablet'],
+            $count_mobile = $devices['mobile']
+        ];
 
         $update = $wpdb->update(
             $table_name,
@@ -209,6 +237,16 @@ function wp_annotation_update_comment() {
         }
     }
     elseif( $_POST['type'] === 'refresh' ){
+        $devices = get_devices_comments();
+
+        $variables = [
+            $view = sanitize_text_field($_POST['view']),
+            $device = isset($_POST['device']) ? sanitize_text_field($_POST['device']) : '',
+            $count_laptop = $devices['laptop'],
+            $count_tablet = $devices['tablet'],
+            $count_mobile = $devices['mobile']
+        ];
+
         ob_start();
         extract($variables);
         include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
@@ -256,7 +294,6 @@ function wp_annotation_replies() {
     if ( isset($_POST['status'])){
         global $wpdb;
         $table_name = $wpdb->prefix . 'reviews_replies';
-        $smtp = get_option('wp_annotation_smtp_valid', false);
     
         if( $_POST['status'] === 'add' ){
             $commentID = isset($_POST['comment_id']) ? intval($_POST['comment_id']) : 0;
@@ -328,7 +365,7 @@ function wp_annotation_replies() {
                 $table_reviews = $wpdb->prefix . 'reviews';
                 $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", $commentID), ARRAY_A);
 
-                if ($notifyEmail && !empty($targetsEmail) && $new_comment_data['user_id'] !== get_current_user_id() && $smtp) {
+                if ($notifyEmail && !empty($targetsEmail) && $new_comment_data['user_id'] !== get_current_user_id()) {
                     sendNotificationEmail(
                         $new_comment_data,
                         [wp_kses_post(stripslashes($commentText)), $new_file_name],
@@ -395,6 +432,31 @@ function wp_annotation_replies() {
 
 add_action('wp_ajax_wp_annotation_replies', 'wp_annotation_replies');
 
+/*** DEVICES */
+// Update comments
+function wp_annotation_device() {
+    $devices = get_devices_comments();
+
+    $variables = [
+        $device = sanitize_text_field($_POST['device']),
+        $view = sanitize_text_field($_POST['view']),
+        $count_laptop = $devices['laptop'],
+        $count_tablet = $devices['tablet'],
+        $count_mobile = $devices['mobile']
+    ];
+
+    ob_start();
+    extract($variables);
+    include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
+    $comments_content = ob_get_clean();
+
+    wp_send_json_success([
+        'comments_content' => $comments_content
+    ]);
+}
+
+add_action('wp_ajax_wp_annotation_device', 'wp_annotation_device');
+
 // Delete all comments
 function flush_reviews_callback() {
     global $wpdb;
@@ -403,10 +465,7 @@ function flush_reviews_callback() {
     $directory_path = WP_ANNOTATION_PATH . '/assets/images/screenshots/';    
     $replies_path = WP_ANNOTATION_PATH . '/assets/images/replies/';
 
-    error_log($_POST['context']);
-
     if($_POST['context'] === 'dehactivate'){
-        error_log('dehactivate');
         $wpdb->query("DROP TABLE IF EXISTS $table_name");
         $wpdb->query("DROP TABLE IF EXISTS $table_replies");
 

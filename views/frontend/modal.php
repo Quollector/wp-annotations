@@ -12,7 +12,15 @@ data-user-id="<?= get_current_user_id() ?>"
     </div>
     <form id="wp-annotation-form">
         <textarea name="comment" placeholder="Ajouter un commentaire..." rows="3" style="width: 100%;"></textarea>
+        <div id="mention-list-main" class="mention-list-main">
+            <div class="mention-list-main__wrapper">
+                <?php foreach(get_wp_annotations_users_by_name() as $id => $user): if($id != get_current_user_id()): ?>
+                    <div class="mention-list-main__item" data-user-id="<?= $id ?>" data-user-name="<?= $user ?>">@<?= $user ?></div>        
+                <?php endif; endforeach; ?>
+            </div>
+        </div>
         <div class="submit-box">
+            <button type="reset">Annuler</button>
             <button type="submit">Envoyer</button>
         </div>
     </form>

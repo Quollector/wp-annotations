@@ -43,7 +43,7 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
     </div>
 </div>
 <div class="reply-box__comment">
-    <?= $comment_data['commentaire'] ?>
+    <?= formatNotificationsComment($comment_data['commentaire']) ?>
 </div>
 <?php if( !empty( $comments_list ) ): ?>
     <div class="reply-box__replies">
