@@ -205,7 +205,11 @@ html{
         border: none;
         cursor: pointer;
         pointer-events: all;
-        transition: transform .5s ease, background .3s ease;
+        transition: transform .5s ease, background .3s ease;        
+
+        .logged-in &{
+            top: 42px;
+        }
 
         .logged-in &{
             top: 42px;
@@ -281,7 +285,11 @@ html{
         border: none;
         cursor: pointer;
         pointer-events: all;
-        transition: transform .5s ease, background .3s ease;
+        transition: transform .5s ease, background .3s ease;   
+
+        .logged-in &{
+            top: 92px;
+        }
 
         .logged-in &{
             top: 92px;
@@ -379,9 +387,9 @@ html{
             height: 100%;
             overflow: auto;
 
-            .logged-in &{
-                padding-top: 32px;
-            }
+            // .logged-in &{
+            //     padding-top: 32px;
+            // }
 
             & > *{
                 position: relative;
@@ -418,6 +426,7 @@ html{
                 margin: 0;
                 padding: 0;
                 font-size: 32px;
+                padding: 0;
             }
         }
 
@@ -980,7 +989,7 @@ html{
             p{
                 font-size: 16px;
                 color: $sombre;
-
+              
                 & + p{
                     margin-top: 8px;
                 }

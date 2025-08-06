@@ -6,7 +6,6 @@
         $mobile = 768; 
         $modal = $('#wp-annotations--modal');    
         var quality = parseFloat(datas.quality);
-        
 
         // *** Switch comment / browse
         $('body').on('click', '#wp-annotations--switch-bubble', function() {
@@ -292,6 +291,7 @@
             event.preventDefault();
             $('#wp-annotations--dashboard').addClass('ajax');
             $modal.find('#wp-annotation-form').hide();
+            $screenQuality = parseFloat(datas.quality);             
             
             html2canvas(document.body, {
                 scale: quality,
@@ -302,7 +302,7 @@
                 x: window.scrollX,
                 y: window.scrollY
             }).then(function(canvas) {
-                var screenshot = canvas.toDataURL('image/png', quality); // Convertir en base64
+                var screenshot = canvas.toDataURL('image/png', quality);
 
                 $('html').removeClass('screenshot');
 

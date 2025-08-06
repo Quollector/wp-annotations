@@ -22,8 +22,7 @@ function wp_annotation_add_overlay() {
         </div>
     </div>
     <script>
-
-        jQuery(document).ready(function($) {
+        jQuery(window).on("load", function($) {
             var $annotationDiv = $("#wp-annotations");
 
             if ($annotationDiv.length) {                
