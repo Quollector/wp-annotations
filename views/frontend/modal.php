@@ -19,6 +19,15 @@ data-user-id="<?= get_current_user_id() ?>"
                 <?php endif; endforeach; ?>
             </div>
         </div>
+        
+        <?php if( check_user_role() ): ?>
+            <label class="client-visible">
+                <input type="checkbox" name="client_visible" value="1"> Visible par le client
+            </label>
+        <?php else: ?>
+            <input type="hidden" name="client_visible" value="<?= check_user_role() ? 0 : 1 ?>">
+        <?php endif; ?>
+
         <div class="submit-box">
             <button type="reset">Annuler</button>
             <button type="submit">Envoyer</button>

@@ -7,7 +7,14 @@
         $modal = $('#wp-annotations--modal');    
         var quality = parseFloat(datas.quality);
 
-        // *** Switch comment / browse
+        //   #####                                                                                           #                                              
+        //  #     # #    # # #####  ####  #    #     ####   ####  #    # #    # ###### #    # #####         #     #####  #####   ####  #    #  ####  ###### 
+        //  #       #    # #   #   #    # #    #    #    # #    # ##  ## ##  ## #      ##   #   #          #      #    # #    # #    # #    # #      #      
+        //   #####  #    # #   #   #      ######    #      #    # # ## # # ## # #####  # #  #   #         #       #####  #    # #    # #    #  ####  #####  
+        //        # # ## # #   #   #      #    #    #      #    # #    # #    # #      #  # #   #        #        #    # #####  #    # # ## #      # #      
+        //  #     # ##  ## #   #   #    # #    #    #    # #    # #    # #    # #      #   ##   #       #         #    # #   #  #    # ##  ## #    # #      
+        //   #####  #    # #   #    ####  #    #     ####   ####  #    # #    # ###### #    #   #      #          #####  #    #  ####  #    #  ####  ###### 
+                                                                                                                                                        
         $('body').on('click', '#wp-annotations--switch-bubble', function() {
             
             $('html').removeClass('dash-open');
@@ -62,14 +69,28 @@
             }
         });
 
-        // *** Update device class on resize
+        //  #     #                                                                                                                                                                          
+        //  #     # #####  #####    ##   ##### ######    #####  ###### #    # #  ####  ######     ####  #        ##    ####   ####      ####  #    #    #####  ######  ####  # ###### ###### 
+        //  #     # #    # #    #  #  #    #   #         #    # #      #    # # #    # #         #    # #       #  #  #      #         #    # ##   #    #    # #      #      #     #  #      
+        //  #     # #    # #    # #    #   #   #####     #    # #####  #    # # #      #####     #      #      #    #  ####   ####     #    # # #  #    #    # #####   ####  #    #   #####  
+        //  #     # #####  #    # ######   #   #         #    # #      #    # # #      #         #      #      ######      #      #    #    # #  # #    #####  #           # #   #    #      
+        //  #     # #      #    # #    #   #   #         #    # #       #  #  # #    # #         #    # #      #    # #    # #    #    #    # #   ##    #   #  #      #    # #  #     #      
+        //   #####  #      #####  #    #   #   ######    #####  ######   ##   #  ####  ######     ####  ###### #    #  ####   ####      ####  #    #    #    # ######  ####  # ###### ###### 
+                                                                                                                                                                                        
         updateDeviceClass();
 
         $(window).resize(function() {
             updateDeviceClass();
         });
 
-        // *** Open/Close dashboard 
+        //  #######                            #  #####                                                                                                   
+        //  #     # #####  ###### #    #      #  #     # #       ####   ####  ######    #####    ##    ####  #    # #####   ####    ##   #####  #####     
+        //  #     # #    # #      ##   #     #   #       #      #    # #      #         #    #  #  #  #      #    # #    # #    #  #  #  #    # #    #    
+        //  #     # #    # #####  # #  #    #    #       #      #    #  ####  #####     #    # #    #  ####  ###### #####  #    # #    # #    # #    #    
+        //  #     # #####  #      #  # #   #     #       #      #    #      # #         #    # ######      # #    # #    # #    # ###### #####  #    #    
+        //  #     # #      #      #   ##  #      #     # #      #    # #    # #         #    # #    # #    # #    # #    # #    # #    # #   #  #    #    
+        //  ####### #      ###### #    # #        #####  ######  ####   ####  ######    #####  #    #  ####  #    # #####   ####  #    # #    # #####     
+                                                                                                                                                    
         $('body').on('click', '#wp-annotations--dash-bubble', function() {
             $('html').removeClass('review-mode');
 
@@ -98,7 +119,14 @@
             }
         });
 
-        // *** Add comment
+        //     #                                                                     
+        //    # #   #####  #####      ####   ####  #    # #    # ###### #    # ##### 
+        //   #   #  #    # #    #    #    # #    # ##  ## ##  ## #      ##   #   #   
+        //  #     # #    # #    #    #      #    # # ## # # ## # #####  # #  #   #   
+        //  ####### #    # #    #    #      #    # #    # #    # #      #  # #   #   
+        //  #     # #    # #    #    #    # #    # #    # #    # #      #   ##   #   
+        //  #     # #####  #####      ####   ####  #    # #    # ###### #    #   #   
+                                                                                
         $('body').on('click', '#wp-annotations--comments-layout', function(event) {            
             var offset = $(this).offset();
             var x = event.pageX - offset.left;
@@ -136,7 +164,14 @@
             event.stopPropagation();
         });
 
-        // *** LIGHTBOX
+        //  #       ###  #####  #     # ####### ######  ####### #     # 
+        //  #        #  #     # #     #    #    #     # #     #  #   #  
+        //  #        #  #       #     #    #    #     # #     #   # #   
+        //  #        #  #  #### #######    #    ######  #     #    #    
+        //  #        #  #     # #     #    #    #     # #     #   # #   
+        //  #        #  #     # #     #    #    #     # #     #  #   #  
+        //  ####### ###  #####  #     #    #    ######  ####### #     # 
+                                                                    
         $('body').on('click', '.wp-annotations .expend', function() {
             var src = $(this).next().attr('src');
             $('body').addClass('no-scroll');
@@ -148,10 +183,16 @@
             $('#wp-annotations--lightbox').fadeOut();
             $('body').removeClass('no-scroll');
         });
-
-
-        // *** DASHBOARD ***
-        // Switch device
+        
+        // '########:::::'###:::::'######::'##::::'##:'########:::'#######:::::'###::::'########::'########::
+        //  ##.... ##:::'## ##:::'##... ##: ##:::: ##: ##.... ##:'##.... ##:::'## ##::: ##.... ##: ##.... ##:
+        //  ##:::: ##::'##:. ##:: ##:::..:: ##:::: ##: ##:::: ##: ##:::: ##::'##:. ##:: ##:::: ##: ##:::: ##:
+        //  ##:::: ##:'##:::. ##:. ######:: #########: ########:: ##:::: ##:'##:::. ##: ########:: ##:::: ##:
+        //  ##:::: ##: #########::..... ##: ##.... ##: ##.... ##: ##:::: ##: #########: ##.. ##::: ##:::: ##:
+        //  ##:::: ##: ##.... ##:'##::: ##: ##:::: ##: ##:::: ##: ##:::: ##: ##.... ##: ##::. ##:: ##:::: ##:
+        //  ########:: ##:::: ##:. ######:: ##:::: ##: ########::. #######:: ##:::: ##: ##:::. ##: ########::
+        // ........:::..:::::..:::......:::..:::::..::........::::.......:::..:::::..::..:::::..::........:::
+        // === Switch device
         $('body').on('click', '.wp-annotations--dashboard__devices button', function() { 
             if( !$(this).hasClass('disabled') ){
                 $device = $(this).data('device');
@@ -199,7 +240,7 @@
             }
         });
         
-        // Switch active / resolved display
+        // === Switch active / resolved display
         $('body').on('click', '.wp-annotations--dashboard__comments button', function() { 
             if( $(this).hasClass('comments-actives') ){
                 if( !$(this).closest('.wp-annotations--dashboard__comments').hasClass('active') ){
@@ -225,12 +266,12 @@
             }
         });
 
-        // Comments accordeon
+        // === Comments accordeon
         $('body').on('click', '.wp-annotations--dashboard .accordeon-header button', function() {
             $(this).closest('.accordeon-header').toggleClass('closed').next().slideToggle();
         });
 
-        // Switch active / resolved status
+        // === Switch active / resolved status
         $('body').on('click', '.wp-annotations--dashboard button.resolve', function() {
             $commentID = $(this).closest('.comment-item').data('comment-id');
             
@@ -286,7 +327,15 @@
             });
         });
 
-        // *** COMMENTS FORM (ADD)
+        // :'######:::'#######::'##::::'##:'##::::'##:'########:'##::: ##:'########::'######:::::'########::'#######::'########::'##::::'##::::::'###::::'###::::'########::'########::'###:::
+        // '##... ##:'##.... ##: ###::'###: ###::'###: ##.....:: ###:: ##:... ##..::'##... ##:::: ##.....::'##.... ##: ##.... ##: ###::'###:::::'##:::::'## ##::: ##.... ##: ##.... ##:.. ##::
+        //  ##:::..:: ##:::: ##: ####'####: ####'####: ##::::::: ####: ##:::: ##:::: ##:::..::::: ##::::::: ##:::: ##: ##:::: ##: ####'####::::'##:::::'##:. ##:: ##:::: ##: ##:::: ##:::: ##:
+        //  ##::::::: ##:::: ##: ## ### ##: ## ### ##: ######::: ## ## ##:::: ##::::. ######::::: ######::: ##:::: ##: ########:: ## ### ##:::: ##::::'##:::. ##: ##:::: ##: ##:::: ##:::: ##:
+        //  ##::::::: ##:::: ##: ##. #: ##: ##. #: ##: ##...:::: ##. ####:::: ##:::::..... ##:::: ##...:::: ##:::: ##: ##.. ##::: ##. #: ##:::: ##:::: #########: ##:::: ##: ##:::: ##:::: ##:
+        //  ##::: ##: ##:::: ##: ##:.:: ##: ##:.:: ##: ##::::::: ##:. ###:::: ##::::'##::: ##:::: ##::::::: ##:::: ##: ##::. ##:: ##:.:: ##::::. ##::: ##.... ##: ##:::: ##: ##:::: ##::: ##::
+        // . ######::. #######:: ##:::: ##: ##:::: ##: ########: ##::. ##:::: ##::::. ######::::: ##:::::::. #######:: ##:::. ##: ##:::: ##:::::. ###: ##:::: ##: ########:: ########:: ###:::
+        // :......::::.......:::..:::::..::..:::::..::........::..::::..:::::..::::::......::::::..:::::::::.......:::..:::::..::..:::::..:::::::...::..:::::..::........:::........:::...::::
+        // === Submit annotation form
         $('#wp-annotation-form').on('submit', function(event) {
             event.preventDefault();
             $('#wp-annotations--dashboard').addClass('ajax');
@@ -338,6 +387,7 @@
                     success: function(response) {
                         if (response.success) {
                             $('#wp-annotations--modal').hide().find('textarea').val('');
+                            $('#wp-annotations--modal').find('input[type="checkbox"]').prop('checked', false);
                             $('#wp-annotations--modal').find('input[type=hidden]').remove();
                             $modal.find('#wp-annotation-form').show();
                             $('#wp-annotations--dashboard').removeClass('ajax');
@@ -352,6 +402,7 @@
                         } else {
                             $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
                             $('#wp-annotations--modal').hide().find('textarea').val('');
+                            $('#wp-annotations--modal').find('input[type="checkbox"]').prop('checked', false);
                             $('#wp-annotations--modal').find('input[type=hidden]').remove();
                             $modal.find('#wp-annotation-form').show();
                             $('#wp-annotations--dashboard').removeClass('ajax');
@@ -377,23 +428,30 @@
             });
         });
 
+        // === Reset annotation form
         $('#wp-annotation-form').on('reset', function(event) {
             $('#wp-annotations--modal').hide().find('textarea').val('').siblings('.mention-list-main').hide();
+            $('#wp-annotations--modal').find('input[type="checkbox"]').prop('checked', false);
             $('#wp-annotations--modal').find('input[type=hidden]').remove();
         })
 
-        $('#wp-annotation-form textarea').on('keydown', function(event) {
+        // === Close modal on Escape key
+        $('#wp-annotations--modal').on('keydown', function(event) {
             // if (event.key === "Enter") { 
             //     event.preventDefault();
             //     $('#wp-annotation-form').submit();
             // }
             // else 
             if( event.key === "Escape" ){
+                console.log('Escape key pressed');
+                
+                $('#wp-annotations--modal').find('input[type="checkbox"]').prop('checked', false);
                 $('#wp-annotations--modal').hide().find('textarea').val('').siblings('.mention-list-main').hide();
                 $('#wp-annotations--modal').find('input[type=hidden]').remove();
             }
         });
 
+        // === Mention list slide down on '@' keyup
         $('body').on('keyup', '#wp-annotation-form textarea', function(event) {
             $textarea = $(this);
             $mentionList = $textarea.closest('form').find('#mention-list-main');
@@ -408,12 +466,14 @@
             }
         });
 
+        // === Mention list slide up on click outside
         $('body').on('click', function(e) {
             if (!$(e.target).closest('#mention-list-main, #wp-annotation-form textarea').length) {
                 $(this).closest('form').find('#mention-list-main').slideUp(250);
             }
         });
 
+        // === Mention list item click
         $('body').on('click', '.mention-list-main__item', function() {            
             $this = $(this);
             $textarea = $this.closest('form').find('textarea');
@@ -438,7 +498,14 @@
             $textarea.focus();
         });
 
-        // *** DELETE COMMENT
+        // '########::'########:'##:::::::'########:'########:'########:::::'######:::'#######::'##::::'##:'##::::'##:'########:'##::: ##:'########:
+        //  ##.... ##: ##.....:: ##::::::: ##.....::... ##..:: ##.....:::::'##... ##:'##.... ##: ###::'###: ###::'###: ##.....:: ###:: ##:... ##..::
+        //  ##:::: ##: ##::::::: ##::::::: ##:::::::::: ##:::: ##:::::::::: ##:::..:: ##:::: ##: ####'####: ####'####: ##::::::: ####: ##:::: ##::::
+        //  ##:::: ##: ######::: ##::::::: ######:::::: ##:::: ######:::::: ##::::::: ##:::: ##: ## ### ##: ## ### ##: ######::: ## ## ##:::: ##::::
+        //  ##:::: ##: ##...:::: ##::::::: ##...::::::: ##:::: ##...::::::: ##::::::: ##:::: ##: ##. #: ##: ##. #: ##: ##...:::: ##. ####:::: ##::::
+        //  ##:::: ##: ##::::::: ##::::::: ##:::::::::: ##:::: ##:::::::::: ##::: ##: ##:::: ##: ##:.:: ##: ##:.:: ##: ##::::::: ##:. ###:::: ##::::
+        //  ########:: ########: ########: ########:::: ##:::: ########::::. ######::. #######:: ##:::: ##: ##:::: ##: ########: ##::. ##:::: ##::::
+        // ........:::........::........::........:::::..:::::........::::::......::::.......:::..:::::..::..:::::..::........::..::::..:::::..:::::
         $('body').on('click', '.wp-annotations--dashboard button.delete', function() {
             var confirmation = confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');
 
@@ -498,9 +565,16 @@
 
         });
 
-        // *** EDIT COMMENT
+        // '########:'########::'####:'########:::::'######:::'#######::'##::::'##:'##::::'##:'########:'##::: ##:'########:
+        //  ##.....:: ##.... ##:. ##::... ##..:::::'##... ##:'##.... ##: ###::'###: ###::'###: ##.....:: ###:: ##:... ##..::
+        //  ##::::::: ##:::: ##:: ##::::: ##::::::: ##:::..:: ##:::: ##: ####'####: ####'####: ##::::::: ####: ##:::: ##::::
+        //  ######::: ##:::: ##:: ##::::: ##::::::: ##::::::: ##:::: ##: ## ### ##: ## ### ##: ######::: ## ## ##:::: ##::::
+        //  ##...:::: ##:::: ##:: ##::::: ##::::::: ##::::::: ##:::: ##: ##. #: ##: ##. #: ##: ##...:::: ##. ####:::: ##::::
+        //  ##::::::: ##:::: ##:: ##::::: ##::::::: ##::: ##: ##:::: ##: ##:.:: ##: ##:.:: ##: ##::::::: ##:. ###:::: ##::::
+        //  ########: ########::'####:::: ##:::::::. ######::. #######:: ##:::: ##: ##:::: ##: ########: ##::. ##:::: ##::::
+        // ........::........:::....:::::..:::::::::......::::.......:::..:::::..::..:::::..::........::..::::..:::::..:::::
 
-        // Switch edit mode
+        // === Switch edit mode
         $('body').on('click', '.wp-annotations--dashboard button.edit', function() {
             $par = $(this).closest('.comment-item');
             $default = $par.find('.comment-item__content p').text();
@@ -520,7 +594,7 @@
             }
         });
 
-        // Cancel edit mode
+        // === Cancel edit mode
         $('body').on('click', '.wp-annotations--dashboard button.cancel', function(event) {
             event.preventDefault();
             $par = $(this).closest('.comment-item');
@@ -537,7 +611,7 @@
             }
         });
 
-        // Update comment
+        // === Update comment
         $('body').on('submit', '.wp-annotations--dashboard .comment-item__content-form', function(event) {
             event.preventDefault();
             $par = $(this).closest('.comment-item');
@@ -602,8 +676,15 @@
 
         });
 
-        // *** REPLIES
-        // Open reply
+        // '########::'########:'########::'##:::::::'####:'########::'######::
+        //  ##.... ##: ##.....:: ##.... ##: ##:::::::. ##:: ##.....::'##... ##:
+        //  ##:::: ##: ##::::::: ##:::: ##: ##:::::::: ##:: ##::::::: ##:::..::
+        //  ########:: ######::: ########:: ##:::::::: ##:: ######:::. ######::
+        //  ##.. ##::: ##...:::: ##.....::: ##:::::::: ##:: ##...:::::..... ##:
+        //  ##::. ##:: ##::::::: ##:::::::: ##:::::::: ##:: ##:::::::'##::: ##:
+        //  ##:::. ##: ########: ##:::::::: ########:'####: ########:. ######::
+        // ..:::::..::........::..:::::::::........::....::........:::......:::
+        // === Open reply
         $('body').on('click', '.open-add-comments', function() {            
             $par = $(this).closest('.comment-item');
             $commentID = $par.data('comment-id');
@@ -633,7 +714,7 @@
             });
         });
         
-        // Add reply
+        // === Add reply
         $('body').on('submit', '#reply-box-form', function(event) {
             event.preventDefault();
             $this = $(this);
@@ -642,10 +723,18 @@
                 $par = $(this).closest('.reply-box');
                 $par.addClass('ajax');
 
+                $visible = $par.find('input[name="client-visible"]');
+
+
                 var commentID = $par.data('comment-id');
                 var userID = $par.data('user-id');
                 var commentText = $this.find('textarea').val();
-                var notifyEmail = $this.find('input[name="email"]').is(':checked') ? 1 : 0;
+
+                if ($visible.attr('type') === 'checkbox') {
+                    var clientVisible = $visible.is(':checked') ? 1 : 0;
+                } else {
+                    var clientVisible = parseInt($visible.val()) || 0;
+                }
 
                 var targetsEmail = [];
 
@@ -661,7 +750,7 @@
                 formData.append('comment_id', commentID);
                 formData.append('user_id', userID);
                 formData.append('comment_text', commentText);
-                formData.append('notify_email', notifyEmail);
+                formData.append('client_visible', clientVisible);
 
                 if( targetsEmail.length > 0 ){
                     targetsEmail.forEach((email, index) => {
@@ -724,7 +813,7 @@
 
         });
 
-        // Delete reply
+        // === Delete reply
         $('body').on('click', '#wp-annotations--replies .delete', function() {            
             var confirmation = confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');
 
@@ -786,13 +875,13 @@
             }
         });
         
-        // Close reply
+        // === Close reply
         $('body').on('click', '#wp-annotations--replies .close-replies', function() {
             $('body').removeClass('no-scroll');
             $('#wp-annotations--replies').fadeOut(300);
         });
 
-        // Replies mentions
+        // === Replies mentions
         $('body').on('keyup', '#reply-box-form textarea', function(event) {
             $textarea = $(this);
             $mentionList = $textarea.closest('form').find('#mention-list');
@@ -837,7 +926,7 @@
             $textarea.focus();
         });
 
-        // Replies input file
+        // === Replies input file
         $('body').on('click', '#reply-box-form .file-input .unfiled', function() {            
             $par = $(this).closest('.file-input');
             $par.find('input').click();
@@ -882,7 +971,14 @@
             });
         });
 
-        // *** FUNCTIONS
+        // '########:'##::::'##:'##::: ##::'######::'########:'####::'#######::'##::: ##::'######::
+        //  ##.....:: ##:::: ##: ###:: ##:'##... ##:... ##..::. ##::'##.... ##: ###:: ##:'##... ##:
+        //  ##::::::: ##:::: ##: ####: ##: ##:::..::::: ##::::: ##:: ##:::: ##: ####: ##: ##:::..::
+        //  ######::: ##:::: ##: ## ## ##: ##:::::::::: ##::::: ##:: ##:::: ##: ## ## ##:. ######::
+        //  ##...:::: ##:::: ##: ##. ####: ##:::::::::: ##::::: ##:: ##:::: ##: ##. ####::..... ##:
+        //  ##::::::: ##:::: ##: ##:. ###: ##::: ##:::: ##::::: ##:: ##:::: ##: ##:. ###:'##::: ##:
+        //  ##:::::::. #######:: ##::. ##:. ######::::: ##::::'####:. #######:: ##::. ##:. ######::
+        // ..:::::::::.......:::..::::..:::......::::::..:::::....:::.......:::..::::..:::......:::
         function refreshDashboard(){
             $('#wp-annotations--dashboard').addClass('ajax');
     

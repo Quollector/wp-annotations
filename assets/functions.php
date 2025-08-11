@@ -32,7 +32,15 @@ function getAllReplies($comment_id) {
     global $wpdb;
     $table_name_replies = $wpdb->prefix . 'reviews_replies';
 
-    $sql = "SELECT * FROM $table_name_replies WHERE comment_id = $comment_id ORDER BY timestamp ASC";
+    if (check_user_role()) {
+        $sql = "SELECT * FROM $table_name_replies WHERE comment_id = $comment_id ORDER BY timestamp ASC";
+    }
+    else{
+        $sql = $wpdb->prepare(
+            "SELECT * FROM $table_name_replies WHERE comment_id = %d AND client_visible = 1 ORDER BY timestamp ASC",
+            $comment_id
+        );
+    }
 
     return $wpdb->get_results($sql);
 }
@@ -68,7 +76,10 @@ function extractUsersEmails($datas, $comment, $notifications){
     foreach($users_array as $id => $notified){
         if($id != get_current_user_id()){
             $user = get_userdata($id);
-            $users_emails[] = [$user->user_email, $notified];
+
+            if (check_user_role($user)) {
+                $users_emails[] = [$user->user_email, $notified];
+            }
         }
     }
 
@@ -268,4 +279,20 @@ function get_devices_comments(){
         'tablet' => $count_tablet,
         'mobile' => $count_mobile
     ];
+}
+
+// CHECK USER ROLE
+function check_user_role( $user = null ) {
+    if( $user === null ) {
+        $user = wp_get_current_user();
+    }
+
+    if( 
+        in_array( WP_ANNOTATION_ROLE, (array) $user->roles ) ||
+        in_array( 'administrator', (array) $user->roles )
+    ) {
+        return true;
+    } else {
+        return false;
+    }
 }

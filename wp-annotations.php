@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Annotations Plugin
  * Description: Plugin d'annotation
- * Version: 1.2.7
+ * Version: 1.3.0
  * Author: Quentin Lequenne
  */
 
@@ -76,6 +76,7 @@ define('WP_ANNOTATION_COLORS', [
         'alt-rgb' => '126, 8, 168',
     ]
 ]);
+define('WP_ANNOTATION_ROLE', 'wp_annotation_admin');
 
 // Styles / scripts
 function wp_annotations_enqueue_assets() {
@@ -149,3 +150,26 @@ function wp_annotations_plugin_action_links($links, $file){
     return $links;
 }
 add_filter('plugin_action_links', 'wp_annotations_plugin_action_links', 10, 2);
+
+register_activation_hook(__FILE__, function () {
+    $editor = get_role('editor');
+    if (!$editor) return;
+
+    remove_role(WP_ANNOTATION_ROLE);
+
+    add_role(
+        WP_ANNOTATION_ROLE,
+        'WP Annotation Admin',
+        $editor->capabilities
+    );
+});
+
+register_deactivation_hook(__FILE__, function () {
+    $users = get_users(['role' => WP_ANNOTATION_ROLE]);
+
+    foreach ($users as $user) {
+        $user->set_role('editor');
+    }
+
+    remove_role(WP_ANNOTATION_ROLE);
+});

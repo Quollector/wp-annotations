@@ -29,6 +29,10 @@ html{
         }
     }
 
+    #wpadminbar{
+        z-index: 9999 !important;
+    }
+
     // &.review-mode{
     //     width: calc(100vw - #{$margin});
     //     margin-left: $margin;
@@ -455,11 +459,15 @@ html{
                     width: auto;
 
                     &.fill{
-                        fill: $sombre;
+                        path{
+                            fill: $sombre;
+                        }
                     }
 
                     &:not(.fill){
-                        stroke: $sombre;
+                        path{
+                            stroke: $sombre;
+                        }
                     }
                 }
 
@@ -671,6 +679,21 @@ html{
                     &:hover{
                         background: rgba($clair_rgb, 0.5);
                     }
+                }
+            }
+
+            .client-visible{
+                display: block;
+                padding: 0 8px 12px;
+                color: $sombre;
+                font-size: 14px;
+
+                input{
+                    transform: translateY(2px);
+                    opacity: 1;
+                    height: initial;
+                    width: auto;
+                    position: relative;
                 }
             }
     
@@ -907,6 +930,21 @@ html{
                 font-weight: 400;
                 color: $main;
                 font-size: 10px;
+            }
+
+            .visible-by-client{
+                display: flex;
+                align-items: center;
+
+                svg{
+                    width: 16px;
+                    height: 16px;
+                    object-fit: contain;
+
+                    path{
+                        fill: $main;
+                    }
+                }
             }
 
             .device{
@@ -1279,6 +1317,21 @@ html{
                 font-size: 10px;
             }
 
+            .visible-by-client{
+                display: flex;
+                align-items: center;
+
+                svg{
+                    width: 16px;
+                    height: 16px;
+                    object-fit: contain;
+
+                    path{
+                        fill: $main;
+                    }
+                }
+            }
+
             .device{
                 display: flex;
                 align-items: center;
@@ -1404,6 +1457,21 @@ html{
                         span{
                             font-size: 12px;
                             color: $main;
+                        }
+
+                        .visible-by-client{
+                            display: flex;
+                            align-items: center;
+
+                            svg{
+                                width: 16px;
+                                height: 16px;
+                                object-fit: contain;
+
+                                path{
+                                    fill: $main;
+                                }
+                            }
                         }
                         
                         .buttons{
@@ -1615,7 +1683,7 @@ html{
 
                 &__front{
                     font-size: 12px;
-                    width: 100%;
+                    width: fit-content;
 
                     iconify-icon{
                         font-size: 14px;
