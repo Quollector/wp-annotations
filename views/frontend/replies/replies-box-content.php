@@ -18,7 +18,7 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
     </div>
     <h5><?= get_userdata($comment_data['user_id'])->display_name ?></h5>
     <span><?= date('d.m.Y', strtotime($comment_data['timestamp'])) ?></span> 
-    <?php if( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) ): ?>
+    <?php if( check_user_role() ): ?>
         <div class="visible-by-client">
             <?php if( !$comment_data['client_visible'] ) : ?>
                 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
@@ -69,8 +69,8 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
                 endif;
 
                 if( 
-                    in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) || 
-                    ( !in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) && $comment->client_visible )
+                    check_user_role() || 
+                    ( !check_user_role() && $comment->client_visible )
                 ):
             ?>
             <div class="reply-item" data-id="<?= $comment->id ?>">
@@ -87,7 +87,7 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
                             <?= date('d.m.Y', strtotime($comment->timestamp)) ?>
                         </span>
                         
-                        <?php if( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) && $comment_data['client_visible'] ): ?>
+                        <?php if( check_user_role() && $comment_data['client_visible'] ): ?>
                             <div class="visible-by-client">
                                 <?php if( !$comment->client_visible ) : ?>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
@@ -162,9 +162,9 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
     </div>
 
     <label>
-        <?php if( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) && $comment_data['client_visible'] ): ?>
+        <?php if( check_user_role() && $comment_data['client_visible'] ): ?>
             <input type="checkbox" name="client-visible" value="1"> Visible par le client
-        <?php elseif( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) && !$comment_data['client_visible'] ): ?>
+        <?php elseif( check_user_role() && !$comment_data['client_visible'] ): ?>
             <input type="hidden" name="client-visible" value="0">
         <?php else: ?>
             <input type="hidden" name="client-visible" value="1">

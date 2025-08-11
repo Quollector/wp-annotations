@@ -24,8 +24,6 @@ function wp_annotation_submit_comment() {
 
         parse_str($datas[0], $form_data);
 
-        error_log('Form data: ' . print_r($form_data, true));
-
         $commentaire = isset($form_data['comment']) ? wp_kses_post(stripslashes($form_data['comment'])) : '';
         $client_visible = isset($form_data['client_visible']) ? intval($form_data['client_visible']) : 0;
         $position_x = isset($datas[1]) ? intval($datas[1]) : 0;

@@ -152,15 +152,15 @@ function wp_annotations_plugin_action_links($links, $file){
 add_filter('plugin_action_links', 'wp_annotations_plugin_action_links', 10, 2);
 
 register_activation_hook(__FILE__, function () {
-    $admin = get_role('administrator');
-    if (!$admin) return;
+    $editor = get_role('editor');
+    if (!$editor) return;
 
     remove_role(WP_ANNOTATION_ROLE);
 
     add_role(
         WP_ANNOTATION_ROLE,
         'WP Annotation Admin',
-        $admin->capabilities
+        $editor->capabilities
     );
 });
 
@@ -168,7 +168,7 @@ register_deactivation_hook(__FILE__, function () {
     $users = get_users(['role' => WP_ANNOTATION_ROLE]);
 
     foreach ($users as $user) {
-        $user->set_role('administrator');
+        $user->set_role('editor');
     }
 
     remove_role(WP_ANNOTATION_ROLE);

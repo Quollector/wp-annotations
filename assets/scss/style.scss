@@ -694,6 +694,10 @@ html{
 
                 input{
                     transform: translateY(2px);
+                    opacity: 1;
+                    height: initial;
+                    width: auto;
+                    position: relative;
                 }
             }
     

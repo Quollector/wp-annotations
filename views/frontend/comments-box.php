@@ -23,7 +23,7 @@ $device = isset($device) ? $device : 'all';
 foreach ($datas as $annotation) {
     $grouped_annotations[$annotation->page_id][] = $annotation;
 
-    if ( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) ) {
+    if ( check_user_role() ) {
         if ( $annotation->statut === 'non résolu' && get_post($annotation->page_id) ) {
             $count_non_resolu++;
         } elseif ( $annotation->statut === 'résolu' && get_post($annotation->page_id) ) {
@@ -140,7 +140,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                 <?php 
                 foreach ($annotations as $annotation) : 
                     if( $annotation->statut === 'non résolu' ) : 
-                        if ( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) || $annotation->client_visible ) :
+                        if ( check_user_role() || $annotation->client_visible ) :
                 ?>
                     <div class="comment-item <?= $annotation->device ?>" data-comment-id="<?= $annotation->id ?>" data-screen-url="<?= $annotation->screenshot_url ?>">
                         <div class="comment-item__header">
@@ -149,7 +149,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                             </div>
                             <h5><?= get_userdata($annotation->user_id)->display_name ?></h5>
                             <span><?= date('d.m.Y', strtotime($annotation->timestamp)) ?></span>
-                            <?php if( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) ): ?>
+                            <?php if( check_user_role() ): ?>
                                 <div class="visible-by-client">
                                     <?php if( !$annotation->client_visible ) : ?>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
@@ -290,7 +290,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                             </div>
                             <h5><?= get_userdata($annotation->user_id)->display_name ?></h5>
                             <span><?= date('d.m.Y', strtotime($annotation->timestamp)) ?></span>
-                            <?php if( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) ): ?>
+                            <?php if( check_user_role() ): ?>
                                 <div class="visible-by-client">
                                     <?php if( !$annotation->client_visible ) : ?>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
