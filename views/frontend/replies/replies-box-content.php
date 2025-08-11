@@ -17,7 +17,20 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
         <?= $comment_data['id'] ?>
     </div>
     <h5><?= get_userdata($comment_data['user_id'])->display_name ?></h5>
-    <span><?= date('d.m.Y', strtotime($comment_data['timestamp'])) ?></span>
+    <span><?= date('d.m.Y', strtotime($comment_data['timestamp'])) ?></span> 
+    <?php if( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) ): ?>
+        <div class="visible-by-client">
+            <?php if( !$comment_data['client_visible'] ) : ?>
+                <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
+                    <path fill="#FF6600" d="M1 12s4.188-6 11-6c.947 0 1.839.121 2.678.322L8.36 12.64A4 4 0 0 1 8 11c0-.937.335-1.787.875-2.469c-2.392.812-4.214 2.385-5.254 3.469a15 15 0 0 0 2.98 2.398l-1.453 1.453C2.497 14.13 1 12 1 12m22 0s-4.188 6-11 6c-.946 0-1.836-.124-2.676-.323L5 22l-1.5-1.5l17-17L22 5l-3.147 3.147C21.501 9.869 23 12 23 12m-2.615.006a14.8 14.8 0 0 0-2.987-2.403L16 11a4 4 0 0 1-4 4l-.947.947c.31.031.624.053.947.053c3.978 0 6.943-2.478 8.385-3.994"/>
+                </svg>
+            <?php else: ?>
+                <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
+                    <path fill="#FF6600" d="M12 6C5.188 6 1 12 1 12s4.188 6 11 6s11-6 11-6s-4.188-6-11-6m0 10c-3.943 0-6.926-2.484-8.379-4c1.04-1.085 2.862-2.657 5.254-3.469A3.96 3.96 0 0 0 8 11a4 4 0 0 0 8 0a3.96 3.96 0 0 0-.875-2.469c2.393.812 4.216 2.385 5.254 3.469c-1.455 1.518-4.437 4-8.379 4"/>
+                </svg>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
     <div class="device">
         <?php if( $comment_data['device'] === 'laptop' ) : ?>
             <svg width="800px" title="laptop" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -48,9 +61,17 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
 <?php if( !empty( $comments_list ) ): ?>
     <div class="reply-box__replies">
         <?php foreach( $comments_list as $comment ): 
-                if ($comment->user_id != get_current_user_id() && !in_array($comment->user_id, $targets_email)):
+                if (
+                    !in_array($comment->user_id, $targets_email) &&
+                    $comment->user_id != get_current_user_id()
+                ):
                     $targets_email[] =  $comment->user_id; 
                 endif;
+
+                if( 
+                    in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) || 
+                    ( !in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) && $comment->client_visible )
+                ):
             ?>
             <div class="reply-item" data-id="<?= $comment->id ?>">
                 <div class="reply-item__header">
@@ -66,6 +87,20 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
                             <?= date('d.m.Y', strtotime($comment->timestamp)) ?>
                         </span>
                         
+                        <?php if( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) && $comment_data['client_visible'] ): ?>
+                            <div class="visible-by-client">
+                                <?php if( !$comment->client_visible ) : ?>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
+                                        <path fill="#FF6600" d="M1 12s4.188-6 11-6c.947 0 1.839.121 2.678.322L8.36 12.64A4 4 0 0 1 8 11c0-.937.335-1.787.875-2.469c-2.392.812-4.214 2.385-5.254 3.469a15 15 0 0 0 2.98 2.398l-1.453 1.453C2.497 14.13 1 12 1 12m22 0s-4.188 6-11 6c-.946 0-1.836-.124-2.676-.323L5 22l-1.5-1.5l17-17L22 5l-3.147 3.147C21.501 9.869 23 12 23 12m-2.615.006a14.8 14.8 0 0 0-2.987-2.403L16 11a4 4 0 0 1-4 4l-.947.947c.31.031.624.053.947.053c3.978 0 6.943-2.478 8.385-3.994"/>
+                                    </svg>
+                                <?php else: ?>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
+                                        <path fill="#FF6600" d="M12 6C5.188 6 1 12 1 12s4.188 6 11 6s11-6 11-6s-4.188-6-11-6m0 10c-3.943 0-6.926-2.484-8.379-4c1.04-1.085 2.862-2.657 5.254-3.469A3.96 3.96 0 0 0 8 11a4 4 0 0 0 8 0a3.96 3.96 0 0 0-.875-2.469c2.393.812 4.216 2.385 5.254 3.469c-1.455 1.518-4.437 4-8.379 4"/>
+                                    </svg>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+
                         <?php if ($comment->user_id == get_current_user_id()) : ?>
                         <div class="buttons">
                             <button class="delete" title="Effacer">
@@ -93,7 +128,7 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
                     </div>
                 <?php endif; ?>
             </div>
-        <?php endforeach; ?>
+        <?php endif; endforeach; ?>
     </div>
 <?php endif; ?>
 <form class="reply-box__form" id="reply-box-form">
@@ -127,8 +162,12 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
     </div>
 
     <label>
-        <?php if($smtp): ?>
-            <input type="checkbox" name="email" value="1" checked> Notifier par courriel
+        <?php if( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) && $comment_data['client_visible'] ): ?>
+            <input type="checkbox" name="client-visible" value="1"> Visible par le client
+        <?php elseif( in_array( WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles ) && !$comment_data['client_visible'] ): ?>
+            <input type="hidden" name="client-visible" value="0">
+        <?php else: ?>
+            <input type="hidden" name="client-visible" value="1">
         <?php endif; ?>
     </label>
     <button type="submit">Envoyer</button>

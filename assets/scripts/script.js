@@ -387,6 +387,7 @@
                     success: function(response) {
                         if (response.success) {
                             $('#wp-annotations--modal').hide().find('textarea').val('');
+                            $('#wp-annotations--modal').find('input[type="checkbox"]').prop('checked', false);
                             $('#wp-annotations--modal').find('input[type=hidden]').remove();
                             $modal.find('#wp-annotation-form').show();
                             $('#wp-annotations--dashboard').removeClass('ajax');
@@ -401,6 +402,7 @@
                         } else {
                             $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
                             $('#wp-annotations--modal').hide().find('textarea').val('');
+                            $('#wp-annotations--modal').find('input[type="checkbox"]').prop('checked', false);
                             $('#wp-annotations--modal').find('input[type=hidden]').remove();
                             $modal.find('#wp-annotation-form').show();
                             $('#wp-annotations--dashboard').removeClass('ajax');
@@ -429,17 +431,21 @@
         // === Reset annotation form
         $('#wp-annotation-form').on('reset', function(event) {
             $('#wp-annotations--modal').hide().find('textarea').val('').siblings('.mention-list-main').hide();
+            $('#wp-annotations--modal').find('input[type="checkbox"]').prop('checked', false);
             $('#wp-annotations--modal').find('input[type=hidden]').remove();
         })
 
         // === Close modal on Escape key
-        $('#wp-annotation-form textarea').on('keydown', function(event) {
+        $('#wp-annotations--modal').on('keydown', function(event) {
             // if (event.key === "Enter") { 
             //     event.preventDefault();
             //     $('#wp-annotation-form').submit();
             // }
             // else 
             if( event.key === "Escape" ){
+                console.log('Escape key pressed');
+                
+                $('#wp-annotations--modal').find('input[type="checkbox"]').prop('checked', false);
                 $('#wp-annotations--modal').hide().find('textarea').val('').siblings('.mention-list-main').hide();
                 $('#wp-annotations--modal').find('input[type=hidden]').remove();
             }
@@ -717,10 +723,18 @@
                 $par = $(this).closest('.reply-box');
                 $par.addClass('ajax');
 
+                $visible = $par.find('input[name="client-visible"]');
+
+
                 var commentID = $par.data('comment-id');
                 var userID = $par.data('user-id');
                 var commentText = $this.find('textarea').val();
-                var notifyEmail = $this.find('input[name="email"]').is(':checked') ? 1 : 0;
+
+                if ($visible.attr('type') === 'checkbox') {
+                    var clientVisible = $visible.is(':checked') ? 1 : 0;
+                } else {
+                    var clientVisible = parseInt($visible.val()) || 0;
+                }
 
                 var targetsEmail = [];
 
@@ -736,7 +750,7 @@
                 formData.append('comment_id', commentID);
                 formData.append('user_id', userID);
                 formData.append('comment_text', commentText);
-                formData.append('notify_email', notifyEmail);
+                formData.append('client_visible', clientVisible);
 
                 if( targetsEmail.length > 0 ){
                     targetsEmail.forEach((email, index) => {

@@ -323,7 +323,7 @@ function wp_annotation_replies() {
             $commentID = isset($_POST['comment_id']) ? intval($_POST['comment_id']) : 0;
             $userID = get_current_user_id();
             $commentText = isset($_POST['comment_text']) ? wp_kses_post(stripslashes($_POST['comment_text'])) : '';
-            $notifyEmail = isset($_POST['notify_email']) ? intval($_POST['notify_email']) : 0;
+            $clientVisible = isset($_POST['client_visible']) ? intval($_POST['client_visible']) : 0;
             $targetsEmail = isset($_POST['targets_email']) ? $_POST['targets_email'] : [];
 
             if (isset($_FILES['reply_file']) && !empty($_FILES['reply_file']['name'])) {
@@ -381,7 +381,8 @@ function wp_annotation_replies() {
                     'comment_id' => $commentID,
                     'user_id' => $userID,
                     'commentaire' => $commentText,
-                    'file_path' => $new_file_name
+                    'file_path' => $new_file_name,
+                    'client_visible' => $clientVisible,
                 ]
             );    
         
@@ -389,7 +390,7 @@ function wp_annotation_replies() {
                 $table_reviews = $wpdb->prefix . 'reviews';
                 $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", $commentID), ARRAY_A);
 
-                if ($notifyEmail && !empty($targetsEmail) && $new_comment_data['user_id'] !== get_current_user_id()) {
+                if (!empty($targetsEmail) && $new_comment_data['user_id'] !== get_current_user_id()) {
                     sendNotificationEmail(
                         $new_comment_data,
                         [wp_kses_post(stripslashes($commentText)), $new_file_name],

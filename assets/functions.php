@@ -32,7 +32,15 @@ function getAllReplies($comment_id) {
     global $wpdb;
     $table_name_replies = $wpdb->prefix . 'reviews_replies';
 
-    $sql = "SELECT * FROM $table_name_replies WHERE comment_id = $comment_id ORDER BY timestamp ASC";
+    if (in_array(WP_ANNOTATION_ROLE, (array) wp_get_current_user()->roles)) {
+        $sql = "SELECT * FROM $table_name_replies WHERE comment_id = $comment_id ORDER BY timestamp ASC";
+    }
+    else{
+        $sql = $wpdb->prepare(
+            "SELECT * FROM $table_name_replies WHERE comment_id = %d AND client_visible = 1 ORDER BY timestamp ASC",
+            $comment_id
+        );
+    }
 
     return $wpdb->get_results($sql);
 }
@@ -68,7 +76,10 @@ function extractUsersEmails($datas, $comment, $notifications){
     foreach($users_array as $id => $notified){
         if($id != get_current_user_id()){
             $user = get_userdata($id);
-            $users_emails[] = [$user->user_email, $notified];
+
+            if (in_array('wp_annotation_admin', (array) $user->roles)) {
+                $users_emails[] = [$user->user_email, $notified];
+            }
         }
     }
 
