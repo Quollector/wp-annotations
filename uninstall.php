@@ -3,6 +3,16 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
     die;
 }
 
+$role_slug = 'wp_annotation_admin';
+
+$users = get_users(['role' => $role_slug]);
+
+foreach ($users as $user) {
+    $user->set_role('administrator');
+}
+
+remove_role($role_slug);
+
 delete_option( 'wp_annotation_users' );
 delete_option( 'wp_annotation_enabled' );
 delete_option( 'wp_annotation_color' );

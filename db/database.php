@@ -19,7 +19,8 @@ function wp_annotation_create_tables() {
             'statut' => "ENUM('non résolu', 'résolu') DEFAULT 'non résolu'",
             'device' => "ENUM('laptop', 'tablet', 'mobile') DEFAULT 'laptop'",
             'user_id' => 'BIGINT(20) UNSIGNED NOT NULL',
-            'screenshot_url' => 'TEXT'
+            'screenshot_url' => 'TEXT',
+            'client_visible' => 'TINYINT(1) DEFAULT 0',
         ],
         $table_name_replies => [
             'id' => 'BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY',
@@ -27,7 +28,8 @@ function wp_annotation_create_tables() {
             'user_id' => 'BIGINT(20) UNSIGNED NOT NULL',
             'commentaire' => 'TEXT NOT NULL',
             'timestamp' => "DATETIME DEFAULT CURRENT_TIMESTAMP",
-            'file_path' => 'TEXT'
+            'file_path' => 'TEXT',
+            'client_visible' => 'TINYINT(1) DEFAULT 0',
         ]
     ];
 

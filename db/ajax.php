@@ -1,6 +1,15 @@
 <?php
-// *** COMMENTS
-// Add new comments
+
+// :'######:::'#######::'##::::'##:'##::::'##:'########:'##::: ##:'########::'######::
+// '##... ##:'##.... ##: ###::'###: ###::'###: ##.....:: ###:: ##:... ##..::'##... ##:
+//  ##:::..:: ##:::: ##: ####'####: ####'####: ##::::::: ####: ##:::: ##:::: ##:::..::
+//  ##::::::: ##:::: ##: ## ### ##: ## ### ##: ######::: ## ## ##:::: ##::::. ######::
+//  ##::::::: ##:::: ##: ##. #: ##: ##. #: ##: ##...:::: ##. ####:::: ##:::::..... ##:
+//  ##::: ##: ##:::: ##: ##:.:: ##: ##:.:: ##: ##::::::: ##:. ###:::: ##::::'##::: ##:
+// . ######::. #######:: ##:::: ##: ##:::: ##: ########: ##::. ##:::: ##::::. ######::
+// :......::::.......:::..:::::..::..:::::..::........::..::::..:::::..::::::......:::
+
+// === Add new comments
 function wp_annotation_submit_comment() {
     if (!is_user_logged_in()) {
         wp_send_json_error(['message' => 'Vous devez être connecté pour ajouter un commentaire.']);
@@ -13,14 +22,12 @@ function wp_annotation_submit_comment() {
         $datas = $_POST['datas'];
         $devices = get_devices_comments();
 
-        $variables = [
-            $device = isset($_POST['device']) ? sanitize_text_field($_POST['device']) : '',
-            $view = sanitize_text_field($_POST['view']),
-        ];
-
         parse_str($datas[0], $form_data);
 
+        error_log('Form data: ' . print_r($form_data, true));
+
         $commentaire = isset($form_data['comment']) ? wp_kses_post(stripslashes($form_data['comment'])) : '';
+        $client_visible = isset($form_data['client_visible']) ? intval($form_data['client_visible']) : 0;
         $position_x = isset($datas[1]) ? intval($datas[1]) : 0;
         $position_y = isset($datas[2]) ? intval($datas[2]) : 0;
         $device = isset($datas[3]) ? sanitize_text_field($datas[3]) : '';
@@ -62,7 +69,8 @@ function wp_annotation_submit_comment() {
             'user_id' => $user_id,
             'timestamp' => current_time('mysql'),
             'statut' => 'non résolu',
-            'screenshot_url' => $screenshot_path
+            'screenshot_url' => $screenshot_path,
+            'client_visible' => $client_visible
         ];
 
         // Insérer le commentaire dans la DB
@@ -71,7 +79,15 @@ function wp_annotation_submit_comment() {
             $table_datas
         );
 
-        if ($insert) {
+        if ($insert) { 
+            $variables = [
+                $device = isset($_POST['device']) ? sanitize_text_field($_POST['device']) : '',
+                $view = sanitize_text_field($_POST['view']),
+                $count_laptop = $devices['laptop'],
+                $count_tablet = $devices['tablet'],
+                $count_mobile = $devices['mobile']
+            ];
+
             ob_start();            
             extract($variables);
             include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
@@ -96,7 +112,7 @@ function wp_annotation_submit_comment() {
 
 add_action('wp_ajax_submit_wp_annotation', 'wp_annotation_submit_comment');
 
-// Update comments
+// === Update comments
 function wp_annotation_update_comment() {
     if (!is_user_logged_in()) {
         wp_send_json_error(['message' => 'Vous devez être connecté pour ajouter un commentaire.']);
@@ -260,8 +276,16 @@ function wp_annotation_update_comment() {
 
 add_action('wp_ajax_update_wp_annotation', 'wp_annotation_update_comment');
 
-// *** REPLIES
-// First display
+// '########::'########:'########::'##:::::::'####:'########::'######::
+//  ##.... ##: ##.....:: ##.... ##: ##:::::::. ##:: ##.....::'##... ##:
+//  ##:::: ##: ##::::::: ##:::: ##: ##:::::::: ##:: ##::::::: ##:::..::
+//  ########:: ######::: ########:: ##:::::::: ##:: ######:::. ######::
+//  ##.. ##::: ##...:::: ##.....::: ##:::::::: ##:: ##...:::::..... ##:
+//  ##::. ##:: ##::::::: ##:::::::: ##:::::::: ##:: ##:::::::'##::: ##:
+//  ##:::. ##: ########: ##:::::::: ########:'####: ########:. ######::
+// ..:::::..::........::..:::::::::........::....::........:::......:::
+
+// === First display
 function wp_annotation_show_reply() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
@@ -284,7 +308,7 @@ function wp_annotation_show_reply() {
 
 add_action('wp_ajax_open_reply_wp_annotation', 'wp_annotation_show_reply');
 
-// Manage replies
+// === Manage replies
 function wp_annotation_replies() {
     if (!is_user_logged_in()) {
         wp_send_json_error(['message' => 'Vous devez être connecté pour ajouter un commentaire.']);
@@ -432,8 +456,16 @@ function wp_annotation_replies() {
 
 add_action('wp_ajax_wp_annotation_replies', 'wp_annotation_replies');
 
-/*** DEVICES */
-// Update comments
+// '########::'########:'##::::'##:'####::'######::'########::'######::
+//  ##.... ##: ##.....:: ##:::: ##:. ##::'##... ##: ##.....::'##... ##:
+//  ##:::: ##: ##::::::: ##:::: ##:: ##:: ##:::..:: ##::::::: ##:::..::
+//  ##:::: ##: ######::: ##:::: ##:: ##:: ##::::::: ######:::. ######::
+//  ##:::: ##: ##...::::. ##:: ##::: ##:: ##::::::: ##...:::::..... ##:
+//  ##:::: ##: ##::::::::. ## ##:::: ##:: ##::: ##: ##:::::::'##::: ##:
+//  ########:: ########:::. ###::::'####:. ######:: ########:. ######::
+// ........:::........:::::...:::::....:::......:::........:::......:::
+
+// === Update Device comments
 function wp_annotation_device() {
     $devices = get_devices_comments();
 
@@ -457,7 +489,16 @@ function wp_annotation_device() {
 
 add_action('wp_ajax_wp_annotation_device', 'wp_annotation_device');
 
-// Delete all comments
+// '########:'##:::::::'##::::'##::'######::'##::::'##:
+//  ##.....:: ##::::::: ##:::: ##:'##... ##: ##:::: ##:
+//  ##::::::: ##::::::: ##:::: ##: ##:::..:: ##:::: ##:
+//  ######::: ##::::::: ##:::: ##:. ######:: #########:
+//  ##...:::: ##::::::: ##:::: ##::..... ##: ##.... ##:
+//  ##::::::: ##::::::: ##:::: ##:'##::: ##: ##:::: ##:
+//  ##::::::: ########:. #######::. ######:: ##:::: ##:
+// ..::::::::........:::.......::::......:::..:::::..::
+
+// === Delete all comments/replies
 function flush_reviews_callback() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';

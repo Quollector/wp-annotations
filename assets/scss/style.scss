@@ -29,6 +29,10 @@ html{
         }
     }
 
+    #wpadminbar{
+        z-index: 9999 !important;
+    }
+
     // &.review-mode{
     //     width: calc(100vw - #{$margin});
     //     margin-left: $margin;
@@ -677,6 +681,17 @@ html{
                     }
                 }
             }
+
+            .client-visible{
+                display: block;
+                padding: 0 8px 12px;
+                color: $sombre;
+                font-size: 14px;
+
+                input{
+                    transform: translateY(2px);
+                }
+            }
     
             .submit-box{
                 display: flex;
@@ -911,6 +926,21 @@ html{
                 font-weight: 400;
                 color: $main;
                 font-size: 10px;
+            }
+
+            .visible-by-client{
+                display: flex;
+                align-items: center;
+
+                svg{
+                    width: 16px;
+                    height: 16px;
+                    object-fit: contain;
+                    
+                    path{
+                        fill: $main;
+                    }
+                }
             }
 
             .device{
