@@ -132,6 +132,246 @@ html{
         }
     } 
 
+    // :::'###:::::'######::'########:'####::'#######::'##::: ##::::'########::'##::::'##:'########:'########::'#######::'##::: ##::'######::
+    // ::'## ##:::'##... ##:... ##..::. ##::'##.... ##: ###:: ##:::: ##.... ##: ##:::: ##:... ##..::... ##..::'##.... ##: ###:: ##:'##... ##:
+    // :'##:. ##:: ##:::..::::: ##::::: ##:: ##:::: ##: ####: ##:::: ##:::: ##: ##:::: ##:::: ##::::::: ##:::: ##:::: ##: ####: ##: ##:::..::
+    // '##:::. ##: ##:::::::::: ##::::: ##:: ##:::: ##: ## ## ##:::: ########:: ##:::: ##:::: ##::::::: ##:::: ##:::: ##: ## ## ##:. ######::
+    //  #########: ##:::::::::: ##::::: ##:: ##:::: ##: ##. ####:::: ##.... ##: ##:::: ##:::: ##::::::: ##:::: ##:::: ##: ##. ####::..... ##:
+    //  ##.... ##: ##::: ##:::: ##::::: ##:: ##:::: ##: ##:. ###:::: ##:::: ##: ##:::: ##:::: ##::::::: ##:::: ##:::: ##: ##:. ###:'##::: ##:
+    //  ##:::: ##:. ######::::: ##::::'####:. #######:: ##::. ##:::: ########::. #######::::: ##::::::: ##::::. #######:: ##::. ##:. ######::
+    // ..:::::..:::......::::::..:::::....:::.......:::..::::..:::::........::::.......::::::..::::::::..::::::.......:::..::::..:::......:::
+    &__actions{
+        position: fixed;
+        left: 0;
+        top: 0;
+        background: linear-gradient(90deg, rgba($sombre_rgb, 0.25), rgba($sombre_rgb, 0.75));
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border-radius: 0 0 8px 0;
+        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
+        z-index: 997;
+        transition: all .5s ease;  
+        backdrop-filter: blur(3px);
+
+        .dash-open &{
+            transform: translateX($margin);
+        }
+
+        &--bubble{
+            width: 40px;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+            pointer-events: all;  
+            background: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+    
+            .review-mode.screenshot &{
+                display: none;
+            }
+    
+            img{
+                width: 20px;
+                height: 20px;
+                object-fit: contain;
+                display: block;
+                transition: all .5s ease;
+            }
+    
+            &:hover{
+                img{
+                    transform: scale(1.1);
+                }
+            }
+
+            &.ann-dash{
+                img{
+                    &.browse{
+                        display: none;
+                    }
+                }
+
+                .dash-open &{
+                    img{
+                        &.browse{
+                            display: block;
+                        }
+        
+                        &.comment{
+                            display: none;
+                        }
+                    }
+                }
+            }
+
+            &.ann-switch{
+                img{
+                    &.browse{
+                        display: none;
+                    }
+                }
+
+                .review-mode &{
+                    img{
+                        &.browse{
+                            display: block;
+                        }
+        
+                        &.comment{
+                            display: none;
+                        }
+                    }
+                }
+            }
+        }
+    
+        &--switch-bubble{
+            width: 40px;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+            pointer-events: all; 
+            background: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+    
+            svg{
+                width: 16px;
+                height: 16px;
+                object-fit: contain;
+                display: block;
+                transition: all .5s ease;
+
+                path{
+                    fill: $white;
+                    transition: fill .3s ease;
+                }
+
+                &.browse{
+                    display: none;
+                }
+            }
+    
+            .review-mode &{    
+                svg{
+                    &.browse{
+                        display: block;
+                    }
+    
+                    &.comment{
+                        display: none;
+                    }
+                }
+            }
+    
+            .dash-open &{
+                transform: translateX($margin);
+            }
+    
+            .review-mode.screenshot &{
+                display: none;
+            }
+    
+            &:hover{
+                svg{
+                    width: 18px;
+                    height: 18px;
+
+                    path{
+                        fill: #BBB;
+                    }
+                }
+            }
+        }
+    }
+
+    // '##::: ##::'#######::'########:'####::'######::'########::'######::
+    //  ###:: ##:'##.... ##:... ##..::. ##::'##... ##: ##.....::'##... ##:
+    //  ####: ##: ##:::: ##:::: ##::::: ##:: ##:::..:: ##::::::: ##:::..::
+    //  ## ## ##: ##:::: ##:::: ##::::: ##:: ##::::::: ######:::. ######::
+    //  ##. ####: ##:::: ##:::: ##::::: ##:: ##::::::: ##...:::::..... ##:
+    //  ##:. ###: ##:::: ##:::: ##::::: ##:: ##::: ##: ##:::::::'##::: ##:
+    //  ##::. ##:. #######::::: ##::::'####:. ######:: ########:. ######::
+    // ..::::..:::.......::::::..:::::....:::......:::........:::......:::
+    &--notices{
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 999;
+        max-width: 250px;
+        background: linear-gradient(90deg, rgba($sombre_rgb, 0.25), rgba($sombre_rgb, 0.75));
+        border: 1px solid $sombre;
+        backdrop-filter: blur(3px);
+        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
+        border-radius: 8px;
+        overflow: hidden;
+        display: none;
+
+        &.success{
+            .wp-annotations--notice__success{
+                display: flex;
+            }
+
+            .wp-annotations--notice__error{
+                display: none;
+            }
+        }
+
+        &.error{
+            .wp-annotations--notice__success{
+                display: none;
+            }
+
+            .wp-annotations--notice__error{
+                display: flex;
+            }
+        }
+
+        @media screen and (max-width: 550px){
+            max-width: 100%;
+            width: calc(100% - 20px);
+            left: 10px;
+            top: auto;           
+        }
+    }
+
+    &--notice{
+        position: relative;
+        display: flex;
+        align-items: stretch;
+
+        span{
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        p{
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: $white;
+            padding: 24px 16px;
+            flex-grow: 1;
+        }
+
+        svg{
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            flex-shrink: 0;
+
+            path{
+                stroke: $white;
+            }
+        }    
+    }
+
     // '##:::::::'####::'######:::'##::::'##:'########:'########:::'#######::'##::::'##:
     //  ##:::::::. ##::'##... ##:: ##:::: ##:... ##..:: ##.... ##:'##.... ##:. ##::'##::
     //  ##:::::::: ##:: ##:::..::: ##:::: ##:::: ##:::: ##:::: ##: ##:::: ##::. ##'##:::
@@ -185,168 +425,6 @@ html{
                 object-fit: contain;
                 object-position: center center;
             }
-        }
-    }
-    
-    // '########:::::'###:::::'######::'##::::'##::::'########::'##::::'##:'########::'########::'##:::::::'########:
-    //  ##.... ##:::'## ##:::'##... ##: ##:::: ##:::: ##.... ##: ##:::: ##: ##.... ##: ##.... ##: ##::::::: ##.....::
-    //  ##:::: ##::'##:. ##:: ##:::..:: ##:::: ##:::: ##:::: ##: ##:::: ##: ##:::: ##: ##:::: ##: ##::::::: ##:::::::
-    //  ##:::: ##:'##:::. ##:. ######:: #########:::: ########:: ##:::: ##: ########:: ########:: ##::::::: ######:::
-    //  ##:::: ##: #########::..... ##: ##.... ##:::: ##.... ##: ##:::: ##: ##.... ##: ##.... ##: ##::::::: ##...::::
-    //  ##:::: ##: ##.... ##:'##::: ##: ##:::: ##:::: ##:::: ##: ##:::: ##: ##:::: ##: ##:::: ##: ##::::::: ##:::::::
-    //  ########:: ##:::: ##:. ######:: ##:::: ##:::: ########::. #######:: ########:: ########:: ########: ########:
-    // ........:::..:::::..:::......:::..:::::..:::::........::::.......:::........:::........:::........::........::
-    &--dash-bubble{
-        position: fixed;
-        left: 10px;
-        top: 10px;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #FFF;
-        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
-        z-index: 997;
-        border: none;
-        cursor: pointer;
-        pointer-events: all;
-        transition: transform .5s ease, background .3s ease;        
-
-        .logged-in &{
-            top: 42px;
-        }
-
-        .logged-in &{
-            top: 42px;
-        }
-
-        .dash-open &{
-            transform: translateX($margin);
-    
-            .wp-annotations--dash-bubble__wrapper{
-                svg{
-                    &.browse{
-                        display: block;
-                    }
-    
-                    &.comment{
-                        display: none;
-                    }
-                }
-            }
-        }
-
-        .review-mode.screenshot &{
-            display: none;
-        }
-
-        &__wrapper{
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            svg{
-                width: 16px;
-                height: 16px;
-                object-fit: contain;
-                display: block;
-
-                path{
-                    stroke: $main;
-                }
-
-                &.browse{
-                    display: none;
-                }
-            }
-        }
-
-        &:hover{
-            background: #DDD;
-        }
-    }
-
-    // :'######::'##:::::'##:'####:'########::'######::'##::::'##::::'########::'##::::'##:'########::'########::'##:::::::'########:
-    // '##... ##: ##:'##: ##:. ##::... ##..::'##... ##: ##:::: ##:::: ##.... ##: ##:::: ##: ##.... ##: ##.... ##: ##::::::: ##.....::
-    //  ##:::..:: ##: ##: ##:: ##::::: ##:::: ##:::..:: ##:::: ##:::: ##:::: ##: ##:::: ##: ##:::: ##: ##:::: ##: ##::::::: ##:::::::
-    // . ######:: ##: ##: ##:: ##::::: ##:::: ##::::::: #########:::: ########:: ##:::: ##: ########:: ########:: ##::::::: ######:::
-    // :..... ##: ##: ##: ##:: ##::::: ##:::: ##::::::: ##.... ##:::: ##.... ##: ##:::: ##: ##.... ##: ##.... ##: ##::::::: ##...::::
-    // '##::: ##: ##: ##: ##:: ##::::: ##:::: ##::: ##: ##:::: ##:::: ##:::: ##: ##:::: ##: ##:::: ##: ##:::: ##: ##::::::: ##:::::::
-    // . ######::. ###. ###::'####:::: ##::::. ######:: ##:::: ##:::: ########::. #######:: ########:: ########:: ########: ########:
-    // :......::::...::...:::....:::::..::::::......:::..:::::..:::::........::::.......:::........:::........:::........::........::
-    &--switch-bubble{
-        position: fixed;
-        left: 10px;
-        top: 60px;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #FFF;
-        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
-        z-index: 997;
-        border: none;
-        cursor: pointer;
-        pointer-events: all;
-        transition: transform .5s ease, background .3s ease;   
-
-        .logged-in &{
-            top: 92px;
-        }
-
-        .logged-in &{
-            top: 92px;
-        }
-
-        .review-mode &{    
-            .wp-annotations--switch-bubble__wrapper{
-                svg{
-                    &.browse{
-                        display: block;
-                    }
-    
-                    &.comment{
-                        display: none;
-                    }
-                }
-            }
-        }
-
-        .dash-open &{
-            transform: translateX($margin);
-        }
-
-        .review-mode.screenshot &{
-            display: none;
-        }
-
-        &__wrapper{
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            svg{
-                width: 16px;
-                height: 16px;
-                object-fit: contain;
-                display: block;
-
-                path{
-                    fill: $main;
-                }
-
-                &.browse{
-                    display: none;
-                }
-            }
-        }
-
-        &:hover{
-            background: #DDD;
         }
     }
 
@@ -628,192 +706,136 @@ html{
                 object-fit: contain;
                 object-position: center center;
             }
-        }
-
-        form{
-            border-radius: 8px;
-            overflow: hidden;
-            background: $white;
-            width: 300px;
-            cursor: default;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-
-            textarea{
-                width: 100%;
-                height: 80px;
-                border: none;
-                border-bottom: 1px solid rgba($sombre_rgb, 0.3);
-                padding: 8px;
-                border-radius: 0;
-                font-family: "Open Sans", serif;
-                color: $sombre;
-                margin-bottom: 8px;
-    
-                &:focus{
-                    outline: none;
-                }
-            }
-
-            .mention-list-main{
-                display: none;
-                width: 100%;
-                padding: 0 8px 8px;
-
-                &__wrapper{
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-start;
-                    gap: 8px;
-                    flex-wrap: wrap;
-                }
-
-                &__item{
-                    padding: 3px 6px;
-                    border: 1px solid $clair;
-                    border-radius: 4px;
-                    font-size: 12px;
-                    cursor: pointer;
-                    transition: background .5s ease;
-
-                    &:hover{
-                        background: rgba($clair_rgb, 0.5);
-                    }
-                }
-            }
-
-            .client-visible{
-                display: block;
-                padding: 0 8px 12px;
-                color: $sombre;
-                font-size: 14px;
-
-                input{
-                    transform: translateY(2px);
-                    opacity: 1;
-                    height: initial;
-                    width: auto;
-                    position: relative;
-                }
-            }
-    
-            .submit-box{
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 8px 8px;
-    
-                button{
-                    padding: 8px 16px;
-                    background: $main;
-                    color: $white;
-                    border: none;
-                    border-radius: 50px;
-                    cursor: pointer;
-                    transition: background .5s ease;
-                    width: fit-content;
-        
-                    &:hover{
-                        background: $alt;
-                    }
-                }
-            }
-
-            .screenshot &{
-                display: none;
-            }
-        }
-        
+        }        
     }
 
-    // '##::: ##::'#######::'########:'####::'######::'########::'######::
-    //  ###:: ##:'##.... ##:... ##..::. ##::'##... ##: ##.....::'##... ##:
-    //  ####: ##: ##:::: ##:::: ##::::: ##:: ##:::..:: ##::::::: ##:::..::
-    //  ## ## ##: ##:::: ##:::: ##::::: ##:: ##::::::: ######:::. ######::
-    //  ##. ####: ##:::: ##:::: ##::::: ##:: ##::::::: ##...:::::..... ##:
-    //  ##:. ###: ##:::: ##:::: ##::::: ##:: ##::: ##: ##:::::::'##::: ##:
-    //  ##::. ##:. #######::::: ##::::'####:. ######:: ########:. ######::
-    // ..::::..:::.......::::::..:::::....:::......:::........:::......:::
-    &--notices{
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 999;
-        max-width: 250px;
-        background: #FFF;
-        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
-        border-radius: 8px;
-        overflow: hidden;
-        display: none;
-
-        p{
-            color: $main;
-            line-height: 1.2;
-            font-size: 14px;
-        }
-
-        .logged-in &{
-            top: 42px;
-        }
-
-        &.success{
-            .wp-annotations--notice__success{
-                display: flex;
-            }
-
-            .wp-annotations--notice__error{
-                display: none;
-            }
-        }
-
-        &.error{
-            .wp-annotations--notice__success{
-                display: none;
-            }
-
-            .wp-annotations--notice__error{
-                display: flex;
-            }
-        }
-
-        @media screen and (max-width: 550px){
-            max-width: 100%;
-            width: calc(100% - 20px);
-            left: 10px;
-            top: auto;           
-        }
-    }
-
-    &--notice{
-        position: relative;
+    .modal-marker{
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
+        top: -30px;
+        left: 0;
+        transform: translateY(-15px);
         display: flex;
-        align-items: stretch;
-
-        span{
-            background: rgba($sombre_rgb, 0.15);
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        p{
-            font-size: 12px;
-            color: $main;
-            padding: 16px;
-            flex-grow: 1;
-        }
+        align-items: center;
+        justify-content: center;
 
         svg{
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            flex-shrink: 0;
-
-            path{
-                stroke: $main;
+            width: 100%;
+            height: 100%;
+            
+            .modal-fill{
+                fill: $main;
             }
-        }    
+
+            .modal-stroke{
+                stroke: $clair;
+            }
+        }
+    } 
+
+    form#wp-annotation-form{
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        border-radius: 4px;
+        overflow: hidden;
+        background: linear-gradient(90deg, rgba($white, 0.85), rgba(200, 200, 200, 0.85));
+        backdrop-filter: blur(3px);
+        width: 400px;
+        max-width: calc(100% - 40px);
+        cursor: default;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25);
+
+        textarea{
+            width: 100%;
+            height: 80px;
+            border: none;
+            border-bottom: 1px solid rgba($sombre_rgb, 0.3);
+            padding: 8px;
+            border-radius: 0;
+            font-family: "Open Sans", serif;
+            color: $sombre;
+            margin-bottom: 8px;
+            background: none;
+
+            &:focus{
+                outline: none;
+            }
+        }
+
+        .mention-list-main{
+            display: none;
+            width: 100%;
+            padding: 0 8px 8px;
+
+            &__wrapper{
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            &__item{
+                padding: 3px 6px;
+                border: 1px solid $clair;
+                border-radius: 4px;
+                font-size: 12px;
+                cursor: pointer;
+                transition: background .5s ease;
+
+                &:hover{
+                    background: rgba($clair_rgb, 0.5);
+                }
+            }
+        }
+
+        .client-visible{
+            display: block;
+            padding: 0 8px 12px;
+            color: $sombre;
+            font-size: 14px;
+
+            input{
+                transform: translateY(2px);
+                opacity: 1;
+                height: initial;
+                width: auto;
+                position: relative;
+                accent-color: $sombre;
+            }
+        }
+
+        .submit-box{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px 8px;
+
+            button{
+                padding: 8px 16px;
+                background: $main;
+                color: $white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background .5s ease;
+                width: fit-content;
+    
+                &:hover{
+                    background: $sombre;
+                }
+            }
+        }
+
+        .screenshot &{
+            display: none;
+        }
     }
 
 
