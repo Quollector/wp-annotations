@@ -138,11 +138,41 @@
         });
 
         // === Close Mention List on outside click
-        $('body').on('click', function(e) {
+        $($layout).on('click', function(e) {
             if (!$(e.target).closest('#mention-list-main, #wp-annotation-form textarea').length) {
-                $(this).closest('form').find('#mention-list-main').slideUp(250);
+                $($formModal).find('#mention-list-main').slideUp(250);
             }
         });
+
+        // === Mention list item click
+        $('body').on('click', '.mention-list-main__item', function() {            
+            $this = $(this);
+            $textarea = $($formModal).find('textarea');
+            $mentionList = $($formModal).find('#mention-list-main');
+            var username = $this.data('user-name');            
+            var text = $textarea.val();
+            var cursorPos = $textarea[0].selectionStart;
+            var beforeCursor = text.substring(0, cursorPos);
+            var afterCursor = text.substring(cursorPos);            
+            
+            let $input = $('<input>', {
+                type: 'hidden',
+                name: 'targets_email[]',
+                value: $this.data('user-id')
+            });
+
+            $($formModal).find('form').append($input);
+            
+            var newText = beforeCursor.replace(/@(\w*)$/, '@' + username + ' ') + afterCursor;
+            $textarea.val(newText);
+            $mentionList.slideUp(250);
+            $textarea.focus();
+        });
+
+        // === Reset annotation form
+        $($formModal).on('reset', function(event) {
+            closeModals();
+        })
 
         // ######## ##     ## ##    ##  ######  ######## ####  #######  ##    ##  ######  
         // ##       ##     ## ###   ## ##    ##    ##     ##  ##     ## ###   ## ##    ## 
