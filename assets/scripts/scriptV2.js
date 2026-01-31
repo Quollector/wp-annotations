@@ -15,11 +15,12 @@
         var mobile = 768; 
         var quality = parseFloat(datas.quality);
 
-        $modal = $('#wp-annotations--modal');  
-        $formModal = $('#wp-annotation-form');  
+        $modal = $('.wp-annotations__modal');  
+        $formModal = '#wp-annotation-form';  
         $switchBubble = '#wp-annotations--switch-bubble';
         $dashBubble = '#wp-annotations--dash-bubble';
         $noticeBox = '#wp-annotations--notices';
+        $layout = '#wp-annotations--comments-layout';
 
         //  ######  ##      ## #### ########  ######  ##     ##     ######   #######  ##     ## ##     ## ######## ##    ## ########  ######        ## ########  ########   #######  ##      ##  ######  ######## 
         // ##    ## ##  ##  ##  ##     ##    ##    ## ##     ##    ##    ## ##     ## ###   ### ###   ### ##       ###   ##    ##    ##    ##      ##  ##     ## ##     ## ##     ## ##  ##  ## ##    ## ##       
@@ -82,6 +83,67 @@
             }
         });
 
+        // ##     ##  #######  ########     ###    ##       
+        // ###   ### ##     ## ##     ##   ## ##   ##       
+        // #### #### ##     ## ##     ##  ##   ##  ##       
+        // ## ### ## ##     ## ##     ## ##     ## ##       
+        // ##     ## ##     ## ##     ## ######### ##       
+        // ##     ## ##     ## ##     ## ##     ## ##       
+        // ##     ##  #######  ########  ##     ## ######## 
+
+        // === Open Modal
+        $('body').on('click', $layout, function(event) {            
+            var offset = $(this).offset();
+            var x = event.pageX - offset.left;
+            var y = event.pageY - offset.top;
+        
+            var pageWidth = $(this).width();
+            var pageHeight = $(this).height();
+        
+            var xPercent = (x / pageWidth) * 100;
+            var yPercent = (y / pageHeight) * 100;
+        
+            $modal
+                .css({ top: yPercent + '%', left: xPercent + '%' })
+                .show();
+
+            $($formModal).show().find('textarea').focus();
+        });  
+
+        // === Stop propagation on modal form
+        $('body').on('click', $formModal, function(e) {
+            e.stopPropagation();
+        });
+
+        // === Close modal on Escape key
+        $($layout).on('keydown', function(event) {
+            if( event.key === "Escape" ){
+                closeModals();
+            }
+        });
+
+        // === Mention List Toggle
+        $('body').on('keyup', $formModal + ' textarea', function(event) {
+            $textarea = $(this);
+            $mentionList = $($formModal).find('#mention-list-main');
+            var cursorPos = this.selectionStart;
+            var text = $textarea.val().substring(0, cursorPos);
+            var match = text.match(/@(\w*)$/);
+    
+            if (match) {
+                $mentionList.slideDown(250);
+            } else {
+                $mentionList.slideUp(250);
+            }
+        });
+
+        // === Close Mention List on outside click
+        $('body').on('click', function(e) {
+            if (!$(e.target).closest('#mention-list-main, #wp-annotation-form textarea').length) {
+                $(this).closest('form').find('#mention-list-main').slideUp(250);
+            }
+        });
+
         // ######## ##     ## ##    ##  ######  ######## ####  #######  ##    ##  ######  
         // ##       ##     ## ###   ## ##    ##    ##     ##  ##     ## ###   ## ##    ## 
         // ##       ##     ## ####  ## ##          ##     ##  ##     ## ####  ## ##       
@@ -91,10 +153,10 @@
         // ##        #######  ##    ##  ######     ##    ####  #######  ##    ##  ######  
 
         function resetModalForm() {
-            $formModal.find('textarea').val('').siblings('.mention-list-main').hide();
-            $formModal.find('input[type="checkbox"]').prop('checked', false);
-            $formModal.find('input[type=hidden]').remove();    
-            $formModal.hide();
+            $($formModal).find('textarea').val('').siblings('.mention-list-main').hide();
+            $($formModal).find('input[type="checkbox"]').prop('checked', false);
+            $($formModal).find('input[type=hidden]').remove();    
+            $($formModal).hide();
         }
                  
         function closeModals() {
