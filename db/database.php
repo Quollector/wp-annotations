@@ -12,8 +12,6 @@ function wp_annotation_create_tables() {
         $table_name => [
             'id' => 'BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY',
             'page_id' => 'INT NOT NULL',
-            'position_x' => 'INT NOT NULL',
-            'position_y' => 'INT NOT NULL',
             'commentaire' => 'TEXT NOT NULL',
             'timestamp' => "DATETIME DEFAULT CURRENT_TIMESTAMP",
             'statut' => "ENUM('non résolu', 'résolu') DEFAULT 'non résolu'",

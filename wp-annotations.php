@@ -91,6 +91,11 @@ function wp_annotations_enqueue_assets() {
 }
 add_action('wp_enqueue_scripts', 'wp_annotations_enqueue_assets');
 
+// Handler
+if ( file_exists( WP_ANNOTATION_PATH . 'assets/handler.php' )) {
+    include WP_ANNOTATION_PATH . 'assets/handler.php';
+}
+
 // Functions
 if ( file_exists( WP_ANNOTATION_PATH . 'assets/functions.php' )) {
     include WP_ANNOTATION_PATH . 'assets/functions.php';

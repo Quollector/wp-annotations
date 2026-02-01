@@ -43,7 +43,7 @@ if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/dashboard.php' ) ) {
              
         
         data-page-id="<?= get_the_ID() ?>"
-        data-user-id="<?= get_current_user_id() ?>"
+            
     > -->
     <div class="wp-annotations__modal" data-position-x="0" data-position-y="0" data-device="laptop">
         <svg width="118" height="118" viewBox="0 0 118 118" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -52,7 +52,7 @@ if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/dashboard.php' ) ) {
         </svg>
     </div>
 
-    <form id="wp-annotation-form">
+    <form id="wp-annotation-form" data-page-id="<?= get_the_ID() ?>" data-user-id="<?= get_current_user_id() ?>">
         <textarea name="comment" placeholder="Ajouter un commentaire..." rows="3" style="width: 100%;"></textarea>
         <div id="mention-list-main" class="mention-list-main">
             <div class="mention-list-main__wrapper">

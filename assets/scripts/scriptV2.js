@@ -183,13 +183,7 @@
         // ##     ## ##         ## ##    ##  ##    ## ##       ##    ## 
         // ########  ########    ###    ####  ######  ########  ######  
 
-        $('#ann-devices-select, #ann-comments-select').select2({
-            templateResult: formatDeviceOption,
-            templateSelection: formatDeviceOption,
-            minimumResultsForSearch: Infinity,
-            containerCssClass: 'wp-annotations-container',
-            dropdownCssClass: 'wp-annotations-dropdown'
-        });
+        initSelect2();
 
         //  ######  ##     ## ########  ##     ## #### ########       ###    ##    ## ##    ##  #######  ########    ###    ######## ####  #######  ##    ##    ########  #######  ########  ##     ## 
         // ##    ## ##     ## ##     ## ###   ###  ##     ##         ## ##   ###   ## ###   ## ##     ##    ##      ## ##      ##     ##  ##     ## ###   ##    ##       ##     ## ##     ## ###   ### 
@@ -202,8 +196,10 @@
         $($formModal).on('submit', function(event) {
             event.preventDefault();
             $($dashboard).addClass('ajax');
-            $formModal.hide();
-            $screenQuality = parseFloat(datas.quality);             
+            $($formModal).hide();
+            $screenQuality = parseFloat(datas.quality);  
+
+            $('html').addClass('screenshot');           
             
             html2canvas(document.body, {
                 scale: quality,
@@ -230,9 +226,8 @@
                 
                 var datas = [
                     $(event.target).serialize(),
-                    $device,
-                    $formModal.attr('data-page-id'),
-                    $formModal.attr('data-user-id')
+                    $device, 
+                    $($formModal).data('page-id')
                 ];
         
                 $.ajax({
@@ -242,48 +237,21 @@
                         action: 'submit_wp_annotation',
                         datas: datas,
                         device: $device,
-                        view: $('.wp-annotations--dashboard__comments').hasClass('active') ? 'active' : 'resolved',
+                        deviceView: $('#ann-devices-select').val(),
+                        view: $('#ann-comments-select').val(),
                         screenshot: screenshot // Ajouter l'image en base64
                     },
                     success: function(response) {
                         if (response.success) {
-                            $('#wp-annotations--modal').hide().find('textarea').val('');
-                            $('#wp-annotations--modal').find('input[type="checkbox"]').prop('checked', false);
-                            $('#wp-annotations--modal').find('input[type=hidden]').remove();
-                            $modal.find('#wp-annotation-form').show();
-                            $('#wp-annotations--dashboard').removeClass('ajax');
-                            $('#wp-annotations--notices').addClass('success').show().find('p').text(response.data.message);
-                            $('#wp-annotations--refresh-box').html(response.data.comments_content);
-        
-                            setTimeout(function() {
-                                $('#wp-annotations--notices').fadeOut(function(){
-                                    $(this).removeClass('error success');
-                                });
-                            }, 2000);
+                            resetAfterSubmit(response.data.comments_content, response.data.message);
                         } else {
-                            $('#wp-annotations--notices').addClass('error').show().find('p').text(response.data.message);
-                            $('#wp-annotations--modal').hide().find('textarea').val('');
-                            $('#wp-annotations--modal').find('input[type="checkbox"]').prop('checked', false);
-                            $('#wp-annotations--modal').find('input[type=hidden]').remove();
-                            $modal.find('#wp-annotation-form').show();
+                            displayNotice(response.data.message, 'error');
                             $('#wp-annotations--dashboard').removeClass('ajax');
-        
-                            setTimeout(function() {
-                                $('#wp-annotations--notices').fadeOut(function(){
-                                    $(this).removeClass('error success');
-                                });
-                            }, 2000);
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        $('#wp-annotations--notices').addClass('error').show().find('p').text('Une erreur s\'est produite');
+                        displayNotice('Une erreur s\'est produite', 'error');
                         $('#wp-annotations--dashboard').removeClass('ajax');
-    
-                        setTimeout(function() {
-                            $('#wp-annotations--notices').fadeOut(function(){
-                                $(this).removeClass('error success');
-                            });
-                        }, 2000);
                     }
                 });
             });
@@ -388,5 +356,23 @@
             return $result;
         }
 
+        function resetAfterSubmit(content, message){
+            closeModals();
+            $($dashboard).removeClass('ajax');
+            $('#wp-annotations--refresh-box').html(content);
+            displayNotice(message, 'success');
+            $('#ann-devices-select, #ann-comments-select').select2('destroy');
+            initSelect2();
+        }
+
+        function initSelect2(){            
+            $('#ann-devices-select, #ann-comments-select').select2({
+                templateResult: formatDeviceOption,
+                templateSelection: formatDeviceOption,
+                minimumResultsForSearch: Infinity,
+                containerCssClass: 'wp-annotations-container',
+                dropdownCssClass: 'wp-annotations-dropdown'
+            });
+        }
     });
 })(jQuery);

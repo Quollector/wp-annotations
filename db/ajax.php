@@ -1,15 +1,13 @@
 <?php
 
-// :'######:::'#######::'##::::'##:'##::::'##:'########:'##::: ##:'########::'######::
-// '##... ##:'##.... ##: ###::'###: ###::'###: ##.....:: ###:: ##:... ##..::'##... ##:
-//  ##:::..:: ##:::: ##: ####'####: ####'####: ##::::::: ####: ##:::: ##:::: ##:::..::
-//  ##::::::: ##:::: ##: ## ### ##: ## ### ##: ######::: ## ## ##:::: ##::::. ######::
-//  ##::::::: ##:::: ##: ##. #: ##: ##. #: ##: ##...:::: ##. ####:::: ##:::::..... ##:
-//  ##::: ##: ##:::: ##: ##:.:: ##: ##:.:: ##: ##::::::: ##:. ###:::: ##::::'##::: ##:
-// . ######::. #######:: ##:::: ##: ##:::: ##: ########: ##::. ##:::: ##::::. ######::
-// :......::::.......:::..:::::..::..:::::..::........::..::::..:::::..::::::......:::
+//    ###    ########  ########     ##    ## ######## ##      ##       ###    ##    ## ##    ##  #######  ######## 
+//   ## ##   ##     ## ##     ##    ###   ## ##       ##  ##  ##      ## ##   ###   ## ###   ## ##     ##    ##    
+//  ##   ##  ##     ## ##     ##    ####  ## ##       ##  ##  ##     ##   ##  ####  ## ####  ## ##     ##    ##    
+// ##     ## ##     ## ##     ##    ## ## ## ######   ##  ##  ##    ##     ## ## ## ## ## ## ## ##     ##    ##    
+// ######### ##     ## ##     ##    ##  #### ##       ##  ##  ##    ######### ##  #### ##  #### ##     ##    ##    
+// ##     ## ##     ## ##     ##    ##   ### ##       ##  ##  ##    ##     ## ##   ### ##   ### ##     ##    ##    
+// ##     ## ########  ########     ##    ## ########  ###  ###     ##     ## ##    ## ##    ##  #######     ##    
 
-// === Add new comments
 function wp_annotation_submit_comment() {
     if (!is_user_logged_in()) {
         wp_send_json_error(['message' => 'Vous devez être connecté pour ajouter un commentaire.']);
@@ -26,11 +24,7 @@ function wp_annotation_submit_comment() {
 
         $commentaire = isset($form_data['comment']) ? wp_kses_post(stripslashes($form_data['comment'])) : '';
         $client_visible = isset($form_data['client_visible']) ? intval($form_data['client_visible']) : 0;
-        $position_x = isset($datas[1]) ? intval($datas[1]) : 0;
-        $position_y = isset($datas[2]) ? intval($datas[2]) : 0;
-        $device = isset($datas[3]) ? sanitize_text_field($datas[3]) : '';
-        $page_id = isset($datas[4]) ? intval($datas[4]) : get_the_ID();
-        $user_id = isset($datas[5]) ? intval($datas[5]) : get_current_user_id();
+        $device = isset($datas[1]) ? sanitize_text_field($datas[1]) : '';
         $targetsEmail = isset($form_data['targets_email']) ? $form_data['targets_email'] : [];
 
         if (empty(trim($commentaire))) {
@@ -60,11 +54,9 @@ function wp_annotation_submit_comment() {
 
         $table_datas = [
             'commentaire' => $commentaire,
-            'position_x' => $position_x,
-            'position_y' => $position_y,
             'device' => $device,
-            'page_id' => $page_id,
-            'user_id' => $user_id,
+            'page_id' => intval($datas[2]),
+            'user_id' => get_current_user_id(),
             'timestamp' => current_time('mysql'),
             'statut' => 'non résolu',
             'screenshot_url' => $screenshot_path,
@@ -81,9 +73,7 @@ function wp_annotation_submit_comment() {
             $variables = [
                 $device = isset($_POST['device']) ? sanitize_text_field($_POST['device']) : '',
                 $view = sanitize_text_field($_POST['view']),
-                $count_laptop = $devices['laptop'],
-                $count_tablet = $devices['tablet'],
-                $count_mobile = $devices['mobile']
+                $viewDevice = sanitize_text_field($_POST['deviceView'])
             ];
 
             ob_start();            
@@ -91,9 +81,9 @@ function wp_annotation_submit_comment() {
             include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
             $comments_content = ob_get_clean(); 
             
-            if ( !empty($targetsEmail) ) {
-                sendNotificationEmail( $table_datas, $table_datas['commentaire'], $targetsEmail, true );
-            }
+            // if ( !empty($targetsEmail) ) {
+            //     sendNotificationEmail( $table_datas, $table_datas['commentaire'], $targetsEmail, true );
+            // }
 
             wp_send_json_success([
                 'message' => 'Commentaire ajouté avec succès',
@@ -109,6 +99,11 @@ function wp_annotation_submit_comment() {
 }
 
 add_action('wp_ajax_submit_wp_annotation', 'wp_annotation_submit_comment');
+
+
+
+
+
 
 // === Update comments
 function wp_annotation_update_comment() {
