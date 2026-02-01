@@ -144,7 +144,7 @@ html{
         position: fixed;
         left: 0;
         top: 0;
-        background: linear-gradient(270deg, rgba($sombre_rgb, 0.45), rgba($sombre_rgb, 0.75));
+        background: rgba($sombre_rgb, 0.85);
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -493,126 +493,24 @@ html{
         }
 
         &__devices{
-            border-bottom: 1px solid $white;
             position: relative;
-
-            .devices-wrapper{
-                display: flex;
-                align-items: center;
-                position: relative;
-                z-index: 2;
-            }
-            
-            &.display-none{
-                display: none;
-            }
-            
-            button{
-                width: 25%;
-                height: 50px;
-                background: none;
-                border: none;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: color .5s ease;
-                font-size: 26px;
-                color: $white;
-
-                &.tablet, &.mobile{
-                    font-size: 22px;
-                }
-
-                &.disabled{
-                    cursor: not-allowed;
-                    opacity: 0.5;
-                    color: $main;
-                }
-            }
-
-            &::after{
-                content: '';
-                height: 100%;
-                width: 25%;
-                background: linear-gradient(90deg, rgba($main_rgb, 0.9), rgba($main_rgb, 0.7));
-                top: 0;
-                left: 0%;
-                position: absolute;
-                transition: left .5s ease;
-                z-index: 1;
-            }
-
-            &.laptop{
-                &::after{
-                    left: 25%;
-                }
-            }
-            
-            &.tablet{
-                &::after{
-                    left: 50%;
-                }
-            }
-            
-            &.mobile{
-                &::after{
-                    left: 75%;
-                }
-            }
+            padding: 8px 16px 0;
         }
 
         &__comments{
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid rgba($sombre_rgb, 0.3);
-            position: relative;
             position: sticky;
             top: 0;
-            background: $white;
             z-index: 3;
-            
-            button{
-                width: 50%;
-                height: 50px;
-                background: none;
-                border: none;
-                cursor: pointer;
-                font-size: 18px;
-                font-weight: 500;
-                color: rgba($clair_rgb, 0.5);
-                transition: color .5s ease;
+            padding: 8px 16px 16px;
+            border-bottom: 1px solid rgba($sombre_rgb, 0.25);
+        }
 
-                &.comments-resolved{
-                    color: $main;
-                }
-            }
-
-            &::after{
-                content: '';
-                height: 3px;
-                width: 50%;
-                background: $main;
-                bottom: 0;
-                left: 50%;
-                position: absolute;
-                transition: left .5s ease;
-            }
-
-            &.active{
-            
-                button{
-                    color: $main;
-                    
-                    &.comments-resolved{
-                        color: rgba($clair_rgb, 0.5);
-                    }
-                }
-
-                &::after{
-                    left: 0;
-                }
-            }
+        label{
+            font-weight: 700;
+            color: $sombre;
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: block;
         }
 
         &__comments-list{
@@ -774,7 +672,6 @@ html{
             display: none;
         }
     }
-
 
     // Comment item (pages)
     .comment-page-item{
@@ -1730,6 +1627,112 @@ html{
                     background: $sombre;
                 }
             }         
+        }
+    }
+
+    //  ######  ######## ##       ########  ######  ########  #######  
+    // ##    ## ##       ##       ##       ##    ##    ##    ##     ## 
+    // ##       ##       ##       ##       ##          ##           ## 
+    //  ######  ######   ##       ######   ##          ##     #######  
+    //       ## ##       ##       ##       ##          ##    ##        
+    // ##    ## ##       ##       ##       ##    ##    ##    ##        
+    //  ######  ######## ######## ########  ######     ##    ######### 
+    .select2{
+        &-container{
+            &--default{
+                .select2-selection--single{
+                    height: 40px;
+                    border: 1px solid rgba($sombre_rgb, 0.25);
+                    border-radius: 4px;
+                    background: none;
+
+                    .select2-selection__rendered{
+                        height: 38px;
+                        display: flex;
+                        align-items: center;
+                        padding: 0 16px;
+                        font-size: 16px;
+                        color: $sombre;
+
+                        span{
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }                    
+                    }
+
+                    .select2-selection__arrow{
+                        top: 50%;
+                        transform: translateY(-50%);
+                    }
+                }
+            }
+        }                
+    }
+}
+
+//  ######  ######## ##       ########  ######  ########  #######     ########  ########   #######  ########  ########   #######  ##      ## ##    ## 
+// ##    ## ##       ##       ##       ##    ##    ##    ##     ##    ##     ## ##     ## ##     ## ##     ## ##     ## ##     ## ##  ##  ## ###   ## 
+// ##       ##       ##       ##       ##          ##           ##    ##     ## ##     ## ##     ## ##     ## ##     ## ##     ## ##  ##  ## ####  ## 
+//  ######  ######   ##       ######   ##          ##     #######     ##     ## ########  ##     ## ########  ##     ## ##     ## ##  ##  ## ## ## ## 
+//       ## ##       ##       ##       ##          ##    ##           ##     ## ##   ##   ##     ## ##        ##     ## ##     ## ##  ##  ## ##  #### 
+// ##    ## ##       ##       ##       ##    ##    ##    ##           ##     ## ##    ##  ##     ## ##        ##     ## ##     ## ##  ##  ## ##   ### 
+//  ######  ######## ######## ########  ######     ##    #########    ########  ##     ##  #######  ##        ########   #######   ###  ###  ##    ## 
+
+.website-page{
+    .wp-annotations-dropdown{
+        // width: 100% !important;
+        
+        // Search
+        .select2-search--dropdown{
+            display: none !important;
+        }
+    
+        // Dropdown
+        &.select2-dropdown{
+            border: 1px solid rgba($sombre_rgb, 0.25) !important;
+            overflow: hidden !important;
+    
+            &.select2-dropdown--below{
+                border-radius: 0 0 4px 4px !important;
+            }
+    
+            &.select2-dropdown--above{
+                border-radius: 4px 4px 0 0 !important;
+            }
+    
+            .select2{
+                &-results{
+                    &__options{
+                        max-height: 200px;
+                        overflow-y: auto;
+                    }
+    
+                    &__option{
+                        height: 40px;
+                        padding: 0 16px;
+                        font-size: 16px;
+                        color: $sombre;
+                        display: flex;
+                        align-items: center;
+
+                        span{
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }
+    
+                        &[aria-selected="true"] {
+                            background: rgba($alt_rgb, 0.5) !important;
+                        }
+    
+                        &--highlighted{
+                            background: $alt !important;
+                            color: $white !important;
+                        }
+                    }
+                }
+            }
         }
     }
 }

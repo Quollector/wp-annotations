@@ -65,27 +65,38 @@ $interface_color = get_option('wp_annotation_color', 'blue');
 
 ?>
 <?php // DEVICES ?>
-<div class="wp-annotations--dashboard__devices <?= $device ?>" data-device="<?= $device ?>">
-    <div class="devices-wrapper">
-        <button class="device all" data-device="all">
-            <iconify-icon icon="material-symbols:devices-outline"></iconify-icon>
-        </button>
-        <button class="device laptop<?= $count_laptop > 0 ? '' : ' disabled' ?>" data-device="laptop">
-            <iconify-icon icon="material-symbols:laptop-mac-outline"></iconify-icon>
-        </button>
-        <button class="device tablet<?= $count_tablet > 0 ? '' : ' disabled' ?>" data-device="tablet">
-            <iconify-icon icon="material-symbols:tablet-mac-outline"></iconify-icon>
-        </button>
-        <button class="device mobile<?= $count_mobile > 0 ? '' : ' disabled' ?>" data-device="mobile">
-            <iconify-icon icon="material-symbols:smartphone-outline"></iconify-icon>
-        </button>
-    </div>
+<div class="wp-annotations--dashboard__devices">
+    <label for="ann-devices-select">Appareils</label>
+    <select name="ann-devices-select" id="ann-devices-select">
+        <option value="all" data-icon="material-symbols:devices-outline">
+            Tous les appareils
+        </option>
+        <option value="laptop" data-icon="material-symbols:laptop-mac-outline" <?= $device === 'laptop' ? 'selected' : '' ?>>
+            Ordinateur
+        </option>
+        <option value="tablet" data-icon="material-symbols:tablet-mac-outline" <?= $device === 'tablet' ? 'selected' : '' ?>>
+            Tablette
+        </option>
+        <option value="mobile" data-icon="material-symbols:smartphone-outline" <?= $device === 'mobile' ? 'selected' : '' ?>>
+            Mobile
+        </option>
+    </select>
 </div>
 
 <?php // COMMENTS STATUS ?>
-<div class="wp-annotations--dashboard__comments<?= $view === 'active' ? ' active' : '' ?>">
-    <button class="comments-actives">Actifs (<?= $count_non_resolu ?>)</button>
-    <button class="comments-resolved">Résolus (<?= $count_resolu ?>)</button>
+<div class="wp-annotations--dashboard__comments">    
+    <label for="ann-comments-select">Commentaires</label>
+    <select name="ann-comments-select" id="ann-comments-select">
+        <option value="active" data-icon="material-symbols:comment-outline-rounded">
+            Tous les commentaires (<?= $count_non_resolu ?>)
+        </option>
+        <option value="active" data-icon="material-symbols:pending-outline">
+            Commentaires actifs (<?= $count_non_resolu ?>)
+        </option>
+        <option value="resolved" data-icon="material-symbols:done-all-rounded">
+            Commentaires résolus (<?= $count_resolu ?>)
+        </option>
+    </select>
 </div>
 
 <?php // COMMENTS ACTIVE ?>
