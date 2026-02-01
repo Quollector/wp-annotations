@@ -12,14 +12,20 @@ function getAllCommentsHandler($view = 'all', $viewDevice = 'all'){
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
 
+    $status = match($view) {
+        'active' => 'non résolu',
+        'resolved' => 'résolu',
+        default => 'all',
+    };
+
     if( $view !== 'all' && $viewDevice !== 'all' ) {
-        $query = "SELECT * FROM $table_name WHERE statut = '$view' AND device = '$viewDevice'";
+        $query = "SELECT * FROM $table_name WHERE statut = '$status' AND device = '$viewDevice'";
     }
     elseif( $viewDevice !== 'all' ) {
         $query = "SELECT * FROM $table_name WHERE device = '$viewDevice'";
     }
     elseif( $view !== 'all' ) {
-        $query = "SELECT * FROM $table_name WHERE statut = '$view'";
+        $query = "SELECT * FROM $table_name WHERE statut = '$status'";
     }
     else {
         $query = "SELECT * FROM $table_name";
@@ -86,4 +92,33 @@ function getAllCommentsHandler($view = 'all', $viewDevice = 'all'){
         'total' => $total
     ];
 
+}
+
+//  ######   ######## ########     ######  ########    ###    ########  ######  
+// ##    ##  ##          ##       ##    ##    ##      ## ##      ##    ##    ## 
+// ##        ##          ##       ##          ##     ##   ##     ##    ##       
+// ##   #### ######      ##        ######     ##    ##     ##    ##     ######  
+// ##    ##  ##          ##             ##    ##    #########    ##          ## 
+// ##    ##  ##          ##       ##    ##    ##    ##     ##    ##    ##    ## 
+//  ######   ########    ##        ######     ##    ##     ##    ##     ######  
+
+function getCommentsCountHandler(){
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reviews';
+
+    $total = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
+    $count_non_resolu = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name WHERE statut = 'non résolu'" );
+    $count_resolu = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name WHERE statut = 'résolu'" );
+    $count_laptop = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name WHERE device = 'laptop'" );
+    $count_tablet = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name WHERE device = 'tablet'" );
+    $count_mobile = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name WHERE device = 'mobile'" );
+
+    return [
+        'total' => $total,
+        'count_non_resolu' => $count_non_resolu,
+        'count_resolu' => $count_resolu,
+        'count_laptop' => $count_laptop,
+        'count_tablet' => $count_tablet,
+        'count_mobile' => $count_mobile
+    ];
 }

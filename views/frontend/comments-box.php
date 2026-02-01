@@ -1,14 +1,12 @@
 <?php
 
-$view = isset( $view ) ? $view : 'all';
+$view = isset( $view ) ? $view : 'active';
 $viewDevice = isset( $viewDevice ) ? $viewDevice : 'all';
 $device = isset( $device ) ? $device : 'all';
-$count_laptop = isset( $count_laptop ) ? $count_laptop : 0;
-$count_tablet = isset( $count_tablet ) ? $count_tablet : 0;
-$count_mobile = isset( $count_mobile ) ? $count_mobile : 0;
 
 $commentsDatas = getAllCommentsHandler( $view, $viewDevice );
-$count_total = $commentsDatas['total'];
+$stats = getCommentsCountHandler();
+$count_total = $stats['total'];
 $count_non_resolu = $commentsDatas['count_non_resolu'];
 $count_resolu = $commentsDatas['count_resolu'];
 $count_laptop = $commentsDatas['count_laptop'];
@@ -23,16 +21,16 @@ $interface_color = get_option('wp_annotation_color', 'blue');
 <div class="wp-annotations--dashboard__devices">
     <label for="ann-devices-select">Appareils</label>
     <select name="ann-devices-select" id="ann-devices-select">
-        <option value="all" data-icon="material-symbols:devices-outline">
+        <option value="all" data-icon="material-symbols:devices-outline"<?= $viewDevice === 'all' ? ' selected' : '' ?>>
             Tous les appareils (<?= $count_total ?>)
         </option>
-        <option value="laptop" data-icon="material-symbols:laptop-mac-outline" <?= $device === 'laptop' ? 'selected' : '' ?>>
+        <option value="laptop" data-icon="material-symbols:laptop-mac-outline" <?= $viewDevice === 'laptop' ? 'selected' : '' ?>>
             Ordinateur (<?= $count_laptop ?>)
         </option>
-        <option value="tablet" data-icon="material-symbols:tablet-mac-outline" <?= $device === 'tablet' ? 'selected' : '' ?>>
+        <option value="tablet" data-icon="material-symbols:tablet-mac-outline" <?= $viewDevice === 'tablet' ? 'selected' : '' ?>>
             Tablette (<?= $count_tablet ?>)
         </option>
-        <option value="mobile" data-icon="material-symbols:smartphone-outline" <?= $device === 'mobile' ? 'selected' : '' ?>>
+        <option value="mobile" data-icon="material-symbols:smartphone-outline" <?= $viewDevice === 'mobile' ? 'selected' : '' ?>>
             Mobile (<?= $count_mobile ?>)
         </option>
     </select>
@@ -42,13 +40,10 @@ $interface_color = get_option('wp_annotation_color', 'blue');
 <div class="wp-annotations--dashboard__comments">    
     <label for="ann-comments-select">Commentaires</label>
     <select name="ann-comments-select" id="ann-comments-select">
-        <option value="active" data-icon="material-symbols:comment-outline-rounded">
-            Tous les commentaires (<?= $count_total ?>)
-        </option>
-        <option value="active" data-icon="material-symbols:pending-outline">
+        <option value="active" data-icon="material-symbols:pending-outline"<?= $view === 'active' ? ' selected' : '' ?>>
             Commentaires actifs (<?= $count_non_resolu ?>)
         </option>
-        <option value="resolved" data-icon="material-symbols:done-all-rounded">
+        <option value="resolved" data-icon="material-symbols:done-all-rounded"<?= $view === 'resolved' ? ' selected' : '' ?>>
             Commentaires résolus (<?= $count_resolu ?>)
         </option>
     </select>

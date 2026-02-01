@@ -101,8 +101,31 @@ function wp_annotation_submit_comment() {
 add_action('wp_ajax_submit_wp_annotation', 'wp_annotation_submit_comment');
 
 
+// ######## #### ##       ######## ######## ########      ######   #######  ##     ## ##     ## ######## ##    ## ########  ######  
+// ##        ##  ##          ##    ##       ##     ##    ##    ## ##     ## ###   ### ###   ### ##       ###   ##    ##    ##    ## 
+// ##        ##  ##          ##    ##       ##     ##    ##       ##     ## #### #### #### #### ##       ####  ##    ##    ##       
+// ######    ##  ##          ##    ######   ########     ##       ##     ## ## ### ## ## ### ## ######   ## ## ##    ##     ######  
+// ##        ##  ##          ##    ##       ##   ##      ##       ##     ## ##     ## ##     ## ##       ##  ####    ##          ## 
+// ##        ##  ##          ##    ##       ##    ##     ##    ## ##     ## ##     ## ##     ## ##       ##   ###    ##    ##    ## 
+// ##       #### ########    ##    ######## ##     ##     ######   #######  ##     ## ##     ## ######## ##    ##    ##     ######  
 
+function wp_annotations_filter_comments() {      
+    $variables = [
+        $view = sanitize_text_field($_POST['view']),
+        $viewDevice = sanitize_text_field($_POST['deviceView'])
+    ];
 
+    ob_start();            
+    extract($variables);
+    include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
+    $comments_content = ob_get_clean(); 
+
+    wp_send_json_success([
+        'comments_content' => $comments_content
+    ]);
+}
+
+add_action('wp_ajax_filter_wp_annotations_comments', 'wp_annotations_filter_comments');
 
 
 // === Update comments

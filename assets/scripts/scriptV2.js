@@ -242,7 +242,7 @@
                         screenshot: screenshot // Ajouter l'image en base64
                     },
                     success: function(response) {
-                        if (response.success) {
+                        if (response.success) {                            
                             resetAfterSubmit(response.data.comments_content, response.data.message);
                         } else {
                             displayNotice(response.data.message, 'error');
@@ -255,6 +255,18 @@
                     }
                 });
             });
+        });
+
+        // ######## #### ##       ######## ######## ########   ######  
+        // ##        ##  ##          ##    ##       ##     ## ##    ## 
+        // ##        ##  ##          ##    ##       ##     ## ##       
+        // ######    ##  ##          ##    ######   ########   ######  
+        // ##        ##  ##          ##    ##       ##   ##         ## 
+        // ##        ##  ##          ##    ##       ##    ##  ##    ## 
+        // ##       #### ########    ##    ######## ##     ##  ######  
+
+        $('body').on('change', '#ann-devices-select, #ann-comments-select', function() {
+            filterComments();
         });
 
         // ######## ##     ## ##    ##  ######  ######## ####  #######  ##    ##  ######  
@@ -360,7 +372,11 @@
             closeModals();
             $($dashboard).removeClass('ajax');
             $('#wp-annotations--refresh-box').html(content);
-            displayNotice(message, 'success');
+
+            if( message ){
+                displayNotice(message, 'success');
+            }
+
             $('#ann-devices-select, #ann-comments-select').select2('destroy');
             initSelect2();
         }
@@ -373,6 +389,36 @@
                 containerCssClass: 'wp-annotations-container',
                 dropdownCssClass: 'wp-annotations-dropdown'
             });
+        }
+
+        function filterComments(){
+            $($dashboard).addClass('ajax');
+
+            var deviceView = $('#ann-devices-select').val();
+            var view = $('#ann-comments-select').val();
+            
+            $.ajax({
+                url: ajaxurl.url,
+                type: 'POST',
+                data: {
+                    action: 'filter_wp_annotations_comments',
+                    deviceView: deviceView,
+                    view: view
+                },
+                success: function(response) {
+                    if (response.success) {
+                        resetAfterSubmit(response.data.comments_content, false);
+                    } else {
+                        displayNotice(response.data.message, 'error');
+                        $('#wp-annotations--dashboard').removeClass('ajax');
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    displayNotice('Une erreur s\'est produite', 'error');
+                    $('#wp-annotations--dashboard').removeClass('ajax');
+                }
+            });
+
         }
     });
 })(jQuery);
