@@ -237,8 +237,8 @@
                         action: 'submit_wp_annotation',
                         datas: datas,
                         device: $device,
-                        deviceView: $('#ann-devices-select').val(),
-                        view: $('#ann-comments-select').val(),
+                        deviceView: getDashboardDevice(),
+                        view: getDashboardView(),
                         screenshot: screenshot // Ajouter l'image en base64
                     },
                     success: function(response) {
@@ -268,6 +268,79 @@
         $('body').on('change', '#ann-devices-select, #ann-comments-select', function() {
             filterComments();
         });
+
+        //  ######   #######  ##     ##       ###     ######   ######   #######  ########  ########  ########  #######  ##    ## 
+        // ##    ## ##     ## ###   ###      ## ##   ##    ## ##    ## ##     ## ##     ## ##     ## ##       ##     ## ###   ## 
+        // ##       ##     ## #### ####     ##   ##  ##       ##       ##     ## ##     ## ##     ## ##       ##     ## ####  ## 
+        // ##       ##     ## ## ### ##    ##     ## ##       ##       ##     ## ########  ##     ## ######   ##     ## ## ## ## 
+        // ##       ##     ## ##     ##    ######### ##       ##       ##     ## ##   ##   ##     ## ##       ##     ## ##  #### 
+        // ##    ## ##     ## ##     ##    ##     ## ##    ## ##    ## ##     ## ##    ##  ##     ## ##       ##     ## ##   ### 
+        //  ######   #######  ##     ##    ##     ##  ######   ######   #######  ##     ## ########  ########  #######  ##    ## 
+
+        $('body').on('click', $dashboard + ' .accordeon-header button', function() {
+            $(this).closest('.accordeon-header').toggleClass('closed').next().slideToggle();
+        });
+
+        //  ######   #######  ##     ##     ######  ########    ###    ######## ##     ##  ######  
+        // ##    ## ##     ## ###   ###    ##    ##    ##      ## ##      ##    ##     ## ##    ## 
+        // ##       ##     ## #### ####    ##          ##     ##   ##     ##    ##     ## ##       
+        // ##       ##     ## ## ### ##     ######     ##    ##     ##    ##    ##     ##  ######  
+        // ##       ##     ## ##     ##          ##    ##    #########    ##    ##     ##       ## 
+        // ##    ## ##     ## ##     ##    ##    ##    ##    ##     ##    ##    ##     ## ##    ## 
+        //  ######   #######  ##     ##     ######     ##    ##     ##    ##     #######   ######  
+
+        $('body').on('click', $dashboard + ' button.resolve', function() {
+            $commentID = $(this).closest('.comment-item').data('comment-id');
+
+            $('#wp-annotations--dashboard').addClass('ajax');
+
+            var datas = {
+                action: 'update_wp_annotation_status',
+                id: $commentID,
+                view: getDashboardView(),
+                deviceView: getDashboardDevice()
+            };
+
+            $.ajax({
+                url: ajaxurl.url,
+                type: 'POST',
+                data: datas,
+                success: function(response) {
+                    if (response.success) {
+                        resetAfterSubmit(response.data.comments_content, response.data.message);                       
+                    } else {                        
+                        $('#wp-annotations--dashboard').removeClass('ajax');
+                        displayNotice(response.data.message, 'error');
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    displayNotice('Une erreur s\'est produite', 'error');
+                    $('#wp-annotations--dashboard').removeClass('ajax');
+                }
+            });
+        });
+
+        // ##       ####  ######   ##     ## ######## ########   #######  ##     ## 
+        // ##        ##  ##    ##  ##     ##    ##    ##     ## ##     ##  ##   ##  
+        // ##        ##  ##        ##     ##    ##    ##     ## ##     ##   ## ##   
+        // ##        ##  ##   #### #########    ##    ########  ##     ##    ###    
+        // ##        ##  ##    ##  ##     ##    ##    ##     ## ##     ##   ## ##   
+        // ##        ##  ##    ##  ##     ##    ##    ##     ## ##     ##  ##   ##  
+        // ######## ####  ######   ##     ##    ##    ########   #######  ##     ## 
+
+        $('body').on('click', '.wp-annotations .expend', function() {
+            var src = $(this).next().attr('src');
+            $('body').addClass('no-scroll');
+
+            $('#wp-annotations--lightbox').fadeIn().find('img.lightbox-img').attr('src', src);
+        });
+
+        $('body').on('click', '#wp-annotations--lightbox .close-light-button', function() {
+            $('#wp-annotations--lightbox').fadeOut();
+            $('body').removeClass('no-scroll');
+        });
+
+
 
         // ######## ##     ## ##    ##  ######  ######## ####  #######  ##    ##  ######  
         // ##       ##     ## ###   ## ##    ##    ##     ##  ##     ## ###   ## ##    ## 
@@ -393,17 +466,14 @@
 
         function filterComments(){
             $($dashboard).addClass('ajax');
-
-            var deviceView = $('#ann-devices-select').val();
-            var view = $('#ann-comments-select').val();
             
             $.ajax({
                 url: ajaxurl.url,
                 type: 'POST',
                 data: {
                     action: 'filter_wp_annotations_comments',
-                    deviceView: deviceView,
-                    view: view
+                    deviceView: getDashboardDevice(),
+                    view: getDashboardView()
                 },
                 success: function(response) {
                     if (response.success) {
@@ -419,6 +489,14 @@
                 }
             });
 
+        }
+
+        function getDashboardView(){
+            return $('#ann-comments-select').val();
+        }
+
+        function getDashboardDevice(){
+            return $('#ann-devices-select').val();
         }
     });
 })(jQuery);

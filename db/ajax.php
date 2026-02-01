@@ -100,7 +100,6 @@ function wp_annotation_submit_comment() {
 
 add_action('wp_ajax_submit_wp_annotation', 'wp_annotation_submit_comment');
 
-
 // ######## #### ##       ######## ######## ########      ######   #######  ##     ## ##     ## ######## ##    ## ########  ######  
 // ##        ##  ##          ##    ##       ##     ##    ##    ## ##     ## ###   ### ###   ### ##       ###   ##    ##    ##    ## 
 // ##        ##  ##          ##    ##       ##     ##    ##       ##     ## #### #### #### #### ##       ####  ##    ##    ##       
@@ -127,6 +126,49 @@ function wp_annotations_filter_comments() {
 
 add_action('wp_ajax_filter_wp_annotations_comments', 'wp_annotations_filter_comments');
 
+// ##     ## ########  ########     ###    ######## ########     ######  ########    ###    ######## ##     ##  ######  
+// ##     ## ##     ## ##     ##   ## ##      ##    ##          ##    ##    ##      ## ##      ##    ##     ## ##    ## 
+// ##     ## ##     ## ##     ##  ##   ##     ##    ##          ##          ##     ##   ##     ##    ##     ## ##       
+// ##     ## ########  ##     ## ##     ##    ##    ######       ######     ##    ##     ##    ##    ##     ##  ######  
+// ##     ## ##        ##     ## #########    ##    ##                ##    ##    #########    ##    ##     ##       ## 
+// ##     ## ##        ##     ## ##     ##    ##    ##          ##    ##    ##    ##     ##    ##    ##     ## ##    ## 
+//  #######  ##        ########  ##     ##    ##    ########     ######     ##    ##     ##    ##     #######   ######  
+
+function wp_annotations_update_comments_status() { 
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reviews';
+
+    $id = intval($_POST['id']);
+
+    $variables = [
+        $view = sanitize_text_field($_POST['view']),
+        $viewDevice = sanitize_text_field($_POST['deviceView'])
+    ];
+
+    $currentStatus = $wpdb->get_var( $wpdb->prepare( "SELECT statut FROM $table_name WHERE id = %d", $id ) );
+
+    $newStatus = ( $currentStatus === 'résolu' ) ? 'non résolu' : 'résolu';
+
+    $update = $wpdb->update(
+        $table_name,
+        [ 'statut' => $newStatus ],
+        [ 'id' => $id ],
+        [ '%s' ],
+        [ '%d' ]
+    );
+
+    ob_start();            
+    extract($variables);
+    include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
+    $comments_content = ob_get_clean(); 
+
+    wp_send_json_success([
+        'message' => ($newStatus === 'résolu') ? 'Commentaire résolu' : 'Commentaire non résolu',
+        'comments_content' => $comments_content
+    ]);
+}
+
+add_action('wp_ajax_update_wp_annotation_status', 'wp_annotations_update_comments_status');
 
 // === Update comments
 function wp_annotation_update_comment() {

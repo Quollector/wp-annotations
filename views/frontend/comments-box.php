@@ -1,18 +1,18 @@
 <?php
 
-$view = isset( $view ) ? $view : 'active';
+$view = isset( $view ) ? $view : 'all';
 $viewDevice = isset( $viewDevice ) ? $viewDevice : 'all';
 $device = isset( $device ) ? $device : 'all';
 
-$commentsDatas = getAllCommentsHandler( $view, $viewDevice );
-$stats = getCommentsCountHandler();
+$grouped_annotations = getAllCommentsHandler( $view, $viewDevice );
+$stats = getCommentsCountHandler($viewDevice);
 $count_total = $stats['total'];
-$count_non_resolu = $commentsDatas['count_non_resolu'];
-$count_resolu = $commentsDatas['count_resolu'];
-$count_laptop = $commentsDatas['count_laptop'];
-$count_tablet = $commentsDatas['count_tablet'];
-$count_mobile = $commentsDatas['count_mobile'];
-$grouped_annotations = $commentsDatas['annotations'];
+$count_totalComments = $stats['totalComments'];
+$count_non_resolu = $stats['count_non_resolu'];
+$count_resolu = $stats['count_resolu'];
+$count_laptop = $stats['count_laptop'];
+$count_tablet = $stats['count_tablet'];
+$count_mobile = $stats['count_mobile'];
 
 $interface_color = get_option('wp_annotation_color', 'blue');
 
@@ -38,8 +38,11 @@ $interface_color = get_option('wp_annotation_color', 'blue');
 
 <?php // COMMENTS STATUS ?>
 <div class="wp-annotations--dashboard__comments">    
-    <label for="ann-comments-select">Commentaires</label>
+    <label for="ann-comments-select">Statut des commentaires</label>
     <select name="ann-comments-select" id="ann-comments-select">
+        <option value="all" data-icon="material-symbols:comment-outline-rounded">
+            Tous les commentaires (<?= $count_totalComments ?>)
+        </option>
         <option value="active" data-icon="material-symbols:pending-outline"<?= $view === 'active' ? ' selected' : '' ?>>
             Commentaires actifs (<?= $count_non_resolu ?>)
         </option>
@@ -60,22 +63,11 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                 $page_title = $page->post_title;
                 $page_url = get_permalink($page_id);
                 $page_slug = wp_make_link_relative(get_permalink($page_id));
-
-                $count_active = 0;
-                $has_active = false;
-                foreach ($annotations as $annotation) {
-                    if ($annotation->statut === 'non résolu') {
-                        $has_active = true;
-                        $count_active++;
-                    }
-                }
-
-                if ($has_active):
         ?>
         <div class="comment-page-item">
             <div class="accordeon-header">
-                <h5><?= $page_slug ?></h5>
-                <span>(<?= $count_active ?>)</span>
+                <h5><?= $page_title ?> (<?= $page_slug ?>)</h5>
+                <span>(<?= count($annotations) ?>)</span>
                 <a href="<?= $page_url ?>" title="Voir la page">
                 <?php // <a href="<= $page_url >?review-mode=1" title="Voir la page"> --> ?>
                     <svg width="800px" height="800px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
@@ -91,8 +83,6 @@ $interface_color = get_option('wp_annotation_color', 'blue');
             <div class="accordeon-content">
                 <?php 
                 foreach ($annotations as $annotation) : 
-                    if( $annotation->statut === 'non résolu' ) : 
-                        if ( check_user_role() || $annotation->client_visible ) :
                 ?>
                     <div class="comment-item <?= $annotation->device ?>" data-comment-id="<?= $annotation->id ?>" data-screen-url="<?= $annotation->screenshot_url ?>">
                         <div class="comment-item__header">
@@ -131,7 +121,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                                 <?php endif; ?>
                             </div>
                             <div class="buttons">
-                                <button class="resolve false" title="Résoudre">
+                                <button class="resolve <?= $annotation->statut === 'résolu' ? 'true' : 'false' ?>" title="Résoudre">
                                     <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="active">
                                         <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
@@ -184,10 +174,10 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                             </div>
                         </div>
                     </div>
-                <?php endif; endif; endforeach; ?>
+                <?php endforeach; ?>
             </div>
         </div>
-        <?php endif; endif; endforeach; ?>
+        <?php endif; endforeach; ?>
     <?php else: ?>
         <div class="no-comment">
             <p>Aucun commentaire.</p>
