@@ -306,40 +306,40 @@ html{
         top: 10px;
         right: 10px;
         z-index: 999;
-        max-width: 250px;
-        background: linear-gradient(90deg, rgba($sombre_rgb, 0.25), rgba($sombre_rgb, 0.75));
-        border: 1px solid $sombre;
-        backdrop-filter: blur(3px);
-        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
-        border-radius: 8px;
-        overflow: hidden;
-        display: none;
 
-        &.success{
-            .wp-annotations--notice__success{
+        .wp-ann-notice-item{
+            max-width: 250px;
+            background: linear-gradient(90deg, rgba($sombre_rgb, 0.25), rgba($sombre_rgb, 0.75));
+            border: 1px solid $sombre;
+            backdrop-filter: blur(3px);
+            box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
+            border-radius: 4px;
+            overflow: hidden;    
+            position: relative;
+            display: flex;
+            align-items: stretch;   
+
+            span{
+                padding: 0 16px;
                 display: flex;
+                align-items: center;
+                flex-shrink: 0;
+                color: $white;
+                font-size: 24px;
             }
 
-            .wp-annotations--notice__error{
-                display: none;
+            p{
+                font-size: 12px;
+                font-weight: 700;
+                line-height: 1.2;
+                color: $white;
+                padding: 24px 16px;
+                flex-grow: 1;
+            }  
+            
+            & + .wp-ann-notice-item{
+                margin-top: 10px;
             }
-        }
-
-        &.error{
-            .wp-annotations--notice__success{
-                display: none;
-            }
-
-            .wp-annotations--notice__error{
-                display: flex;
-            }
-        }
-
-        @media screen and (max-width: 550px){
-            max-width: 100%;
-            width: calc(100% - 20px);
-            left: 10px;
-            top: auto;           
         }
     }
 
@@ -353,6 +353,8 @@ html{
             display: flex;
             align-items: center;
             flex-shrink: 0;
+            color: $white;
+            font-size: 24px;
         }
 
         p{
@@ -362,17 +364,6 @@ html{
             color: $white;
             padding: 24px 16px;
             flex-grow: 1;
-        }
-
-        svg{
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            flex-shrink: 0;
-
-            path{
-                stroke: $white;
-            }
         }    
     }
 
@@ -921,10 +912,9 @@ html{
             textarea{
                 width: 100%;
                 border: 1px solid $sombre;
-                border-radius: 0;
                 background: none;
                 text-align: left;
-                border-radius: 8px;
+                border-radius: 4px;
                 color: $sombre;
                 transition: border .5s ease;
                 padding: 8px;
@@ -947,7 +937,7 @@ html{
                     background: $main;
                     color: $white;
                     border: none;
-                    border-radius: 50px;
+                    border-radius: 4px;
                     cursor: pointer;
                     transition: background .5s ease;
                     font-size: 10px;

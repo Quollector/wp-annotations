@@ -163,12 +163,124 @@ function wp_annotations_update_comments_status() {
     $comments_content = ob_get_clean(); 
 
     wp_send_json_success([
-        'message' => ($newStatus === 'résolu') ? 'Commentaire résolu' : 'Commentaire non résolu',
+        'message' => ($newStatus === 'résolu') ? 'Statut du commentaire #' . $id . ' passé à "Résolu"' : 'Statut du commentaire #' . $id . ' passé à "Actif"',
         'comments_content' => $comments_content
     ]);
 }
 
 add_action('wp_ajax_update_wp_annotation_status', 'wp_annotations_update_comments_status');
+
+// ######## ########  #### ########     ######   #######  ##     ## ##     ## ######## ##    ## ######## 
+// ##       ##     ##  ##     ##       ##    ## ##     ## ###   ### ###   ### ##       ###   ##    ##    
+// ##       ##     ##  ##     ##       ##       ##     ## #### #### #### #### ##       ####  ##    ##    
+// ######   ##     ##  ##     ##       ##       ##     ## ## ### ## ## ### ## ######   ## ## ##    ##    
+// ##       ##     ##  ##     ##       ##       ##     ## ##     ## ##     ## ##       ##  ####    ##    
+// ##       ##     ##  ##     ##       ##    ## ##     ## ##     ## ##     ## ##       ##   ###    ##    
+// ######## ########  ####    ##        ######   #######  ##     ## ##     ## ######## ##    ##    ##    
+
+function wp_annotations_edit_comment() { 
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reviews';
+
+    $id = intval($_POST['id']);
+    $comment = wp_kses_post(stripslashes($_POST['comment']));
+
+    $variables = [
+        $view = sanitize_text_field($_POST['view']),
+        $viewDevice = sanitize_text_field($_POST['deviceView'])
+    ];
+
+    $update = $wpdb->update(
+        $table_name,
+        [ 'commentaire' => $comment ],
+        [ 'id' => $id ],
+        [ '%s' ],
+        [ '%d' ]
+    );
+
+    ob_start();            
+    extract($variables);
+    include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
+    $comments_content = ob_get_clean(); 
+
+    wp_send_json_success([
+        'message' => 'Commentaire #' . $id . ' modifié',
+        'comments_content' => $comments_content
+    ]);
+}
+
+add_action('wp_ajax_edit_wp_annotation_comment', 'wp_annotations_edit_comment');
+
+// ########  ######## ##       ######## ######## ########     ######   #######  ##     ## ##     ## ######## ##    ## ######## 
+// ##     ## ##       ##       ##          ##    ##          ##    ## ##     ## ###   ### ###   ### ##       ###   ##    ##    
+// ##     ## ##       ##       ##          ##    ##          ##       ##     ## #### #### #### #### ##       ####  ##    ##    
+// ##     ## ######   ##       ######      ##    ######      ##       ##     ## ## ### ## ## ### ## ######   ## ## ##    ##    
+// ##     ## ##       ##       ##          ##    ##          ##       ##     ## ##     ## ##     ## ##       ##  ####    ##    
+// ##     ## ##       ##       ##          ##    ##          ##    ## ##     ## ##     ## ##     ## ##       ##   ###    ##    
+// ########  ######## ######## ########    ##    ########     ######   #######  ##     ## ##     ## ######## ##    ##    ##    
+
+function wp_annotations_delete_comment() { 
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reviews';
+    $id = intval($_POST['id']);
+    $delete = array();
+
+    $filename = $wpdb->get_row($wpdb->prepare("SELECT screenshot_url FROM $table_name WHERE id = %d", $id), ARRAY_A);
+    $screenUrl = $filename['screenshot_url'];
+
+    $file_path = WP_ANNOTATION_PATH . 'assets/images/screenshots/' . $screenUrl;
+    if (file_exists($file_path)) {
+        unlink($file_path);
+    }
+
+    $variables = [
+        $view = sanitize_text_field($_POST['view']),
+        $viewDevice = sanitize_text_field($_POST['deviceView'])
+    ];
+
+    $delete[] = $wpdb->delete(
+        $table_name,
+        ['id' => $id],
+        ['%d']
+    );
+
+    // $repliesFiles = $wpdb->get_results($wpdb->prepare("SELECT file_path FROM $table_replies WHERE comment_id = %d", $id), ARRAY_A);
+    
+    // if( !empty($repliesFiles) ){
+    //     foreach($repliesFiles as $repliesFile){
+    //         $screenUrl = $repliesFile['file_path'];
+    //         $file_path = WP_ANNOTATION_PATH . 'assets/images/replies/' . $screenUrl;
+    //         if (file_exists($file_path)) {
+    //             unlink($file_path);
+    //         }
+    //     }
+    // }
+
+    // $delete[] = $wpdb->delete(
+    //     $table_replies,
+    //     ['comment_id' => $id]
+    // );
+
+    if( $delete[0] !== false /*&& $delete[1] !== false*/ ){
+        ob_start();            
+        extract($variables);
+        include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
+        $comments_content = ob_get_clean(); 
+    
+        wp_send_json_success([
+            'message' => 'Commentaire #' . $id . ' supprimé',
+            'comments_content' => $comments_content
+        ]);
+    } 
+    else {
+        wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
+    }
+}
+
+add_action('wp_ajax_delete_wp_annotation_comment', 'wp_annotations_delete_comment');
+
+
+
 
 // === Update comments
 function wp_annotation_update_comment() {
@@ -228,7 +340,7 @@ function wp_annotation_update_comment() {
         
         $file_path = WP_ANNOTATION_PATH . 'assets/images/screenshots/' . $screenUrl;
         if (file_exists($file_path)) {
-                unlink($file_path);
+            unlink($file_path);
         }
 
         $delete[] = $wpdb->delete(

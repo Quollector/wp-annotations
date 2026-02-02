@@ -320,6 +320,139 @@
             });
         });
 
+        //  ######   #######  ##     ##    ######## ########  #### ######## ####  #######  ##    ## 
+        // ##    ## ##     ## ###   ###    ##       ##     ##  ##     ##     ##  ##     ## ###   ## 
+        // ##       ##     ## #### ####    ##       ##     ##  ##     ##     ##  ##     ## ####  ## 
+        // ##       ##     ## ## ### ##    ######   ##     ##  ##     ##     ##  ##     ## ## ## ## 
+        // ##       ##     ## ##     ##    ##       ##     ##  ##     ##     ##  ##     ## ##  #### 
+        // ##    ## ##     ## ##     ##    ##       ##     ##  ##     ##     ##  ##     ## ##   ### 
+        //  ######   #######  ##     ##    ######## ########  ####    ##    ####  #######  ##    ## 
+
+        // === Switch edit mode
+        $('body').on('click', $dashboard + ' button.edit', function() {
+            $par = $(this).closest('.comment-item');
+            $default = $par.find('.comment-item__content p').text();
+            $textarea = $par.find('textarea').val();
+
+            if( $par.hasClass('edit') ){
+                var confirmation = $default != $textarea ? confirm('Votre commentaire n\'a pas été sauvegardé. Souhaitez-vous l\'annuler ?') : true;
+
+                if( confirmation ){
+                    $par.removeClass('edit');
+                    $par.find('.comment-item__content').show().next().hide().find('textarea').val($default);
+                }
+            }
+            else{
+                $par.addClass('edit');
+                $par.find('.comment-item__content').hide().next().show();
+            }
+        });
+
+        // === Cancel edit mode
+        $('body').on('click', $dashboard + ' button.cancel', function(event) {
+            event.preventDefault();
+            $par = $(this).closest('.comment-item');
+            $default = $par.find('.comment-item__content p').text();
+            $textarea = $par.find('textarea').val();
+
+            if( $par.hasClass('edit') ){
+                var confirmation = $default != $textarea ? confirm('Votre commentaire n\'a pas été sauvegardé. Souhaitez-vous l\'annuler ?') : true;
+
+                if( confirmation ){
+                    $par.removeClass('edit');
+                    $par.find('.comment-item__content').show().next().hide().find('textarea').val($default);
+                }
+            }
+        });
+
+        // === Update comment
+        $('body').on('submit', $dashboard + ' .comment-item__content-form', function(event) {
+            event.preventDefault();
+            $par = $(this).closest('.comment-item');
+            $default = $par.find('.comment-item__content p').text();
+            $textarea = $par.find('textarea').val();
+            $commentID = $(this).closest('.comment-item').data('comment-id');
+
+            if( $default != $textarea ){
+                $('#wp-annotations--dashboard').addClass('ajax');
+    
+                var datas = {
+                    action: 'edit_wp_annotation_comment',
+                    id: $commentID,
+                    comment: $textarea,
+                    deviceView: getDashboardDevice(),
+                    view: getDashboardView()
+                };                       
+    
+                $.ajax({
+                    url: ajaxurl.url,
+                    type: 'POST',
+                    data: datas,
+                    success: function(response) {
+                        if (response.success) {
+                            resetAfterSubmit(response.data.comments_content, response.data.message);                       
+                        } else {
+                            $('#wp-annotations--dashboard').removeClass('ajax');
+                            displayNotice(response.data.message, 'error');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#wp-annotations--dashboard').removeClass('ajax');
+                        displayNotice('Une erreur s\'est produite', 'error');
+                    }
+                });
+            }
+            else{
+                $par.removeClass('edit');
+                $par.find('.comment-item__content').show().next().hide().find('textarea').val($default);
+            }
+
+        });
+
+        // ########  ######## ##       ######## ######## ########     ######   #######  ##     ## 
+        // ##     ## ##       ##       ##          ##    ##          ##    ## ##     ## ###   ### 
+        // ##     ## ##       ##       ##          ##    ##          ##       ##     ## #### #### 
+        // ##     ## ######   ##       ######      ##    ######      ##       ##     ## ## ### ## 
+        // ##     ## ##       ##       ##          ##    ##          ##       ##     ## ##     ## 
+        // ##     ## ##       ##       ##          ##    ##          ##    ## ##     ## ##     ## 
+        // ########  ######## ######## ########    ##    ########     ######   #######  ##     ## 
+
+        $('body').on('click', $dashboard + ' button.delete', function() {
+            var confirmation = confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');
+
+            if (confirmation) {
+                $commentID = $(this).closest('.comment-item').data('comment-id');
+    
+                $('#wp-annotations--dashboard').addClass('ajax');
+    
+                var datas = {
+                    action: 'delete_wp_annotation_comment',
+                    id: $commentID,
+                    deviceView: getDashboardDevice(),
+                    view: getDashboardView()
+                };                       
+    
+                $.ajax({
+                    url: ajaxurl.url,
+                    type: 'POST',
+                    data: datas,
+                    success: function(response) {
+                        if (response.success) {
+                            resetAfterSubmit(response.data.comments_content, response.data.message);                        
+                        } else {
+                            $('#wp-annotations--dashboard').removeClass('ajax');
+                            displayNotice(response.data.message, 'error');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#wp-annotations--dashboard').removeClass('ajax');
+                        displayNotice('Une erreur s\'est produite', 'error');
+                    }
+                });
+            }
+
+        });
+
         // ##       ####  ######   ##     ## ######## ########   #######  ##     ## 
         // ##        ##  ##    ##  ##     ##    ##    ##     ## ##     ##  ##   ##  
         // ##        ##  ##        ##     ##    ##    ##     ## ##     ##   ## ##   
@@ -339,8 +472,6 @@
             $('#wp-annotations--lightbox').fadeOut();
             $('body').removeClass('no-scroll');
         });
-
-
 
         // ######## ##     ## ##    ##  ######  ######## ####  #######  ##    ##  ######  
         // ##       ##     ## ###   ## ##    ##    ##     ##  ##     ## ###   ## ##    ## 
@@ -363,13 +494,25 @@
         }
 
         function displayNotice(message, type='success') {
-            $($noticeBox).addClass(type).show().find('p').text(message);
+            var uniqueID = 'notice-' + Date.now();
+            $newNotice = '<div class="wp-ann-notice-item ' + uniqueID + '">';
+            if( type === 'success' ){
+                $newNotice += '<span><iconify-icon icon="material-symbols:check-circle"></iconify-icon></span>';
+            }
+            else{
+                $newNotice += '<span><iconify-icon icon="material-symbols:warning-rounded"></iconify-icon></span>';
+            }
+            $newNotice += '<p class="wp-ann-notice-item__message">' + message + '</p>';
+            $newNotice += '</div>';
+
+
+            $($noticeBox).append($newNotice);
 
             setTimeout(function() {
-                $($noticeBox).fadeOut(function(){
-                    $(this).removeClass(type);
+                $($noticeBox).find('.' + uniqueID).fadeOut(300, function() {
+                    $(this).remove();
                 });
-            }, 2000);
+            }, 3000);
         }
 
         function setHTMLClasses( active = false, type = 'review' ){
