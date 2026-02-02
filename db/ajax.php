@@ -279,6 +279,48 @@ function wp_annotations_delete_comment() {
 
 add_action('wp_ajax_delete_wp_annotation_comment', 'wp_annotations_delete_comment');
 
+//  #######  ########  ######## ##    ##    ########  ######## ########  ##       #### ########  ######  
+// ##     ## ##     ## ##       ###   ##    ##     ## ##       ##     ## ##        ##  ##       ##    ## 
+// ##     ## ##     ## ##       ####  ##    ##     ## ##       ##     ## ##        ##  ##       ##       
+// ##     ## ########  ######   ## ## ##    ########  ######   ########  ##        ##  ######    ######  
+// ##     ## ##        ##       ##  ####    ##   ##   ##       ##        ##        ##  ##             ## 
+// ##     ## ##        ##       ##   ###    ##    ##  ##       ##        ##        ##  ##       ##    ## 
+//  #######  ##        ######## ##    ##    ##     ## ######## ##        ######## #### ########  ######  
+
+// === First display
+function wp_annotation_show_reply() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reviews';
+
+    $comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", intval($_POST['id'])), ARRAY_A);
+
+    if (!$comment_data) {
+        wp_send_json_error(['message' => 'Commentaire non trouvé.']);
+    }
+
+    ob_start();
+    extract($comment_data);
+    include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box.php';
+    $reply_content = ob_get_clean();
+    
+    wp_send_json_success([
+        'reply_content' => $reply_content
+    ]);
+}
+
+add_action('wp_ajax_open_reply_wp_annotation', 'wp_annotation_show_reply');
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -454,29 +496,6 @@ add_action('wp_ajax_update_wp_annotation', 'wp_annotation_update_comment');
 //  ##::. ##:: ##::::::: ##:::::::: ##:::::::: ##:: ##:::::::'##::: ##:
 //  ##:::. ##: ########: ##:::::::: ########:'####: ########:. ######::
 // ..:::::..::........::..:::::::::........::....::........:::......:::
-
-// === First display
-function wp_annotation_show_reply() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'reviews';
-
-    $comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", intval($_POST['id'])), ARRAY_A);
-
-    if (!$comment_data) {
-        wp_send_json_error(['message' => 'Commentaire non trouvé.']);
-    }
-
-    ob_start();
-    extract($comment_data);
-    include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box.php';
-    $reply_content = ob_get_clean();
-    
-    wp_send_json_success([
-        'reply_content' => $reply_content
-    ]);
-}
-
-add_action('wp_ajax_open_reply_wp_annotation', 'wp_annotation_show_reply');
 
 // === Manage replies
 function wp_annotation_replies() {

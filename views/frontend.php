@@ -1,7 +1,7 @@
 <!-- Replies box -->
 <?php  
-if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/replies/replies.php' ) ) {
-    include WP_ANNOTATION_PATH . 'views/frontend/replies/replies.php';
+if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/replies.php' ) ) {
+    include WP_ANNOTATION_PATH . 'views/frontend/replies.php';
 }
 ?>
 
@@ -52,12 +52,12 @@ if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/dashboard.php' ) ) {
         </svg>
     </div>
 
-    <form id="wp-annotation-form" data-page-id="<?= get_the_ID() ?>" data-user-id="<?= get_current_user_id() ?>">
+    <form id="wp-annotation-form" class="mention-list-parent" data-page-id="<?= get_the_ID() ?>" data-user-id="<?= get_current_user_id() ?>">
         <textarea name="comment" placeholder="Ajouter un commentaire..." rows="3" style="width: 100%;"></textarea>
-        <div id="mention-list-main" class="mention-list-main">
+        <div id="mention-list-main" class="mention-list-main mention-list-box">
             <div class="mention-list-main__wrapper">
                 <?php foreach(get_wp_annotations_users_by_name() as $id => $user): if($id != get_current_user_id()): ?>
-                    <div class="mention-list-main__item" data-user-id="<?= $id ?>" data-user-name="<?= $user ?>">@<?= $user ?></div>        
+                    <div class="mention-list-main__item mention-list-item" data-user-id="<?= $id ?>" data-user-name="<?= $user ?>">@<?= $user ?></div>        
                 <?php endif; endforeach; ?>
             </div>
         </div>

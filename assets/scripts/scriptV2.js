@@ -22,6 +22,7 @@
         $noticeBox = '#wp-annotations--notices';
         $layout = '#wp-annotations--comments-layout';
         $dashboard = '#wp-annotations--dashboard';
+        $replyBox = '#wp-annotations__replies';
 
         //  ######  ##      ## #### ########  ######  ##     ##     ######   #######  ##     ## ##     ## ######## ##    ## ########  ######        ## ########  ########   #######  ##      ##  ######  ######## 
         // ##    ## ##  ##  ##  ##     ##    ##    ## ##     ##    ##    ## ##     ## ###   ### ###   ### ##       ###   ##    ##    ##    ##      ##  ##     ## ##     ## ##     ## ##  ##  ## ##    ## ##       
@@ -123,10 +124,23 @@
             }
         });
 
+        // === Reset annotation form
+        $($formModal).on('reset', function(event) {
+            closeModals();
+        })
+
+        // ##     ## ######## ##    ## ######## ####  #######  ##    ##    ##       ####  ######  ######## 
+        // ###   ### ##       ###   ##    ##     ##  ##     ## ###   ##    ##        ##  ##    ##    ##    
+        // #### #### ##       ####  ##    ##     ##  ##     ## ####  ##    ##        ##  ##          ##    
+        // ## ### ## ######   ## ## ##    ##     ##  ##     ## ## ## ##    ##        ##   ######     ##    
+        // ##     ## ##       ##  ####    ##     ##  ##     ## ##  ####    ##        ##        ##    ##    
+        // ##     ## ##       ##   ###    ##     ##  ##     ## ##   ###    ##        ##  ##    ##    ##    
+        // ##     ## ######## ##    ##    ##    ####  #######  ##    ##    ######## ####  ######     ##    
+
         // === Mention List Toggle
-        $('body').on('keyup', $formModal + ' textarea', function(event) {
+        $('body').on('keyup', '.mention-list-parent textarea', function(event) {
             $textarea = $(this);
-            $mentionList = $($formModal).find('#mention-list-main');
+            $mentionList = $textarea.closest('.mention-list-parent').find('.mention-list-box');
             var cursorPos = this.selectionStart;
             var text = $textarea.val().substring(0, cursorPos);
             var match = text.match(/@(\w*)$/);
@@ -140,16 +154,16 @@
 
         // === Close Mention List on outside click
         $($layout).on('click', function(e) {
-            if (!$(e.target).closest('#mention-list-main, #wp-annotation-form textarea').length) {
-                $($formModal).find('#mention-list-main').slideUp(250);
+            if (!$(e.target).closest('.mention-list-box, .mention-list-parent textarea').length) {
+                $('.mention-list-parent').find('.mention-list-box').slideUp(250);
             }
         });
 
         // === Mention list item click
-        $('body').on('click', '.mention-list-main__item', function() {            
+        $('body').on('click', '.mention-list-item', function() {            
             $this = $(this);
-            $textarea = $($formModal).find('textarea');
-            $mentionList = $($formModal).find('#mention-list-main');
+            $textarea = $this.closest('.mention-list-parent').find('textarea');
+            $mentionList = $this.closest('.mention-list-parent').find('.mention-list-box');
             var username = $this.data('user-name');            
             var text = $textarea.val();
             var cursorPos = $textarea[0].selectionStart;
@@ -162,18 +176,13 @@
                 value: $this.data('user-id')
             });
 
-            $($formModal).find('form').append($input);
+            $this.closest('form').append($input);
             
             var newText = beforeCursor.replace(/@(\w*)$/, '@' + username + ' ') + afterCursor;
             $textarea.val(newText);
             $mentionList.slideUp(250);
             $textarea.focus();
         });
-
-        // === Reset annotation form
-        $($formModal).on('reset', function(event) {
-            closeModals();
-        })
 
         // ########  ######## ##     ## ####  ######  ########  ######  
         // ##     ## ##       ##     ##  ##  ##    ## ##       ##    ## 
@@ -453,6 +462,50 @@
 
         });
 
+        // ########  ######## ########  ##       #### ########  ######  
+        // ##     ## ##       ##     ## ##        ##  ##       ##    ## 
+        // ##     ## ##       ##     ## ##        ##  ##       ##       
+        // ########  ######   ########  ##        ##  ######    ######  
+        // ##   ##   ##       ##        ##        ##  ##             ## 
+        // ##    ##  ##       ##        ##        ##  ##       ##    ## 
+        // ##     ## ######## ##        ######## #### ########  ######  
+
+        // === Open reply
+        $('body').on('click', '.open-add-comments', function() {            
+            $par = $(this).closest('.comment-item');
+            $commentID = $par.data('comment-id');
+
+            $('body').addClass('no-scroll');
+            $($replyBox).addClass('ajax').fadeIn(300);    
+    
+            var datas = {
+                action: 'open_reply_wp_annotation',
+                id: $commentID,
+            };                    
+    
+            $.ajax({
+                url: ajaxurl.url,
+                type: 'POST',
+                data: datas,
+                success: function(response) {
+                    if (response.success) {
+                        $($replyBox).removeClass('ajax');  
+                        $('#wp-annotations-replies-display').html(response.data.reply_content);                     
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $($replyBox).removeClass('loading');  
+                    displayNotice('Une erreur s\'est produite', 'error');   
+                }
+            });
+        });
+        
+        // === Close reply
+        $('body').on('click', $replyBox + ' .close-replies', function() {
+            $('body').removeClass('no-scroll');
+            $($replyBox).fadeOut(300);
+        });
+
         // ##       ####  ######   ##     ## ######## ########   #######  ##     ## 
         // ##        ##  ##    ##  ##     ##    ##    ##     ## ##     ##  ##   ##  
         // ##        ##  ##        ##     ##    ##    ##     ## ##     ##   ## ##   
@@ -481,18 +534,21 @@
         // ##       ##     ## ##   ### ##    ##    ##     ##  ##     ## ##   ### ##    ## 
         // ##        #######  ##    ##  ######     ##    ####  #######  ##    ##  ######  
 
+        // ### Reset modal form
         function resetModalForm() {
             $($formModal).find('textarea').val('').siblings('.mention-list-main').hide();
             $($formModal).find('input[type="checkbox"]').prop('checked', false);
             $($formModal).find('input[type=hidden]').remove();    
             $($formModal).hide();
         }
-                 
+             
+        // ### Close modals
         function closeModals() {
             $modal.hide();
             resetModalForm();
         }
 
+        // ### Display notice messages
         function displayNotice(message, type='success') {
             var uniqueID = 'notice-' + Date.now();
             $newNotice = '<div class="wp-ann-notice-item ' + uniqueID + '">';
@@ -515,6 +571,7 @@
             }, 3000);
         }
 
+        // ### Set HTML classes for review or dashboard mode
         function setHTMLClasses( active = false, type = 'review' ){
             if( active ){
                 $('html').removeClass('review-mode dash-open laptop mobile tablet');
@@ -537,6 +594,7 @@
             }
         }
 
+        // ### Update device class on HTML tag
         function updateDeviceClass() {            
             $winWidth = $(window).width();    
 
@@ -551,6 +609,7 @@
             }
         }
 
+        // ### Check for unsaved comment edits
         function checkCommentsEdits(){            
             if( $('.wp-annotations--dashboard .comment-item.edit').length ){
 
@@ -569,6 +628,32 @@
             }
         }
 
+        // ### Reset dashboard after AJAX actions
+        function resetAfterSubmit(content, message){
+            closeModals();
+            $($dashboard).removeClass('ajax');
+            $('#wp-annotations--refresh-box').html(content);
+
+            if( message ){
+                displayNotice(message, 'success');
+            }
+
+            $('#ann-devices-select, #ann-comments-select').select2('destroy');
+            initSelect2();
+        }
+
+        // ### Initialize Select2 for dashboard filters
+        function initSelect2(){            
+            $('#ann-devices-select, #ann-comments-select').select2({
+                templateResult: formatDeviceOption,
+                templateSelection: formatDeviceOption,
+                minimumResultsForSearch: Infinity,
+                containerCssClass: 'wp-annotations-container',
+                dropdownCssClass: 'wp-annotations-dropdown'
+            });
+        }
+
+        // ### Format Select2 options with icons
         function formatDeviceOption(option) {
             if (!option.id) {
                 return option.text;
@@ -584,29 +669,7 @@
             return $result;
         }
 
-        function resetAfterSubmit(content, message){
-            closeModals();
-            $($dashboard).removeClass('ajax');
-            $('#wp-annotations--refresh-box').html(content);
-
-            if( message ){
-                displayNotice(message, 'success');
-            }
-
-            $('#ann-devices-select, #ann-comments-select').select2('destroy');
-            initSelect2();
-        }
-
-        function initSelect2(){            
-            $('#ann-devices-select, #ann-comments-select').select2({
-                templateResult: formatDeviceOption,
-                templateSelection: formatDeviceOption,
-                minimumResultsForSearch: Infinity,
-                containerCssClass: 'wp-annotations-container',
-                dropdownCssClass: 'wp-annotations-dropdown'
-            });
-        }
-
+        // ### Filter comments
         function filterComments(){
             $($dashboard).addClass('ajax');
             
@@ -634,6 +697,7 @@
 
         }
 
+        // ### Getters for dashboard filters ---
         function getDashboardView(){
             return $('#ann-comments-select').val();
         }
@@ -641,5 +705,6 @@
         function getDashboardDevice(){
             return $('#ann-devices-select').val();
         }
+        // --- ###
     });
 })(jQuery);

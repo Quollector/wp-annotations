@@ -131,15 +131,15 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
         <?php endif; endforeach; ?>
     </div>
 <?php endif; ?>
-<form class="reply-box__form" id="reply-box-form">
+<form class="reply-box__form mention-list-parent" id="reply-box-form">
     <?php foreach($targets_email as $email_id): ?>
         <input type="hidden" name="targets_email[]" value="<?= $email_id ?>">
     <?php endforeach; ?>
     <textarea name="comment" id="comment" placeholder="Répondre" rows="5"></textarea>
-    <div id="mention-list" class="mention-list">
+    <div id="mention-list" class="mention-list mention-list-box">
         <div class="mention-list__wrapper">
             <?php foreach(get_wp_annotations_users_by_name() as $id => $user): if($id != get_current_user_id()): ?>
-                <div class="mention-list__item" data-user-id="<?= $id ?>" data-user-name="<?= $user ?>">@<?= $user ?></div>        
+                <div class="mention-list__item mention-list-item" data-user-id="<?= $id ?>" data-user-name="<?= $user ?>">@<?= $user ?></div>        
             <?php endif; endforeach; ?>
         </div>
     </div>
