@@ -1092,7 +1092,7 @@ html{
             overflow: auto;
             transition: all .2s ease;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
         }
 
@@ -1274,16 +1274,48 @@ html{
             }
         }
 
+        &__comment{
+            margin-top: 12px;
+            font-size: 16px;
+            background: rgba($sombre_rgb, 0.55);
+            color: $white;
+            padding: 16px;
+            border-radius: 4px;
+
+            &.has-replies{
+                border-radius: 4px 4px 0 0;
+            }
+
+            h5{
+                font-weight: 700;
+                margin: 0 0 12px 0;
+                padding: 0;
+                font-size: 12px;
+                color: $white;
+            }
+
+            p{
+                & + p{
+                    margin-top: 8px;
+                }
+            }
+        }
+
         &__replies{
-            padding-top: 16px;
-            padding-left: 24px;
-            padding-bottom: 12px;
             border-bottom: 1px solid rgba($sombre_rgb, 0.3);
+            padding-bottom: 16px;
 
             .reply-item{
-                padding: 8px 8px 8px 12px;
-                border-left: 2px solid rgba($clair_rgb, 0.5);
-                background: rgba($clair_rgb, 0.05);
+                padding: 24px;
+                background: rgba($white, 0.2);
+                
+                &:nth-child(odd){
+                    background: rgba($clair_rgb, 0.05);
+                }
+
+                &:last-child{
+                    border-radius: 0 0 4px 4px;
+                }
 
                 &__header{
                     display: flex;
@@ -1354,7 +1386,7 @@ html{
                                 background: none;
                                 cursor: pointer;
                                 border: 1px solid $sombre;
-                                border-radius: 50%;
+                                border-radius: 2px;
                                 padding: 0;
                                 transition: background .5s ease;
                 
@@ -1387,11 +1419,12 @@ html{
                 }
 
                 &__content{
-                    margin-top: 12px;
+                    margin-top: 24px;
                     
                     p{
                         font-size: 16px;
                         color: $sombre;
+                        float: left;
 
                         & + p{
                             margin-top: 8px;
@@ -1407,10 +1440,10 @@ html{
                 }
 
                 &__image{
-                    margin-top: 12px;
-                    width: 80px;
+                    float: right;
+                    width: 120px;
                     aspect-ratio: 4/3;
-                    border-radius: 12px;
+                    border-radius: 4px;
                     object-fit: cover;
                     border: 1px solid rgba($sombre_rgb, 0.3);
                     overflow: hidden;
@@ -1453,23 +1486,8 @@ html{
                     }
                 }
 
-                & + .reply-item{
-                    margin-top: 16px;
-                }
-            }
-        }
-
-        &__comment{
-            margin-top: 12px;
-            font-size: 16px;
-            background: rgba($sombre_rgb, 0.55);
-            color: $white;
-            padding: 16px;
-            border-radius: 4px;
-
-            p{
-                & + p{
-                    margin-top: 8px;
+                &__clear{
+                    clear: both;
                 }
             }
         }

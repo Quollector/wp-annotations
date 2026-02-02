@@ -23,6 +23,7 @@
         $layout = '#wp-annotations--comments-layout';
         $dashboard = '#wp-annotations--dashboard';
         $replyBox = '#wp-annotations__replies';
+        $replyForm = '#reply-box-form';
 
         //  ######  ##      ## #### ########  ######  ##     ##     ######   #######  ##     ## ##     ## ######## ##    ## ########  ######        ## ########  ########   #######  ##      ##  ######  ######## 
         // ##    ## ##  ##  ##  ##     ##    ##    ## ##     ##    ##    ## ##     ## ###   ### ###   ### ##       ###   ##    ##    ##    ##      ##  ##     ## ##     ## ##     ## ##  ##  ## ##    ## ##       
@@ -243,7 +244,7 @@
                     url: ajaxurl.url,
                     type: 'POST',
                     data: {
-                        action: 'submit_wp_annotation',
+                        action: 'wp_annotations_submit_comment',
                         datas: datas,
                         device: $device,
                         deviceView: getDashboardDevice(),
@@ -255,12 +256,12 @@
                             resetAfterSubmit(response.data.comments_content, response.data.message);
                         } else {
                             displayNotice(response.data.message, 'error');
-                            $('#wp-annotations--dashboard').removeClass('ajax');
+                            $($dashboard).removeClass('ajax');
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         displayNotice('Une erreur s\'est produite', 'error');
-                        $('#wp-annotations--dashboard').removeClass('ajax');
+                        $($dashboard).removeClass('ajax');
                     }
                 });
             });
@@ -301,10 +302,10 @@
         $('body').on('click', $dashboard + ' button.resolve', function() {
             $commentID = $(this).closest('.comment-item').data('comment-id');
 
-            $('#wp-annotations--dashboard').addClass('ajax');
+            $($dashboard).addClass('ajax');
 
             var datas = {
-                action: 'update_wp_annotation_status',
+                action: 'wp_annotations_update_status',
                 id: $commentID,
                 view: getDashboardView(),
                 deviceView: getDashboardDevice()
@@ -318,13 +319,13 @@
                     if (response.success) {
                         resetAfterSubmit(response.data.comments_content, response.data.message);                       
                     } else {                        
-                        $('#wp-annotations--dashboard').removeClass('ajax');
+                        $($dashboard).removeClass('ajax');
                         displayNotice(response.data.message, 'error');
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     displayNotice('Une erreur s\'est produite', 'error');
-                    $('#wp-annotations--dashboard').removeClass('ajax');
+                    $($dashboard).removeClass('ajax');
                 }
             });
         });
@@ -383,10 +384,10 @@
             $commentID = $(this).closest('.comment-item').data('comment-id');
 
             if( $default != $textarea ){
-                $('#wp-annotations--dashboard').addClass('ajax');
+                $($dashboard).addClass('ajax');
     
                 var datas = {
-                    action: 'edit_wp_annotation_comment',
+                    action: 'wp_annotations_edit_comment',
                     id: $commentID,
                     comment: $textarea,
                     deviceView: getDashboardDevice(),
@@ -401,12 +402,12 @@
                         if (response.success) {
                             resetAfterSubmit(response.data.comments_content, response.data.message);                       
                         } else {
-                            $('#wp-annotations--dashboard').removeClass('ajax');
+                            $($dashboard).removeClass('ajax');
                             displayNotice(response.data.message, 'error');
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        $('#wp-annotations--dashboard').removeClass('ajax');
+                        $($dashboard).removeClass('ajax');
                         displayNotice('Une erreur s\'est produite', 'error');
                     }
                 });
@@ -432,10 +433,10 @@
             if (confirmation) {
                 $commentID = $(this).closest('.comment-item').data('comment-id');
     
-                $('#wp-annotations--dashboard').addClass('ajax');
+                $($dashboard).addClass('ajax');
     
                 var datas = {
-                    action: 'delete_wp_annotation_comment',
+                    action: 'wp_annotations_delete_comment',
                     id: $commentID,
                     deviceView: getDashboardDevice(),
                     view: getDashboardView()
@@ -449,12 +450,12 @@
                         if (response.success) {
                             resetAfterSubmit(response.data.comments_content, response.data.message);                        
                         } else {
-                            $('#wp-annotations--dashboard').removeClass('ajax');
+                            $($dashboard).removeClass('ajax');
                             displayNotice(response.data.message, 'error');
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        $('#wp-annotations--dashboard').removeClass('ajax');
+                        $($dashboard).removeClass('ajax');
                         displayNotice('Une erreur s\'est produite', 'error');
                     }
                 });
@@ -479,7 +480,7 @@
             $($replyBox).addClass('ajax').fadeIn(300);    
     
             var datas = {
-                action: 'open_reply_wp_annotation',
+                action: 'wp_annotations_open_reply',
                 id: $commentID,
             };                    
     
@@ -504,6 +505,141 @@
         $('body').on('click', $replyBox + ' .close-replies', function() {
             $('body').removeClass('no-scroll');
             $($replyBox).fadeOut(300);
+        });
+
+        // ########  ######## ########  ##       ##    ##    ######## #### ##       ######## 
+        // ##     ## ##       ##     ## ##        ##  ##     ##        ##  ##       ##       
+        // ##     ## ##       ##     ## ##         ####      ##        ##  ##       ##       
+        // ########  ######   ########  ##          ##       ######    ##  ##       ######   
+        // ##   ##   ##       ##        ##          ##       ##        ##  ##       ##       
+        // ##    ##  ##       ##        ##          ##       ##        ##  ##       ##       
+        // ##     ## ######## ##        ########    ##       ##       #### ######## ######## 
+
+        $('body').on('click', $replyForm + ' .file-input .unfiled', function() {            
+            $par = $(this).closest('.file-input');
+            $par.find('input').click();
+        });
+
+        $('body').on('change', $replyForm + ' .file-input input', function() {
+            if($(this).attr('name') == 'mulfiles'){
+                $par = $(this).closest('.file-input');
+                var files = $(this)[0].files;
+                selectedFiles = Array.from(files);
+                updateFileDisplay();
+            }
+            else{
+                $par = $(this).closest('.file-input');
+                var fileName = $(this).val().split('\\').pop();  
+        
+                $par.find('.filed .text').text(fileName);
+                $par.find('.unfiled').fadeOut(150, function(){
+                    $par.find('.filed').fadeIn(150);
+                });
+            }
+        });
+
+        $('body').on('click', $replyForm + ' .file-input .filed .clear', function() {
+            $par = $(this).closest('.file-input');
+            var $fileItem = $(this).closest('.file-item');
+            var fileName = $fileItem.find('.text').text();
+
+            $par.find('.filed').fadeOut(150, function(){
+                $par.find('.unfiled').fadeIn(150);
+            });
+            $par.find('input').val('');
+
+            $fileItem.fadeOut(150, function() {
+                $fileItem.remove();
+                selectedFiles = selectedFiles.filter(file => file.name !== fileName);
+                updateFileInput();
+                if ($('.filed-files').children().length === 0) {
+                    $('.unfiled').fadeIn(150);
+                }
+            });
+        });
+
+        //  ######  ##     ## ########  ##     ## #### ########    ########  ######## ########  ##       ##    ## 
+        // ##    ## ##     ## ##     ## ###   ###  ##     ##       ##     ## ##       ##     ## ##        ##  ##  
+        // ##       ##     ## ##     ## #### ####  ##     ##       ##     ## ##       ##     ## ##         ####   
+        //  ######  ##     ## ########  ## ### ##  ##     ##       ########  ######   ########  ##          ##    
+        //       ## ##     ## ##     ## ##     ##  ##     ##       ##   ##   ##       ##        ##          ##    
+        // ##    ## ##     ## ##     ## ##     ##  ##     ##       ##    ##  ##       ##        ##          ##    
+        //  ######   #######  ########  ##     ## ####    ##       ##     ## ######## ##        ########    ##    
+
+        $('body').on('submit', $replyForm, function(event) {
+            event.preventDefault();
+            $this = $(this);
+
+            if( $(this).find('textarea').val() != '' ){
+                $par = $(this).closest('.reply-box');
+                $par.addClass('ajax');
+
+                $visible = $par.find('input[name="client-visible"]');
+
+
+                var commentID = $par.data('comment-id');
+                var userID = $par.data('user-id');
+                var commentText = $this.find('textarea').val();
+
+                if ($visible.attr('type') === 'checkbox') {
+                    var clientVisible = $visible.is(':checked') ? 1 : 0;
+                } else {
+                    var clientVisible = parseInt($visible.val()) || 0;
+                }
+
+                var targetsEmail = [];
+
+                $(this).find('input[name="targets_email[]"]').each(function() {                    
+                    targetsEmail.push($(this).val());
+                });
+
+                targetsEmail = [...new Set(targetsEmail)];              
+
+                var formData = new FormData();
+                formData.append('action', 'wp_annotations_submit_reply');
+                formData.append('comment_id', commentID);
+                formData.append('user_id', userID);
+                formData.append('comment_text', commentText);
+                formData.append('client_visible', clientVisible);
+
+                if( targetsEmail.length > 0 ){
+                    targetsEmail.forEach((email, index) => {
+                        formData.append(`targets_email[${index}]`, email);
+                    });
+                } else {
+                    formData.append('targets_email', '');
+                }
+        
+                var fileInput = $this.find('input[type="file"]')[0];
+                if (fileInput.files.length > 0) {
+                    formData.append('reply_file', fileInput.files[0]);
+                }
+        
+                $.ajax({
+                    url: ajaxurl.url,
+                    type: 'POST',
+                    data: formData,
+                    processData: false, 
+                    contentType: false,  
+                    success: function(response) {
+                        if (response.success) {
+                            resetAfterReplySubmit(response.data.reply_content, response.data.message, $par);
+                            refreshDashboard();
+                        } else {
+                            $par.removeClass('ajax');
+                            displayNotice(response.data.message, 'error');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $par.removeClass('ajax');
+                        displayNotice('Une erreur s\'est produite', 'error');
+                    }
+                });
+            }
+            else{
+                alert('Veuillez saisir un commentaire');
+            }
+
         });
 
         // ##       ####  ######   ##     ## ######## ########   #######  ##     ## 
@@ -628,6 +764,18 @@
             }
         }
 
+        // ### Refresh after reply submission
+        function resetAfterReplySubmit(content, message, parent){
+            parent.find('textarea, input[name="email"]').val('');
+            parent.removeClass('ajax');
+            $('#reply-box-content').html(content);
+            refreshDashboard();
+
+            if( message ){
+                displayNotice(message, 'success');
+            }
+        }
+
         // ### Reset dashboard after AJAX actions
         function resetAfterSubmit(content, message){
             closeModals();
@@ -640,6 +788,38 @@
 
             $('#ann-devices-select, #ann-comments-select').select2('destroy');
             initSelect2();
+        }
+
+        // ### Refresh dashboard comments
+        function refreshDashboard(){
+            $($dashboard).addClass('ajax');
+    
+            var datas = {
+                action: 'wp_annotations_refresh_dashboard',
+                type: 'refresh',
+                deviceView: getDashboardDevice(),
+                view: getDashboardView()
+            };                       
+
+            $.ajax({
+                url: ajaxurl.url,
+                type: 'POST',
+                data: datas,
+                success: function(response) {
+                    if (response.success) {
+                        $($dashboard).removeClass('ajax');
+                        $('#wp-annotations--refresh-box').html(response.data.comments_content);                        
+                    } else {
+                        $($dashboard).removeClass('ajax');
+                        displayNotice(response.data.message, 'error');
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $($dashboard).removeClass('ajax');
+                    displayNotice('Une erreur s\'est produite', 'error');
+                }
+            });
+
         }
 
         // ### Initialize Select2 for dashboard filters
@@ -686,12 +866,12 @@
                         resetAfterSubmit(response.data.comments_content, false);
                     } else {
                         displayNotice(response.data.message, 'error');
-                        $('#wp-annotations--dashboard').removeClass('ajax');
+                        $($dashboard).removeClass('ajax');
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     displayNotice('Une erreur s\'est produite', 'error');
-                    $('#wp-annotations--dashboard').removeClass('ajax');
+                    $($dashboard).removeClass('ajax');
                 }
             });
 
