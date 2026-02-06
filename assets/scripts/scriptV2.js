@@ -642,6 +642,53 @@
 
         });
 
+        // ########  ######## ##       ######## ######## ########    ########  ######## ########  ##       ##    ## 
+        // ##     ## ##       ##       ##          ##    ##          ##     ## ##       ##     ## ##        ##  ##  
+        // ##     ## ##       ##       ##          ##    ##          ##     ## ##       ##     ## ##         ####   
+        // ##     ## ######   ##       ######      ##    ######      ########  ######   ########  ##          ##    
+        // ##     ## ##       ##       ##          ##    ##          ##   ##   ##       ##        ##          ##    
+        // ##     ## ##       ##       ##          ##    ##          ##    ##  ##       ##        ##          ##    
+        // ########  ######## ######## ########    ##    ########    ##     ## ######## ##        ########    ##    
+
+        $('body').on('click', $replyBox + ' .delete', function() {            
+            var confirmation = confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');
+
+            if( confirmation ){
+                $par = $(this).closest('.reply-box');
+                $par.addClass('ajax');
+                $commentID = $par.data('comment-id');
+                $parRep = $(this).closest('.reply-item');
+                $replyID = $parRep.data('id');
+                    
+                var datas = [
+                    $replyID,
+                    $commentID
+                ];
+        
+                $.ajax({
+                    url: ajaxurl.url,
+                    type: 'POST',
+                    data: {
+                        action: 'wp_annotation_delete_reply',
+                        datas: datas
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            resetAfterReplySubmit(response.data.reply_content, response.data.message, $par);
+                            refreshDashboard();
+                        } else {
+                            $par.removeClass('ajax');
+                            displayNotice(response.data.message, 'error');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $par.removeClass('ajax');
+                        displayNotice('Une erreur s\'est produite', 'error');
+                    }
+                });
+            }
+        });
+
         // ##       ####  ######   ##     ## ######## ########   #######  ##     ## 
         // ##        ##  ##    ##  ##     ##    ##    ##     ## ##     ##  ##   ##  
         // ##        ##  ##        ##     ##    ##    ##     ## ##     ##   ## ##   
@@ -808,7 +855,7 @@
                 success: function(response) {
                     if (response.success) {
                         $($dashboard).removeClass('ajax');
-                        $('#wp-annotations--refresh-box').html(response.data.comments_content);                        
+                        resetAfterSubmit(response.data.comments_content, false);                       
                     } else {
                         $($dashboard).removeClass('ajax');
                         displayNotice(response.data.message, 'error');

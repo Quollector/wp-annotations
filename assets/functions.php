@@ -1,10 +1,48 @@
 <?php
-require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
-require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
-require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+//  ######  ######## ##    ## ########     ######## ##     ##    ###    #### ##       
+// ##    ## ##       ###   ## ##     ##    ##       ###   ###   ## ##    ##  ##       
+// ##       ##       ####  ## ##     ##    ##       #### ####  ##   ##   ##  ##       
+//  ######  ######   ## ## ## ##     ##    ######   ## ### ## ##     ##  ##  ##       
+//       ## ##       ##  #### ##     ##    ##       ##     ## #########  ##  ##       
+// ##    ## ##       ##   ### ##     ##    ##       ##     ## ##     ##  ##  ##       
+//  ######  ######## ##    ## ########     ######## ##     ## ##     ## #### ######## 
+
+function sendNotificationEmail($datas, $comment, $notifications, $highLvl = false) {
+    $emails = getUsersEmails($datas, $highLvl ? $comment : $comment[0], $notifications);
+    $current_user_name = get_userdata(get_current_user_id())->display_name;
+    $smtp_name = get_option('wp_annotation_smtp_from_name', '');
+    $smtp_email = get_option('wp_annotation_smtp_from_email', '');
+
+    $headers = array(
+        'Content-Type: text/html; charset=UTF-8'
+    );
+    
+    if (!empty($smtp_email) && !empty($smtp_name)) {
+        $headers[] = 'From: ' . $smtp_name . ' <' . $smtp_email . '>';
+    }
+
+    foreach($emails as $email){
+        if(!empty($email[0])){
+            if( $email[1] ){
+                $subject = 'Mention de commentaire - ' . get_bloginfo('name'); 
+            }
+            else{
+                $subject = 'Réponse à votre commentaire - ' . get_bloginfo('name'); 
+            }
+    
+            $message = createNotificationsMessage( $datas, $email[1], $current_user_name, $comment, $highLvl );
+            
+            $sent = wp_mail($email[0], $subject, $message, $headers);
+            
+            if($sent){
+                error_log('✅ Email envoyé avec succès à ' . $email[0]);
+            } else {
+                error_log('❌ Erreur d\'envoi de l\'email à ' . $email[0]);
+            }
+        }
+    }
+}
 
 // Check if user is allowed to see annotations
 function is_user_allowed_for_annotations() {
@@ -25,120 +63,6 @@ function get_wp_annotations_users_by_name() {
     }
 
     return $users_array;
-}
-
-// Get all comment replies
-function getAllReplies($comment_id) {
-    global $wpdb;
-    $table_name_replies = $wpdb->prefix . 'reviews_replies';
-
-    if (check_user_role()) {
-        $sql = "SELECT * FROM $table_name_replies WHERE comment_id = $comment_id ORDER BY timestamp ASC";
-    }
-    else{
-        $sql = $wpdb->prepare(
-            "SELECT * FROM $table_name_replies WHERE comment_id = %d AND client_visible = 1 ORDER BY timestamp ASC",
-            $comment_id
-        );
-    }
-
-    return $wpdb->get_results($sql);
-}
-
-// Extract users Emails
-function extractUsersEmails($datas, $comment, $notifications){
-    $users_array = array();
-    $replies = isset($datas['id']) ? getAllReplies($datas['id']) : [];
-
-    $users_array[$datas['user_id']] = false;
-
-    $users_emails = array();
-
-    if(!empty($replies)){
-        foreach($replies as $reply){
-            $users_array[$reply->user_id] = false;
-        }
-    }
-
-    if(!empty($notifications)){
-        foreach($notifications as $not_id){
-            if(get_userdata($not_id)){
-                $username = get_userdata($not_id)->display_name;
-                $pattern = '/@' . preg_quote($username, '/') . '/';
-    
-                if(preg_match($pattern, $comment)){
-                    $users_array[$not_id] = true;
-                }
-            }
-        }
-    }
-
-    foreach($users_array as $id => $notified){
-        if($id != get_current_user_id()){
-            $user = get_userdata($id);
-
-            if (check_user_role($user)) {
-                $users_emails[] = [$user->user_email, $notified];
-            }
-        }
-    }
-
-    return $users_emails;
-}
-
-// Send notification email to user
-function sendNotificationEmail($datas, $comment, $notifications, $highLvl = false) {
-    $emails = extractUsersEmails($datas, $highLvl ? $comment : $comment[0], $notifications);
-    $current_user_name = get_userdata(get_current_user_id())->display_name;
-    $smtp = get_option('wp_annotation_smtp_valid', false);
-    $mail = new PHPMailer(true);
-    $site_url = get_site_url();
-
-    if(!$smtp){
-        error_log('❌ SMTP non configuré.');
-        return;
-    }
-
-    $smtp_mail = get_option('wp_annotation_smtp_mail', '');
-    $smtp_user = get_option('wp_annotation_smtp_user', '');
-    $smtp_password = trim(get_option('wp_annotation_smtp_password', ''));
-    $smtp_name = get_option('wp_annotation_smtp_from_name', '');
-    $smtp_email = get_option('wp_annotation_smtp_from_email', '');
-
-    try {
-        $mail->isSMTP();
-        $mail->Host       = $smtp_mail;
-        $mail->SMTPAuth   = true;
-        $mail->Username   = $smtp_user;
-        $mail->Password   = $smtp_password;
-        $mail->SMTPSecure = 'tls';
-        $mail->Port       = 587;
-        $mail->CharSet = 'UTF-8';
-        $mail->Encoding = 'base64';
-        $mail->isHTML(true);
-
-        $mail->setFrom($smtp_email, $smtp_name);
-
-        foreach($emails as $email){
-            if(!empty($email[0])){
-                $mail->clearAddresses();
-                $mail->addAddress($email[0]);
-    
-                if( $email[1] ){
-                    $mail->Subject = 'Mention de commentaire - ' . get_bloginfo('name'); 
-                }
-                else{
-                    $mail->Subject = 'Réponse à votre commentaire - ' . get_bloginfo('name'); 
-                }
-        
-                $mail->Body = createNotificationsMessage( $datas, $email[1], $current_user_name, $comment, $highLvl );
-                $mail->send();
-                error_log('✅ Email envoyé avec succès !');
-            }
-        }
-    } catch (Exception $e) {
-        error_log('❌ Erreur d\'envoi : ' . $mail->ErrorInfo);
-    }
 }
 
 // Email message
@@ -249,36 +173,6 @@ function wp_annotations_dehactivation_warning() {
         });
     </script>
 <?php
-}
-
-// CHECK DEVICES POSTS
-function get_devices_comments(){
-    
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'reviews';
-    $query = "SELECT * FROM $table_name";
-    $datas = $wpdb->get_results($query);
-    $count_laptop = 0;
-    $count_tablet = 0;
-    $count_mobile = 0;
-
-    foreach ($datas as $annotation) {
-        if( $annotation->device === 'laptop' ){
-            $count_laptop++;
-        }
-        elseif( $annotation->device === 'tablet' ){
-            $count_tablet++;
-        }
-        elseif( $annotation->device === 'mobile' ){
-            $count_mobile++;
-        }
-    }
-
-    return [
-        'laptop' => $count_laptop,
-        'tablet' => $count_tablet,
-        'mobile' => $count_mobile
-    ];
 }
 
 // CHECK USER ROLE

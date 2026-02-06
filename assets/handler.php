@@ -108,3 +108,76 @@ function getCommentsCountHandler($device = 'all'){
         'count_mobile' => $count_mobile
     ];
 }
+
+//  ######   ######## ########    ########  ######## ########  ##       #### ########  ######  
+// ##    ##  ##          ##       ##     ## ##       ##     ## ##        ##  ##       ##    ## 
+// ##        ##          ##       ##     ## ##       ##     ## ##        ##  ##       ##       
+// ##   #### ######      ##       ########  ######   ########  ##        ##  ######    ######  
+// ##    ##  ##          ##       ##   ##   ##       ##        ##        ##  ##             ## 
+// ##    ##  ##          ##       ##    ##  ##       ##        ##        ##  ##       ##    ## 
+//  ######   ########    ##       ##     ## ######## ##        ######## #### ########  ######  
+
+function getAllReplies($comment_id) {
+    global $wpdb;
+    $table_name_replies = $wpdb->prefix . 'reviews_replies';
+
+    if (check_user_role()) {
+        $sql = "SELECT * FROM $table_name_replies WHERE comment_id = $comment_id ORDER BY timestamp ASC";
+    }
+    else{
+        $sql = $wpdb->prepare(
+            "SELECT * FROM $table_name_replies WHERE comment_id = %d AND client_visible = 1 ORDER BY timestamp ASC",
+            $comment_id
+        );
+    }
+
+    return $wpdb->get_results($sql);
+}
+
+//  ######   ######## ########    ##     ##  ######  ######## ########   ######     ######## ##     ##    ###    #### ##        ######  
+// ##    ##  ##          ##       ##     ## ##    ## ##       ##     ## ##    ##    ##       ###   ###   ## ##    ##  ##       ##    ## 
+// ##        ##          ##       ##     ## ##       ##       ##     ## ##          ##       #### ####  ##   ##   ##  ##       ##       
+// ##   #### ######      ##       ##     ##  ######  ######   ########   ######     ######   ## ### ## ##     ##  ##  ##        ######  
+// ##    ##  ##          ##       ##     ##       ## ##       ##   ##         ##    ##       ##     ## #########  ##  ##             ## 
+// ##    ##  ##          ##       ##     ## ##    ## ##       ##    ##  ##    ##    ##       ##     ## ##     ##  ##  ##       ##    ## 
+//  ######   ########    ##        #######   ######  ######## ##     ##  ######     ######## ##     ## ##     ## #### ########  ######  
+
+function getUsersEmails($datas, $comment, $notifications){
+    $users_array = array();
+    $replies = isset($datas['id']) ? getAllReplies($datas['id']) : [];
+
+    $users_array[$datas['user_id']] = false;
+
+    $users_emails = array();
+
+    if(!empty($replies)){
+        foreach($replies as $reply){
+            $users_array[$reply->user_id] = false;
+        }
+    }
+
+    if(!empty($notifications)){
+        foreach($notifications as $not_id){
+            if(get_userdata($not_id)){
+                $username = get_userdata($not_id)->display_name;
+                $pattern = '/@' . preg_quote($username, '/') . '/';
+    
+                if(preg_match($pattern, $comment)){
+                    $users_array[$not_id] = true;
+                }
+            }
+        }
+    }
+
+    foreach($users_array as $id => $notified){
+        if($id != get_current_user_id()){
+            $user = get_userdata($id);
+
+            if (check_user_role($user)) {
+                $users_emails[] = [$user->user_email, $notified];
+            }
+        }
+    }
+
+    return $users_emails;
+}

@@ -1308,6 +1308,8 @@ html{
             .reply-item{
                 padding: 24px;
                 background: rgba($white, 0.2);
+                border-left: 4px solid rgba($sombre_rgb, 0.55);
+
                 
                 &:nth-child(odd){
                     background: rgba($clair_rgb, 0.05);
@@ -1424,7 +1426,6 @@ html{
                     p{
                         font-size: 16px;
                         color: $sombre;
-                        float: left;
 
                         & + p{
                             margin-top: 8px;
@@ -1440,7 +1441,6 @@ html{
                 }
 
                 &__image{
-                    float: right;
                     width: 120px;
                     aspect-ratio: 4/3;
                     border-radius: 4px;
@@ -1449,6 +1449,7 @@ html{
                     overflow: hidden;
                     cursor: pointer;
                     position: relative;
+                    margin-top: 24px;
     
                     .expend{
                         position: absolute;

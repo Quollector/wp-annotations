@@ -36,15 +36,6 @@ if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/dashboard.php' ) ) {
 
 <!-- Comments layout -->
 <div id="wp-annotations--comments-layout" class="wp-annotations--comments-layout">
-    <!-- <div 
-        id="wp-annotations--modal" 
-        class="wp-annotations--modal" 
-        data-position-x="0" 
-             
-        
-        data-page-id="<?= get_the_ID() ?>"
-            
-    > -->
     <div class="wp-annotations__modal" data-position-x="0" data-position-y="0" data-device="laptop">
         <svg width="118" height="118" viewBox="0 0 118 118" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="59" cy="59" r="40" fill="white" class="modal-fill"/>

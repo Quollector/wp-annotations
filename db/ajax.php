@@ -18,7 +18,6 @@ function wp_annotations_submit_comment() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'reviews';
         $datas = $_POST['datas'];
-        $devices = get_devices_comments();
 
         parse_str($datas[0], $form_data);
 
@@ -79,11 +78,11 @@ function wp_annotations_submit_comment() {
             ob_start();            
             extract($variables);
             include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
-            $comments_content = ob_get_clean(); 
+            $comments_content = ob_get_clean();
             
-            // if ( !empty($targetsEmail) ) {
-            //     sendNotificationEmail( $table_datas, $table_datas['commentaire'], $targetsEmail, true );
-            // }
+            if ( !empty($targetsEmail) ) {
+                sendNotificationEmail( $table_datas, $table_datas['commentaire'], $targetsEmail, true );
+            }
 
             wp_send_json_success([
                 'message' => 'Commentaire ajouté avec succès',
@@ -222,6 +221,7 @@ add_action('wp_ajax_wp_annotations_edit_comment', 'wp_annotations_edit_comment')
 function wp_annotations_delete_comment() { 
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
+    $table_replies = $wpdb->prefix . 'reviews_replies';
     $id = intval($_POST['id']);
     $delete = array();
 
@@ -244,24 +244,24 @@ function wp_annotations_delete_comment() {
         ['%d']
     );
 
-    // $repliesFiles = $wpdb->get_results($wpdb->prepare("SELECT file_path FROM $table_replies WHERE comment_id = %d", $id), ARRAY_A);
+    $repliesFiles = $wpdb->get_results($wpdb->prepare("SELECT file_path FROM $table_replies WHERE comment_id = %d", $id), ARRAY_A);
     
-    // if( !empty($repliesFiles) ){
-    //     foreach($repliesFiles as $repliesFile){
-    //         $screenUrl = $repliesFile['file_path'];
-    //         $file_path = WP_ANNOTATION_PATH . 'assets/images/replies/' . $screenUrl;
-    //         if (file_exists($file_path)) {
-    //             unlink($file_path);
-    //         }
-    //     }
-    // }
+    if( !empty($repliesFiles) ){
+        foreach($repliesFiles as $repliesFile){
+            $screenUrl = $repliesFile['file_path'];
+            $file_path = WP_ANNOTATION_PATH . 'assets/images/replies/' . $screenUrl;
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+        }
+    }
 
-    // $delete[] = $wpdb->delete(
-    //     $table_replies,
-    //     ['comment_id' => $id]
-    // );
+    $delete[] = $wpdb->delete(
+        $table_replies,
+        ['comment_id' => $id]
+    );
 
-    if( $delete[0] !== false /*&& $delete[1] !== false*/ ){
+    if( $delete[0] !== false && $delete[1] !== false ){
         ob_start();            
         extract($variables);
         include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
@@ -415,374 +415,83 @@ function wp_annotations_submit_reply() {
 
 add_action('wp_ajax_wp_annotations_submit_reply', 'wp_annotations_submit_reply');
 
+// ########  ######## ##       ######## ######## ########    ########  ######## ########  ##       ##    ## 
+// ##     ## ##       ##       ##          ##    ##          ##     ## ##       ##     ## ##        ##  ##  
+// ##     ## ##       ##       ##          ##    ##          ##     ## ##       ##     ## ##         ####   
+// ##     ## ######   ##       ######      ##    ######      ########  ######   ########  ##          ##    
+// ##     ## ##       ##       ##          ##    ##          ##   ##   ##       ##        ##          ##    
+// ##     ## ##       ##       ##          ##    ##          ##    ##  ##       ##        ##          ##    
+// ########  ######## ######## ########    ##    ########    ##     ## ######## ##        ########    ##    
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// === Update comments
-function wp_annotation_update_comment() {
-    if (!is_user_logged_in()) {
-        wp_send_json_error(['message' => 'Vous devez être connecté pour ajouter un commentaire.']);
-        return;
-    }
-
+function wp_annotation_delete_reply() { 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'reviews';
-    $table_replies = $wpdb->prefix . 'reviews_replies';
-    $devices = get_devices_comments();
-
-    $variables = [
-        $view = sanitize_text_field($_POST['view']),
-        $device = isset($_POST['device']) ? sanitize_text_field($_POST['device']) : '',
-        $count_laptop = $devices['laptop'],
-        $count_tablet = $devices['tablet'],
-        $count_mobile = $devices['mobile']
-    ];
-    
-    if( $_POST['type'] === 'status' ){
-        $id = intval($_POST['id']);
-        $status = sanitize_text_field($_POST['status']);
-        $message = $status == 'Résolu' ? 'Commentaire résolu' : 'Commentaire non résolu';
-
-        $update = $wpdb->update(
-            $table_name,
-            [ 'statut' => $status ],
-            [ 'id' => $id ],
-            [ '%s' ],
-            [ '%d' ]
-        );    
-    
-        if ($update !== false) {
-            ob_start();
-            extract($variables);
-            include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
-            $comments_content = ob_get_clean();
-    
-            wp_send_json_success([
-                'message' => $message,
-                'comments_content' => $comments_content
-            ]);
-        } 
-        else {
-            wp_send_json_error(['message' => 'Une erreur est survenue.']);
-        }
-    }
-    elseif( $_POST['type'] === 'delete' ){
-        $id = intval($_POST['id']);
-        $screenUrl = sanitize_text_field($_POST['screenUrl']);
-        $delete = array();
-
-        $filename = $wpdb->get_row($wpdb->prepare("SELECT screenshot_url FROM $table_name WHERE id = %d", $id), ARRAY_A);
-        $screenUrl = $filename['screenshot_url'];
+    $table_name = $wpdb->prefix . 'reviews_replies';
+    $datas = $_POST['datas'];
         
-        $file_path = WP_ANNOTATION_PATH . 'assets/images/screenshots/' . $screenUrl;
+    $id = intval( $datas[0] );
+    $filename = $wpdb->get_row($wpdb->prepare("SELECT file_path FROM $table_name WHERE id = %d", $id), ARRAY_A);
+
+    if(!empty($filename['file_path'])){
+        $screenUrl = $filename['file_path'];
+
+        $file_path = WP_ANNOTATION_PATH . 'assets/images/replies/' . $screenUrl;
         if (file_exists($file_path)) {
-            unlink($file_path);
-        }
-
-        $delete[] = $wpdb->delete(
-            $table_name,
-            ['id' => $id],
-            ['%d']
-        );
-
-        $repliesFiles = $wpdb->get_results($wpdb->prepare("SELECT file_path FROM $table_replies WHERE comment_id = %d", $id), ARRAY_A);
-       
-        if( !empty($repliesFiles) ){
-            foreach($repliesFiles as $repliesFile){
-                $screenUrl = $repliesFile['file_path'];
-                $file_path = WP_ANNOTATION_PATH . 'assets/images/replies/' . $screenUrl;
-                if (file_exists($file_path)) {
-                    unlink($file_path);
-                }
-            }
-        }
-
-        $delete[] = $wpdb->delete(
-            $table_replies,
-            ['comment_id' => $id]
-        );
-
-        if ($delete[0] !== false && $delete[1] !== false) {
-            
-            $file_path = WP_ANNOTATION_PATH . 'assets/images/screenshots/' . $screenUrl;
-            if (file_exists($file_path)) {
                 unlink($file_path);
-            }
-
-            ob_start();
-            extract($variables);
-            include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
-            $comments_content = ob_get_clean();
-    
-            wp_send_json_success([
-                'message' => 'Commentaire supprimé',
-                'comments_content' => $comments_content
-            ]);
-        } else {
-            wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
         }
     }
-    elseif( $_POST['type'] === 'update' ){
-        $id = intval($_POST['id']);
-        $comment = wp_kses_post(stripslashes($_POST['comment']));
-        $devices = get_devices_comments();
 
-        $variables = [
-            $view = sanitize_text_field($_POST['view']),
-            $device = isset($_POST['device']) ? sanitize_text_field($_POST['device']) : '',
-            $count_laptop = $devices['laptop'],
-            $count_tablet = $devices['tablet'],
-            $count_mobile = $devices['mobile']
-        ];
+    $delete = $wpdb->delete(
+        $table_name,
+        ['id' => $id],
+        ['%d']
+    );
 
-        $update = $wpdb->update(
-            $table_name,
-            [ 'commentaire' => $comment ],
-            [ 'id' => $id ],
-            [ '%s' ],
-            [ '%d' ]
-        );    
-    
-        if ($update !== false) {
-            ob_start();
-            extract($variables);
-            include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
-            $comments_content = ob_get_clean();
-    
-            wp_send_json_success([
-                'message' => 'Commentaire mis à jour',
-                'comments_content' => $comments_content
-            ]);
-        } 
-        else {
-            wp_send_json_error(['message' => 'Une erreur est survenue.']);
-        }
-    }
-    elseif( $_POST['type'] === 'refresh' ){
-        $devices = get_devices_comments();
-
-        $variables = [
-            $view = sanitize_text_field($_POST['view']),
-            $device = isset($_POST['device']) ? sanitize_text_field($_POST['device']) : '',
-            $count_laptop = $devices['laptop'],
-            $count_tablet = $devices['tablet'],
-            $count_mobile = $devices['mobile']
-        ];
+    if ($delete !== false) {              
+        $table_reviews = $wpdb->prefix . 'reviews';
+        $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", intval($datas[1])), ARRAY_A);
 
         ob_start();
-        extract($variables);
-        include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
-        $comments_content = ob_get_clean();
+        extract($new_comment_data);
+        include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box-content.php';
+        $reply_content = ob_get_clean();
 
         wp_send_json_success([
-            'comments_content' => $comments_content
+            'message' => 'Réponse supprimée avec succès',
+            'reply_content' => $reply_content
         ]);
-    }
-}
-
-add_action('wp_ajax_update_wp_annotation', 'wp_annotation_update_comment');
-
-// '########::'########:'########::'##:::::::'####:'########::'######::
-//  ##.... ##: ##.....:: ##.... ##: ##:::::::. ##:: ##.....::'##... ##:
-//  ##:::: ##: ##::::::: ##:::: ##: ##:::::::: ##:: ##::::::: ##:::..::
-//  ########:: ######::: ########:: ##:::::::: ##:: ######:::. ######::
-//  ##.. ##::: ##...:::: ##.....::: ##:::::::: ##:: ##...:::::..... ##:
-//  ##::. ##:: ##::::::: ##:::::::: ##:::::::: ##:: ##:::::::'##::: ##:
-//  ##:::. ##: ########: ##:::::::: ########:'####: ########:. ######::
-// ..:::::..::........::..:::::::::........::....::........:::......:::
-
-// === Manage replies
-function wp_annotation_replies() {
-    if (!is_user_logged_in()) {
-        wp_send_json_error(['message' => 'Vous devez être connecté pour ajouter un commentaire.']);
-        return;
-    }
-
-    if ( isset($_POST['status'])){
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'reviews_replies';
-    
-        if( $_POST['status'] === 'add' ){
-            $commentID = isset($_POST['comment_id']) ? intval($_POST['comment_id']) : 0;
-            $userID = get_current_user_id();
-            $commentText = isset($_POST['comment_text']) ? wp_kses_post(stripslashes($_POST['comment_text'])) : '';
-            $clientVisible = isset($_POST['client_visible']) ? intval($_POST['client_visible']) : 0;
-            $targetsEmail = isset($_POST['targets_email']) ? $_POST['targets_email'] : [];
-
-            if (isset($_FILES['reply_file']) && !empty($_FILES['reply_file']['name'])) {
-                $file = $_FILES['reply_file'];
-    
-                $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
-                if (!in_array(strtolower($file['type']), $allowed_types)) {
-                    wp_send_json_error(['message' => 'Type de fichier non autorisé.']);
-                    return;
-                }
-    
-                if ($file['error'] !== UPLOAD_ERR_OK) {
-                    $upload_errors = [
-                        UPLOAD_ERR_INI_SIZE   => 'Le fichier est trop grand (dépassant la limite de php.ini).',
-                        UPLOAD_ERR_FORM_SIZE  => 'Le fichier est trop grand (dépassant la limite de formulaire).',
-                        UPLOAD_ERR_PARTIAL    => 'Le fichier n\'a été que partiellement téléchargé.',
-                        UPLOAD_ERR_NO_FILE    => 'Aucun fichier n\'a été téléchargé.',
-                        UPLOAD_ERR_NO_TMP_DIR => 'Dossier temporaire manquant.',
-                        UPLOAD_ERR_CANT_WRITE => 'Impossible d\'écrire sur le disque.',
-                        UPLOAD_ERR_EXTENSION  => 'Une extension PHP a arrêté le téléchargement du fichier.'
-                    ];
-                    
-                    $error_message = isset($upload_errors[$file['error']]) ? $upload_errors[$file['error']] : 'Une erreur inconnue est survenue.';
-                    wp_send_json_error(['message' => $error_message]);
-                    return;
-                }
-    
-                $upload_dir = WP_ANNOTATION_PATH . 'assets/images/replies/';
-                
-                if (!file_exists($upload_dir)) {
-                    if (!mkdir($upload_dir, 0777, true)) {
-                        wp_send_json_error(['message' => 'Impossible de créer le répertoire de destination.']);
-                        return;
-                    }
-                }
-
-                $unique_id = uniqid();
-                $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-
-                $new_file_name = "reply_{$unique_id}.{$file_extension}"; 
-
-                $file_path = $upload_dir . $new_file_name;
-
-                if (!move_uploaded_file($file['tmp_name'], $file_path)) {
-                    wp_send_json_error(['message' => 'Une erreur est survenue lors du traitement du fichier.']);
-                    return;
-                }    
-            } else {
-                $new_file_name = '';
-            }
-
-            $insert = $wpdb->insert(
-                $table_name,
-                [
-                    'comment_id' => $commentID,
-                    'user_id' => $userID,
-                    'commentaire' => $commentText,
-                    'file_path' => $new_file_name,
-                    'client_visible' => $clientVisible,
-                ]
-            );    
-        
-            if ($insert) {                
-                $table_reviews = $wpdb->prefix . 'reviews';
-                $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", $commentID), ARRAY_A);
-
-                if (!empty($targetsEmail) && $new_comment_data['user_id'] !== get_current_user_id()) {
-                    sendNotificationEmail(
-                        $new_comment_data,
-                        [wp_kses_post(stripslashes($commentText)), $new_file_name],
-                        $targetsEmail
-                    );
-                }
-
-                ob_start();
-                extract($new_comment_data);
-                include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box-content.php';
-                $reply_content = ob_get_clean();
-    
-                wp_send_json_success([
-                    'message' => 'Commentaire ajouté avec succès',
-                    'reply_content' => $reply_content
-                ]);
-            } else {
-                wp_send_json_error(['message' => 'Une erreur est survenue lors de l\'ajout du commentaire.']);
-            }
-        }
-        elseif( $_POST['status'] === 'delete' ){
-            $datas = $_POST['datas'];
-                
-            $id = intval( $datas[0] );
-
-            $filename = $wpdb->get_row($wpdb->prepare("SELECT file_path FROM $table_name WHERE id = %d", $id), ARRAY_A);
-
-            if(!empty($filename['file_path'])){
-                $screenUrl = $filename['file_path'];
-
-                $file_path = WP_ANNOTATION_PATH . 'assets/images/replies/' . $screenUrl;
-                if (file_exists($file_path)) {
-                        unlink($file_path);
-                }
-            }
-    
-            $delete = $wpdb->delete(
-                $table_name,
-                ['id' => $id],
-                ['%d']
-            );
-    
-            if ($delete !== false) {              
-                $table_reviews = $wpdb->prefix . 'reviews';
-                $new_comment_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_reviews WHERE id = %d", intval($datas[1])), ARRAY_A);
-
-                ob_start();
-                extract($new_comment_data);
-                include WP_ANNOTATION_PATH . 'views/frontend/replies/replies-box-content.php';
-                $reply_content = ob_get_clean();
-    
-                wp_send_json_success([
-                    'message' => 'Commentaire supprimé avec succès',
-                    'reply_content' => $reply_content
-                ]);
-            } else {
-                wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
-            }  
-        }
     } else {
-        wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression du commentaire.']);
-    } 
+        wp_send_json_error(['message' => 'Une erreur est survenue lors de la suppression de la réponse.']);
+    }  
 }
 
-add_action('wp_ajax_wp_annotation_replies', 'wp_annotation_replies');
+add_action('wp_ajax_wp_annotation_delete_reply', 'wp_annotation_delete_reply');
 
-// '########::'########:'##::::'##:'####::'######::'########::'######::
-//  ##.... ##: ##.....:: ##:::: ##:. ##::'##... ##: ##.....::'##... ##:
-//  ##:::: ##: ##::::::: ##:::: ##:: ##:: ##:::..:: ##::::::: ##:::..::
-//  ##:::: ##: ######::: ##:::: ##:: ##:: ##::::::: ######:::. ######::
-//  ##:::: ##: ##...::::. ##:: ##::: ##:: ##::::::: ##...:::::..... ##:
-//  ##:::: ##: ##::::::::. ## ##:::: ##:: ##::: ##: ##:::::::'##::: ##:
-//  ########:: ########:::. ###::::'####:. ######:: ########:. ######::
-// ........:::........:::::...:::::....:::......:::........:::......:::
+// ##     ## ########  ########     ###    ######## ########    ########     ###     ######  ##     ## ########   #######     ###    ########  ########  
+// ##     ## ##     ## ##     ##   ## ##      ##    ##          ##     ##   ## ##   ##    ## ##     ## ##     ## ##     ##   ## ##   ##     ## ##     ## 
+// ##     ## ##     ## ##     ##  ##   ##     ##    ##          ##     ##  ##   ##  ##       ##     ## ##     ## ##     ##  ##   ##  ##     ## ##     ## 
+// ##     ## ########  ##     ## ##     ##    ##    ######      ##     ## ##     ##  ######  ######### ########  ##     ## ##     ## ########  ##     ## 
+// ##     ## ##        ##     ## #########    ##    ##          ##     ## #########       ## ##     ## ##     ## ##     ## ######### ##   ##   ##     ## 
+// ##     ## ##        ##     ## ##     ##    ##    ##          ##     ## ##     ## ##    ## ##     ## ##     ## ##     ## ##     ## ##    ##  ##     ## 
+//  #######  ##        ########  ##     ##    ##    ########    ########  ##     ##  ######  ##     ## ########   #######  ##     ## ##     ## ########  
 
-// === Update Device comments
-function wp_annotation_device() {
-    $devices = get_devices_comments();
-
+function wp_annotations_refresh_dashboard() { 
     $variables = [
-        $device = sanitize_text_field($_POST['device']),
         $view = sanitize_text_field($_POST['view']),
-        $count_laptop = $devices['laptop'],
-        $count_tablet = $devices['tablet'],
-        $count_mobile = $devices['mobile']
+        $viewDevice = sanitize_text_field($_POST['deviceView'])
     ];
 
-    ob_start();
+    ob_start();            
     extract($variables);
     include WP_ANNOTATION_PATH . 'views/frontend/comments-box.php';
-    $comments_content = ob_get_clean();
+    $comments_content = ob_get_clean(); 
 
     wp_send_json_success([
+        'message' => '',
         'comments_content' => $comments_content
     ]);
 }
 
-add_action('wp_ajax_wp_annotation_device', 'wp_annotation_device');
+add_action('wp_ajax_wp_annotations_refresh_dashboard', 'wp_annotations_refresh_dashboard');
 
 // '########:'##:::::::'##::::'##::'######::'##::::'##:
 //  ##.....:: ##::::::: ##:::: ##:'##... ##: ##:::: ##:
