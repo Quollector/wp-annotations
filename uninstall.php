@@ -32,8 +32,8 @@ $table_name_replies = $wpdb->prefix . 'reviews_replies';
 $wpdb->query("DROP TABLE IF EXISTS $table_name");
 $wpdb->query("DROP TABLE IF EXISTS $table_name_replies");
 
-$screenshots_dir = plugin_dir_url( __FILE__ ) . 'assets/images/screenshots/';
-$replies_dir = plugin_dir_url( __FILE__ ) . 'assets/images/replies/';
+$screenshots_dir = plugin_dir_path( __FILE__ ) . 'assets/images/screenshots/';
+$replies_dir = plugin_dir_path( __FILE__ ) . 'assets/images/replies/';
 
 if ( is_dir( $screenshots_dir ) ) {
     $files = glob( $screenshots_dir . '*' ); 

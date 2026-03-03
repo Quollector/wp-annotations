@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 //  ######  ######## ##    ## ########     ######## ##     ##    ###    #### ##       
 // ##    ## ##       ###   ## ##     ##    ##       ###   ###   ## ##    ##  ##       
@@ -68,6 +69,9 @@ function get_wp_annotations_users_by_name() {
 // Email message
 function createNotificationsMessage( $datas, $notif, $current_user_name, $comment, $highLvl = false ) {
     $interface_color = get_option('wp_annotation_color', 'blue');
+    if ( ! array_key_exists( $interface_color, WP_ANNOTATION_COLORS ) ) {
+        $interface_color = 'blue';
+    }
 
     $message = '<html><body>';
     $message .= '<table style="width: 100%; font-family: Arial, sans-serif; line-height: 1.6;">';
@@ -145,6 +149,7 @@ add_action('init', 'checkSMTPSettings');
 add_action( 'admin_footer', 'wp_annotations_dehactivation_warning' );
 
 function wp_annotations_dehactivation_warning() {
+$nonce = wp_create_nonce('wp_annotations_nonce');
 ?>
     <script type="text/javascript">
         jQuery(document).ready(function($) {
@@ -153,6 +158,7 @@ function wp_annotations_dehactivation_warning() {
                     
                     $.post(ajaxurl, {
                         action: 'flush_reviews',
+                        nonce: '<?php echo esc_js($nonce); ?>',
                         context: 'dehactivate'
                     }, function(response) {
                         if (response.success) {

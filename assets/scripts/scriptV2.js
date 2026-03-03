@@ -245,6 +245,7 @@
                     type: 'POST',
                     data: {
                         action: 'wp_annotations_submit_comment',
+                        nonce: ajaxurl.nonce,
                         datas: datas,
                         device: $device,
                         deviceView: getDashboardDevice(),
@@ -306,6 +307,7 @@
 
             var datas = {
                 action: 'wp_annotations_update_status',
+                nonce: ajaxurl.nonce,
                 id: $commentID,
                 view: getDashboardView(),
                 deviceView: getDashboardDevice()
@@ -388,6 +390,7 @@
     
                 var datas = {
                     action: 'wp_annotations_edit_comment',
+                    nonce: ajaxurl.nonce,
                     id: $commentID,
                     comment: $textarea,
                     deviceView: getDashboardDevice(),
@@ -437,6 +440,7 @@
     
                 var datas = {
                     action: 'wp_annotations_delete_comment',
+                    nonce: ajaxurl.nonce,
                     id: $commentID,
                     deviceView: getDashboardDevice(),
                     view: getDashboardView()
@@ -481,6 +485,7 @@
     
             var datas = {
                 action: 'wp_annotations_open_reply',
+                nonce: ajaxurl.nonce,
                 id: $commentID,
             };                    
     
@@ -597,6 +602,7 @@
 
                 var formData = new FormData();
                 formData.append('action', 'wp_annotations_submit_reply');
+                formData.append('nonce', ajaxurl.nonce);
                 formData.append('comment_id', commentID);
                 formData.append('user_id', userID);
                 formData.append('comment_text', commentText);
@@ -670,6 +676,7 @@
                     type: 'POST',
                     data: {
                         action: 'wp_annotation_delete_reply',
+                        nonce: ajaxurl.nonce,
                         datas: datas
                     },
                     success: function(response) {
@@ -843,6 +850,7 @@
     
             var datas = {
                 action: 'wp_annotations_refresh_dashboard',
+                nonce: ajaxurl.nonce,
                 type: 'refresh',
                 deviceView: getDashboardDevice(),
                 view: getDashboardView()
@@ -905,6 +913,7 @@
                 type: 'POST',
                 data: {
                     action: 'filter_wp_annotations_comments',
+                    nonce: ajaxurl.nonce,
                     deviceView: getDashboardDevice(),
                     view: getDashboardView()
                 },

@@ -15,6 +15,9 @@ $count_tablet = $stats['count_tablet'];
 $count_mobile = $stats['count_mobile'];
 
 $interface_color = get_option('wp_annotation_color', 'blue');
+if ( ! array_key_exists( $interface_color, WP_ANNOTATION_COLORS ) ) {
+    $interface_color = 'blue';
+}
 
 ?>
 <?php // DEVICES ?>

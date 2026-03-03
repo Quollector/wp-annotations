@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 //    ###    ########  ########     ##    ## ######## ##      ##       ###    ##    ## ##    ##  #######  ######## 
 //   ## ##   ##     ## ##     ##    ###   ## ##       ##  ##  ##      ## ##   ###   ## ###   ## ##     ##    ##    
@@ -9,6 +10,8 @@
 // ##     ## ########  ########     ##    ## ########  ###  ###     ##     ## ##    ## ##    ##  #######     ##    
 
 function wp_annotations_submit_comment() {
+    check_ajax_referer( 'wp_annotations_nonce', 'nonce' );
+
     if (!is_user_logged_in()) {
         wp_send_json_error(['message' => 'Vous devez être connecté pour ajouter un commentaire.']);
         return;
@@ -24,7 +27,7 @@ function wp_annotations_submit_comment() {
         $commentaire = isset($form_data['comment']) ? wp_kses_post(stripslashes($form_data['comment'])) : '';
         $client_visible = isset($form_data['client_visible']) ? intval($form_data['client_visible']) : 0;
         $device = isset($datas[1]) ? sanitize_text_field($datas[1]) : '';
-        $targetsEmail = isset($form_data['targets_email']) ? $form_data['targets_email'] : [];
+        $targetsEmail = isset($form_data['targets_email']) ? array_map('intval', (array) $form_data['targets_email']) : [];
 
         if (empty(trim($commentaire))) {
             wp_send_json_error(['message' => 'Le commentaire ne peut pas être vide.']);
@@ -45,7 +48,13 @@ function wp_annotations_submit_comment() {
             
             $screenshot_data = $_POST['screenshot'];
             $screenshot_data = str_replace('data:image/png;base64,', '', $screenshot_data);
-            $screenshot_data = base64_decode($screenshot_data);
+            $screenshot_data = base64_decode($screenshot_data, true);
+
+            // Vérifier la signature PNG (magic bytes)
+            if ( $screenshot_data === false || substr($screenshot_data, 0, 8) !== "\x89PNG\r\n\x1a\n" ) {
+                wp_send_json_error(['message' => 'Format de capture écran invalide.']);
+                return;
+            }
 
             file_put_contents($file_path, $screenshot_data);
             $screenshot_path = $file_name;
@@ -107,7 +116,14 @@ add_action('wp_ajax_wp_annotations_submit_comment', 'wp_annotations_submit_comme
 // ##        ##  ##          ##    ##       ##    ##     ##    ## ##     ## ##     ## ##     ## ##       ##   ###    ##    ##    ## 
 // ##       #### ########    ##    ######## ##     ##     ######   #######  ##     ## ##     ## ######## ##    ##    ##     ######  
 
-function wp_annotations_filter_comments() {      
+function wp_annotations_filter_comments() {
+    check_ajax_referer( 'wp_annotations_nonce', 'nonce' );
+
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error(['message' => 'Permission refusée.']);
+        return;
+    }
+
     $variables = [
         $view = sanitize_text_field($_POST['view']),
         $viewDevice = sanitize_text_field($_POST['deviceView'])
@@ -133,7 +149,14 @@ add_action('wp_ajax_filter_wp_annotations_comments', 'wp_annotations_filter_comm
 // ##     ## ##        ##     ## ##     ##    ##    ##          ##    ##    ##    ##     ##    ##    ##     ## ##    ## 
 //  #######  ##        ########  ##     ##    ##    ########     ######     ##    ##     ##    ##     #######   ######  
 
-function wp_annotations_update_status() { 
+function wp_annotations_update_status() {
+    check_ajax_referer( 'wp_annotations_nonce', 'nonce' );
+
+    if ( ! is_user_logged_in() || ! check_user_role() ) {
+        wp_send_json_error(['message' => 'Permission refusée.']);
+        return;
+    }
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
 
@@ -177,7 +200,14 @@ add_action('wp_ajax_wp_annotations_update_status', 'wp_annotations_update_status
 // ##       ##     ##  ##     ##       ##    ## ##     ## ##     ## ##     ## ##       ##   ###    ##    
 // ######## ########  ####    ##        ######   #######  ##     ## ##     ## ######## ##    ##    ##    
 
-function wp_annotations_edit_comment() { 
+function wp_annotations_edit_comment() {
+    check_ajax_referer( 'wp_annotations_nonce', 'nonce' );
+
+    if ( ! is_user_logged_in() || ! check_user_role() ) {
+        wp_send_json_error(['message' => 'Permission refusée.']);
+        return;
+    }
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
 
@@ -218,7 +248,14 @@ add_action('wp_ajax_wp_annotations_edit_comment', 'wp_annotations_edit_comment')
 // ##     ## ##       ##       ##          ##    ##          ##    ## ##     ## ##     ## ##     ## ##       ##   ###    ##    
 // ########  ######## ######## ########    ##    ########     ######   #######  ##     ## ##     ## ######## ##    ##    ##    
 
-function wp_annotations_delete_comment() { 
+function wp_annotations_delete_comment() {
+    check_ajax_referer( 'wp_annotations_nonce', 'nonce' );
+
+    if ( ! is_user_logged_in() || ! check_user_role() ) {
+        wp_send_json_error(['message' => 'Permission refusée.']);
+        return;
+    }
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
     $table_replies = $wpdb->prefix . 'reviews_replies';
@@ -289,6 +326,13 @@ add_action('wp_ajax_wp_annotations_delete_comment', 'wp_annotations_delete_comme
 
 // === First display
 function wp_annotations_open_reply() {
+    check_ajax_referer( 'wp_annotations_nonce', 'nonce' );
+
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error(['message' => 'Permission refusée.']);
+        return;
+    }
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
 
@@ -318,20 +362,33 @@ add_action('wp_ajax_wp_annotations_open_reply', 'wp_annotations_open_reply');
 // ##    ## ##     ## ##     ## ##     ##  ##     ##       ##    ##  ##       ##        ##          ##    
 //  ######   #######  ########  ##     ## ####    ##       ##     ## ######## ##        ########    ##    
 
-function wp_annotations_submit_reply() { 
+function wp_annotations_submit_reply() {
+    check_ajax_referer( 'wp_annotations_nonce', 'nonce' );
+
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error(['message' => 'Permission refusée.']);
+        return;
+    }
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews_replies';
     $commentID = isset($_POST['comment_id']) ? intval($_POST['comment_id']) : 0;
     $userID = get_current_user_id();
     $commentText = isset($_POST['comment_text']) ? wp_kses_post(stripslashes($_POST['comment_text'])) : '';
     $clientVisible = isset($_POST['client_visible']) ? intval($_POST['client_visible']) : 0;
-    $targetsEmail = isset($_POST['targets_email']) ? $_POST['targets_email'] : [];
+    $targetsEmail = isset($_POST['targets_email']) ? array_map('intval', (array) $_POST['targets_email']) : [];
 
     if (isset($_FILES['reply_file']) && !empty($_FILES['reply_file']['name'])) {
         $file = $_FILES['reply_file'];
 
         $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
-        if (!in_array(strtolower($file['type']), $allowed_types)) {
+
+        // Vérification côté serveur du vrai type MIME (ne pas se fier à $_FILES['type'])
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $real_mime = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+
+        if (!in_array(strtolower($real_mime), $allowed_types)) {
             wp_send_json_error(['message' => 'Type de fichier non autorisé.']);
             return;
         }
@@ -355,7 +412,7 @@ function wp_annotations_submit_reply() {
         $upload_dir = WP_ANNOTATION_PATH . 'assets/images/replies/';
         
         if (!file_exists($upload_dir)) {
-            if (!mkdir($upload_dir, 0777, true)) {
+            if (!mkdir($upload_dir, 0755, true)) {
                 wp_send_json_error(['message' => 'Impossible de créer le répertoire de destination.']);
                 return;
             }
@@ -423,7 +480,14 @@ add_action('wp_ajax_wp_annotations_submit_reply', 'wp_annotations_submit_reply')
 // ##     ## ##       ##       ##          ##    ##          ##    ##  ##       ##        ##          ##    
 // ########  ######## ######## ########    ##    ########    ##     ## ######## ##        ########    ##    
 
-function wp_annotation_delete_reply() { 
+function wp_annotation_delete_reply() {
+    check_ajax_referer( 'wp_annotations_nonce', 'nonce' );
+
+    if ( ! is_user_logged_in() || ! check_user_role() ) {
+        wp_send_json_error(['message' => 'Permission refusée.']);
+        return;
+    }
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews_replies';
     $datas = $_POST['datas'];
@@ -474,7 +538,14 @@ add_action('wp_ajax_wp_annotation_delete_reply', 'wp_annotation_delete_reply');
 // ##     ## ##        ##     ## ##     ##    ##    ##          ##     ## ##     ## ##    ## ##     ## ##     ## ##     ## ##     ## ##    ##  ##     ## 
 //  #######  ##        ########  ##     ##    ##    ########    ########  ##     ##  ######  ##     ## ########   #######  ##     ## ##     ## ########  
 
-function wp_annotations_refresh_dashboard() { 
+function wp_annotations_refresh_dashboard() {
+    check_ajax_referer( 'wp_annotations_nonce', 'nonce' );
+
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error(['message' => 'Permission refusée.']);
+        return;
+    }
+
     $variables = [
         $view = sanitize_text_field($_POST['view']),
         $viewDevice = sanitize_text_field($_POST['deviceView'])
@@ -504,6 +575,13 @@ add_action('wp_ajax_wp_annotations_refresh_dashboard', 'wp_annotations_refresh_d
 
 // === Delete all comments/replies
 function flush_reviews_callback() {
+    check_ajax_referer( 'wp_annotations_nonce', 'nonce' );
+
+    if ( ! is_user_logged_in() || ! check_user_role() ) {
+        wp_send_json_error(['message' => 'Permission refusée.']);
+        return;
+    }
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'reviews';
     $table_replies = $wpdb->prefix . 'reviews_replies';    
