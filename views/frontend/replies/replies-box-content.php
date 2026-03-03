@@ -55,7 +55,8 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
         </button>
     </div>
 </div>
-<div class="reply-box__comment">
+<div class="reply-box__comment<?= !empty( $comments_list ) ? ' has-replies' : '' ?>">
+    <h5>Commentaire original:</h5>
     <?= formatNotificationsComment($comment_data['commentaire']) ?>
 </div>
 <?php if( !empty( $comments_list ) ): ?>
@@ -118,28 +119,29 @@ $targets_email = [$comment_data['user_id'] != get_current_user_id() ? $comment_d
                 </div>
                 <div class="reply-item__content">
                     <?= formatNotificationsComment($comment->commentaire) ?>
-                </div>
-                <?php if(!empty($comment->file_path)): ?>
-                    <div class="reply-item__image">
-                        <div class="expend">
-                            <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/expend.svg' ?>" alt="" class="">
+                    <?php if(!empty($comment->file_path)): ?>
+                        <div class="reply-item__image">
+                            <div class="expend">
+                                <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/expend.svg' ?>" alt="" class="">
+                            </div>
+                            <img src="<?= WP_ANNOTATION_URL . 'assets/images/replies/' . $comment->file_path ?>" alt="" class="src-img">
                         </div>
-                        <img src="<?= WP_ANNOTATION_URL . 'assets/images/replies/' . $comment->file_path ?>" alt="" class="src-img">
-                    </div>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+                <div class="reply-item__clear"></div>
             </div>
         <?php endif; endforeach; ?>
     </div>
 <?php endif; ?>
-<form class="reply-box__form" id="reply-box-form">
+<form class="reply-box__form mention-list-parent" id="reply-box-form">
     <?php foreach($targets_email as $email_id): ?>
         <input type="hidden" name="targets_email[]" value="<?= $email_id ?>">
     <?php endforeach; ?>
     <textarea name="comment" id="comment" placeholder="Répondre" rows="5"></textarea>
-    <div id="mention-list" class="mention-list">
+    <div id="mention-list" class="mention-list mention-list-box">
         <div class="mention-list__wrapper">
             <?php foreach(get_wp_annotations_users_by_name() as $id => $user): if($id != get_current_user_id()): ?>
-                <div class="mention-list__item" data-user-id="<?= $id ?>" data-user-name="<?= $user ?>">@<?= $user ?></div>        
+                <div class="mention-list__item mention-list-item" data-user-id="<?= $id ?>" data-user-name="<?= $user ?>">@<?= $user ?></div>        
             <?php endif; endforeach; ?>
         </div>
     </div>

@@ -1,23 +1,31 @@
 <!-- Replies box -->
 <?php  
-if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/replies/replies.php' ) ) {
-    include WP_ANNOTATION_PATH . 'views/frontend/replies/replies.php';
+if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/replies.php' ) ) {
+    include WP_ANNOTATION_PATH . 'views/frontend/replies.php';
 }
 ?>
 
 <!-- Lightbox -->
-<?php  
-if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/lightbox.php' ) ) {
-    include WP_ANNOTATION_PATH . 'views/frontend/lightbox.php';
-}
-?>
+<div id="wp-annotations--lightbox" class="wp-annotations--lightbox">
+    <div class="wp-annotations--lightbox__wrapper">
+        <div class="close-light-button">
+            <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/close.svg' ?>" alt="Fermer" title="Fermer">
+        </div>
+        <img src="" class="lightbox-img">
+    </div>
+</div>
 
-<!-- Switch -->
-<?php  
-if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/switch.php' ) ) {
-    include WP_ANNOTATION_PATH . 'views/frontend/switch.php';
-}
-?>
+<!-- Switches -->
+<div class="wp-annotations__actions">
+    <button class="wp-annotations__actions--bubble ann-dash" id="wp-annotations--dash-bubble">
+        <img src="<?= WP_ANNOTATION_URL ?>assets/images/icons/annotation.svg" alt="Tableau de bord" title="Tableau de bord" class="comment">
+        <img src="<?= WP_ANNOTATION_URL ?>assets/images/icons/close.svg" alt="Fermer" title="Fermer" class="browse">
+    </button>
+    <button class="wp-annotations__actions--bubble ann-switch" id="wp-annotations--switch-bubble">
+        <img src="<?= WP_ANNOTATION_URL ?>assets/images/icons/pen.svg" alt="Commenter" title="Commenter" class="comment">
+        <img src="<?= WP_ANNOTATION_URL ?>assets/images/icons/unpen.svg" alt="Naviguer" title="Naviguer" class="browse">
+    </button>
+</div>
 
 <!-- Dashboard -->
 <?php  
@@ -28,30 +36,37 @@ if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/dashboard.php' ) ) {
 
 <!-- Comments layout -->
 <div id="wp-annotations--comments-layout" class="wp-annotations--comments-layout">
-    <?php  
-    if ( file_exists( WP_ANNOTATION_PATH . 'views/frontend/modal.php' ) ) {
-        include WP_ANNOTATION_PATH . 'views/frontend/modal.php';
-    }
-    ?>
+    <div class="wp-annotations__modal" data-position-x="0" data-position-y="0" data-device="laptop">
+        <svg width="118" height="118" viewBox="0 0 118 118" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="59" cy="59" r="40" fill="white" class="modal-fill"/>
+            <circle cx="59" cy="59" r="56.5" stroke="white" stroke-width="5" class="modal-stroke"/>
+        </svg>
+    </div>
+
+    <form id="wp-annotation-form" class="mention-list-parent" data-page-id="<?= get_the_ID() ?>" data-user-id="<?= get_current_user_id() ?>">
+        <textarea name="comment" placeholder="Ajouter un commentaire..." rows="3" style="width: 100%;"></textarea>
+        <div id="mention-list-main" class="mention-list-main mention-list-box">
+            <div class="mention-list-main__wrapper">
+                <?php foreach(get_wp_annotations_users_by_name() as $id => $user): if($id != get_current_user_id()): ?>
+                    <div class="mention-list-main__item mention-list-item" data-user-id="<?= $id ?>" data-user-name="<?= $user ?>">@<?= $user ?></div>        
+                <?php endif; endforeach; ?>
+            </div>
+        </div>
+        
+        <?php if( check_user_role() ): ?>
+            <label class="client-visible">
+                <input type="checkbox" name="client_visible" value="1"> Visible par le client
+            </label>
+        <?php else: ?>
+            <input type="hidden" name="client_visible" value="<?= check_user_role() ? 0 : 1 ?>">
+        <?php endif; ?>
+
+        <div class="submit-box">
+            <button type="reset">Annuler</button>
+            <button type="submit">Envoyer</button>
+        </div>
+    </form>
 </div>
 
 <!-- Notices -->
-<div id="wp-annotations--notices" class="wp-annotations--notices">
-    <div class="wp-annotations--notice wp-annotations--notice__success">
-        <span>
-            <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </span>
-        <p class="wp-annotations--notice__message"></p>
-    </div>
-    <div class="wp-annotations--notice wp-annotations--notice__error">
-        <span>
-            <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 4L20 20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M20 4L4 20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </span>
-        <p class="wp-annotations--notice__message">Lorem ipsum dolor sit amet</p>
-    </div>
-</div>
+<div id="wp-annotations--notices" class="wp-annotations--notices"></div>

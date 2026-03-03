@@ -2,8 +2,9 @@
 /**
  * Plugin Name: WP Annotations Plugin
  * Description: Plugin d'annotation
- * Version: 1.3.0
- * Author: Quentin Lequenne
+ * Version: 1.4.0
+ * Author: Le Moulin à vent | Agence web
+ * Author URI: https://lemoulinavent.ca
  */
 
 // Enregistrement des paramètres
@@ -80,39 +81,23 @@ define('WP_ANNOTATION_ROLE', 'wp_annotation_admin');
 
 // Styles / scripts
 function wp_annotations_enqueue_assets() {
-    wp_enqueue_style(
-        'wp-annotations-style', 
-        WP_ANNOTATION_URL . 'assets/css/style.min.css', 
-        [],
-        filemtime(WP_ANNOTATION_PATH . 'assets/css/style.min.css')
-    );
+    wp_enqueue_style( 'wp-annotations-style', WP_ANNOTATION_URL . 'assets/css/style.min.css', [], '1.' . date('YmdHis') );
+    wp_enqueue_script( 'wp-annotations-script', WP_ANNOTATION_URL . 'assets/scripts/scriptV2.js', ['jquery'], '1.' . date('YmdHis'), true );
+    wp_enqueue_script( 'html2canvas', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', [], '1.4.1', true );
 
-    wp_enqueue_script(
-        'wp-annotations-script', 
-        WP_ANNOTATION_URL . 'assets/scripts/script.js', 
-        ['jquery'],
-        filemtime(WP_ANNOTATION_PATH . 'assets/scripts/script.js'),
-        true 
-    );
-
-    wp_enqueue_script(
-        'html2canvas', 
-        'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 
-        [], 
-        '1.4.1', 
-        true
-    );
-
-    // Assure-toi que tu transmets un tableau
+    wp_enqueue_script( 'annotation-iconify', 'https://code.iconify.design/iconify-icon/1.0.2/iconify-icon.min.js', array( 'jquery' ), '1.0', true );
     wp_localize_script('wp-annotations-script', 'ajaxurl', array(
-        'url' => admin_url('admin-ajax.php')
+        'url'   => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('wp_annotations_nonce'),
     ));
-    
-    wp_localize_script('wp-annotations-script', 'datas', array(
-        'quality' => get_option('wp_annotation_quality', '0.7')
-    ));
+    wp_localize_script('wp-annotations-script', 'datas', array( 'quality' => get_option('wp_annotation_quality', '0.7') ));
 }
 add_action('wp_enqueue_scripts', 'wp_annotations_enqueue_assets');
+
+// Handler
+if ( file_exists( WP_ANNOTATION_PATH . 'assets/handler.php' )) {
+    include WP_ANNOTATION_PATH . 'assets/handler.php';
+}
 
 // Functions
 if ( file_exists( WP_ANNOTATION_PATH . 'assets/functions.php' )) {

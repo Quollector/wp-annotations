@@ -1,105 +1,63 @@
 <?php
-global $wpdb;
-$table_name = $wpdb->prefix . 'reviews';
 
-if( isset( $device ) && $device !== 'all' ) {
-    $query = "SELECT * FROM $table_name WHERE device = '$device'";
-}
-else {
-    $query = "SELECT * FROM $table_name";
-}
+$view = isset( $view ) ? $view : 'all';
+$viewDevice = isset( $viewDevice ) ? $viewDevice : 'all';
+$device = isset( $device ) ? $device : 'all';
 
-$datas = $wpdb->get_results($query);
-
-$grouped_annotations = [];
-$count_non_resolu = 0;
-$count_resolu = 0;
-$count_laptop = isset( $count_laptop ) ? $count_laptop : 0;
-$count_tablet = isset( $count_tablet ) ? $count_tablet : 0;
-$count_mobile = isset( $count_mobile ) ? $count_mobile : 0;
-$view = isset($view) ? $view : 'active';
-$device = isset($device) ? $device : 'all';
-
-foreach ($datas as $annotation) {
-    $grouped_annotations[$annotation->page_id][] = $annotation;
-
-    if ( check_user_role() ) {
-        if ( $annotation->statut === 'non résolu' && get_post($annotation->page_id) ) {
-            $count_non_resolu++;
-        } elseif ( $annotation->statut === 'résolu' && get_post($annotation->page_id) ) {
-            $count_resolu++;
-        }
-
-        if( $annotation->device === 'laptop' ){
-            $count_laptop++;
-        }
-        elseif( $annotation->device === 'tablet' ){
-            $count_tablet++;
-        }
-        elseif( $annotation->device === 'mobile' ){
-            $count_mobile++;
-        }
-    }
-    else{
-        if( $annotation->client_visible ) {
-            if ( $annotation->statut === 'non résolu' && get_post($annotation->page_id) ) {
-                $count_non_resolu++;
-            } elseif ( $annotation->statut === 'résolu' && get_post($annotation->page_id) ) {
-                $count_resolu++;
-            }   
-    
-            if( $annotation->device === 'laptop' ){
-                $count_laptop++;
-            }
-            elseif( $annotation->device === 'tablet' ){
-                $count_tablet++;
-            }
-            elseif( $annotation->device === 'mobile' ){
-                $count_mobile++;
-            }
-        }
-    }
-}
+$grouped_annotations = getAllCommentsHandler( $view, $viewDevice );
+$stats = getCommentsCountHandler($viewDevice);
+$count_total = $stats['total'];
+$count_totalComments = $stats['totalComments'];
+$count_non_resolu = $stats['count_non_resolu'];
+$count_resolu = $stats['count_resolu'];
+$count_laptop = $stats['count_laptop'];
+$count_tablet = $stats['count_tablet'];
+$count_mobile = $stats['count_mobile'];
 
 $interface_color = get_option('wp_annotation_color', 'blue');
+if ( ! array_key_exists( $interface_color, WP_ANNOTATION_COLORS ) ) {
+    $interface_color = 'blue';
+}
 
 ?>
 <?php // DEVICES ?>
-<div class="wp-annotations--dashboard__devices <?= $device ?>" data-device="<?= $device ?>">
-    <div class="devices-wrapper">
-        <button class="device all" data-device="all">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="fill">
-                <path d="M1 2h22v4h-2V4H3v13h9v2H1zm13 6h10v14H14zm2 2v10h6V10zm1.998 6.998h2.004v2.004h-2.004zM5 20h7v2H5z"/>
-            </svg>
-        </button>
-        <button class="device laptop<?= $count_laptop > 0 ? '' : ' disabled' ?>" data-device="laptop">
-            <svg width="800px" title="laptop" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 18H14M7.20003 3H16.8C17.9201 3 18.4802 3 18.908 3.21799C19.2843 3.40973 19.5903 3.71569 19.782 4.09202C20 4.51984 20 5.0799 20 6.2V11.8C20 12.9201 20 13.4802 19.782 13.908C19.5903 14.2843 19.2843 14.5903 18.908 14.782C18.4802 15 17.9201 15 16.8 15H7.20003C6.07992 15 5.51987 15 5.09205 14.782C4.71572 14.5903 4.40976 14.2843 4.21801 13.908C4.00003 13.4802 4.00003 12.9201 4.00003 11.8V6.2C4.00003 5.0799 4.00003 4.51984 4.21801 4.09202C4.40976 3.71569 4.71572 3.40973 5.09205 3.21799C5.51987 3 6.07992 3 7.20003 3ZM4.58888 21H19.4112C20.2684 21 20.697 21 20.9551 20.8195C21.1805 20.6618 21.3311 20.4183 21.3713 20.1462C21.4173 19.8345 21.2256 19.4512 20.8423 18.6845L20.3267 17.6534C19.8451 16.6902 19.6043 16.2086 19.2451 15.8567C18.9274 15.5456 18.5445 15.309 18.1241 15.164C17.6488 15 17.1103 15 16.0335 15H7.96659C6.88972 15 6.35128 15 5.87592 15.164C5.45554 15.309 5.07266 15.5456 4.75497 15.8567C4.39573 16.2086 4.15493 16.6902 3.67334 17.6534L3.1578 18.6845C2.77444 19.4512 2.58276 19.8345 2.6288 20.1462C2.669 20.4183 2.81952 20.6618 3.04492 20.8195C3.30306 21 3.73166 21 4.58888 21Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-        <button class="device tablet<?= $count_tablet > 0 ? '' : ' disabled' ?>" data-device="tablet">
-            <svg width="800px" title="tablet" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 3V4.4C9 4.96005 9 5.24008 9.10899 5.45399C9.20487 5.64215 9.35785 5.79513 9.54601 5.89101C9.75992 6 10.0399 6 10.6 6H13.4C13.9601 6 14.2401 6 14.454 5.89101C14.6422 5.79513 14.7951 5.64215 14.891 5.45399C15 5.24008 15 4.96005 15 4.4V3M8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V6.2C19 5.0799 19 4.51984 18.782 4.09202C18.5903 3.71569 18.2843 3.40973 17.908 3.21799C17.4802 3 16.9201 3 15.8 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.07989 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.07989 21 8.2 21Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-        <button class="device mobile<?= $count_mobile > 0 ? '' : ' disabled' ?>" data-device="mobile">
-            <svg fill="#000000" title="mobile" width="800px" height="800px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" class="fill">
-                <path d="M12.25 0h-8.5A1.25 1.25 0 0 0 2.5 1.25v13.5A1.25 1.25 0 0 0 3.75 16h8.5a1.25 1.25 0 0 0 1.25-1.25V1.25A1.25 1.25 0 0 0 12.25 0zm0 14.75h-8.5V1.25h8.5z"/>
-                <ellipse cx="8" cy="12.75" rx=".8" ry=".75"/>
-            </svg>
-        </button>
-    </div>
+<div class="wp-annotations--dashboard__devices">
+    <label for="ann-devices-select">Appareils</label>
+    <select name="ann-devices-select" id="ann-devices-select">
+        <option value="all" data-icon="material-symbols:devices-outline"<?= $viewDevice === 'all' ? ' selected' : '' ?>>
+            Tous les appareils (<?= $count_total ?>)
+        </option>
+        <option value="laptop" data-icon="material-symbols:laptop-mac-outline" <?= $viewDevice === 'laptop' ? 'selected' : '' ?>>
+            Ordinateur (<?= $count_laptop ?>)
+        </option>
+        <option value="tablet" data-icon="material-symbols:tablet-mac-outline" <?= $viewDevice === 'tablet' ? 'selected' : '' ?>>
+            Tablette (<?= $count_tablet ?>)
+        </option>
+        <option value="mobile" data-icon="material-symbols:smartphone-outline" <?= $viewDevice === 'mobile' ? 'selected' : '' ?>>
+            Mobile (<?= $count_mobile ?>)
+        </option>
+    </select>
 </div>
 
 <?php // COMMENTS STATUS ?>
-<div class="wp-annotations--dashboard__comments<?= $view === 'active' ? ' active' : '' ?>">
-    <button class="comments-actives">Actifs (<?= $count_non_resolu ?>)</button>
-    <button class="comments-resolved">Résolus (<?= $count_resolu ?>)</button>
+<div class="wp-annotations--dashboard__comments">    
+    <label for="ann-comments-select">Statut des commentaires</label>
+    <select name="ann-comments-select" id="ann-comments-select">
+        <option value="all" data-icon="material-symbols:comment-outline-rounded">
+            Tous les commentaires (<?= $count_totalComments ?>)
+        </option>
+        <option value="active" data-icon="material-symbols:pending-outline"<?= $view === 'active' ? ' selected' : '' ?>>
+            Commentaires actifs (<?= $count_non_resolu ?>)
+        </option>
+        <option value="resolved" data-icon="material-symbols:done-all-rounded"<?= $view === 'resolved' ? ' selected' : '' ?>>
+            Commentaires résolus (<?= $count_resolu ?>)
+        </option>
+    </select>
 </div>
 
-<?php // COMMENTS ACTIVE ?>
-<div class="wp-annotations--dashboard__comments-list active-comments<?= $view === 'active' ? '' : ' display-none' ?>">
-    <?php if( $count_non_resolu > 0 ): ?>
+<?php // COMMENTS ?>
+<div class="wp-annotations--dashboard__comments-list">
+    <?php if( count($grouped_annotations) > 0 ): ?>
         <?php
         foreach ($grouped_annotations as $page_id => $annotations) :
             $page = get_post($page_id);
@@ -108,22 +66,11 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                 $page_title = $page->post_title;
                 $page_url = get_permalink($page_id);
                 $page_slug = wp_make_link_relative(get_permalink($page_id));
-
-                $count_active = 0;
-                $has_active = false;
-                foreach ($annotations as $annotation) {
-                    if ($annotation->statut === 'non résolu') {
-                        $has_active = true;
-                        $count_active++;
-                    }
-                }
-
-                if ($has_active):
         ?>
         <div class="comment-page-item">
             <div class="accordeon-header">
-                <h5><?= $page_slug ?></h5>
-                <span>(<?= $count_active ?>)</span>
+                <h5><?= $page_title ?> (<?= $page_slug ?>)</h5>
+                <span>(<?= count($annotations) ?>)</span>
                 <a href="<?= $page_url ?>" title="Voir la page">
                 <?php // <a href="<= $page_url >?review-mode=1" title="Voir la page"> --> ?>
                     <svg width="800px" height="800px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
@@ -139,8 +86,6 @@ $interface_color = get_option('wp_annotation_color', 'blue');
             <div class="accordeon-content">
                 <?php 
                 foreach ($annotations as $annotation) : 
-                    if( $annotation->statut === 'non résolu' ) : 
-                        if ( check_user_role() || $annotation->client_visible ) :
                 ?>
                     <div class="comment-item <?= $annotation->device ?>" data-comment-id="<?= $annotation->id ?>" data-screen-url="<?= $annotation->screenshot_url ?>">
                         <div class="comment-item__header">
@@ -179,7 +124,7 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                                 <?php endif; ?>
                             </div>
                             <div class="buttons">
-                                <button class="resolve false" title="Résoudre">
+                                <button class="resolve <?= $annotation->statut === 'résolu' ? 'true' : 'false' ?>" title="Résoudre">
                                     <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="active">
                                         <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
@@ -232,138 +177,10 @@ $interface_color = get_option('wp_annotation_color', 'blue');
                             </div>
                         </div>
                     </div>
-                <?php endif; endif; endforeach; ?>
+                <?php endforeach; ?>
             </div>
         </div>
-        <?php endif; endif; endforeach; ?>
-    <?php else: ?>
-        <div class="no-comment">
-            <p>Aucun commentaire.</p>
-        </div>
-    <?php endif; ?>
-</div>
-
-<?php // COMMENTS RESOLVED ?>
-<div class="wp-annotations--dashboard__comments-list resolved-comments<?= $view === 'active' ? ' display-none' : '' ?>">
-    <?php if( $count_resolu > 0 ): ?>
-        <?php
-        foreach ($grouped_annotations as $page_id => $annotations) :
-            $page = get_post($page_id);
-
-            if ($page):
-            $page_title = $page->post_title;
-            $page_url = get_permalink($page_id);
-            $page_slug = wp_make_link_relative(get_permalink($page_id));
-
-            $count_resolved = 0;
-            $has_resolved = false;
-            foreach ($annotations as $annotation) {
-                if ($annotation->statut === 'résolu') {
-                    $has_resolved = true;
-                    $count_resolved++;
-                }
-            }
-
-            if ($has_resolved):
-        ?>
-        <div class="comment-page-item">
-            <div class="accordeon-header">
-                <h5><?= $page_slug ?></h5>
-                <span>(<?= $count_resolved ?>)</span>
-                <a href="<?= $page_url ?>?review-mode=1&view=resolved" title="Voir la page">
-                    <svg width="800px" height="800px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6 5.914l2.06-2.06v-.708L5.915 1l-.707.707.043.043.25.25 1 1h-3a2.5 2.5 0 0 0 0 5H4V7h-.5a1.5 1.5 0 1 1 0-3h3L5.207 5.293 5.914 6 6 5.914zM11 2H8.328l-1-1H12l.71.29 3 3L16 5v9l-1 1H6l-1-1V6.5l1 .847V14h9V6h-4V2zm1 0v3h3l-3-3z"/>
-                    </svg>
-                </a>
-                <button class="toggle-accordeon">
-                    <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M4.46938 9.39966C4.76227 9.10677 5.23715 9.10677 5.53004 9.39966L11.894 15.7636C11.9916 15.8613 12.1499 15.8613 12.2476 15.7636L18.6115 9.39966C18.9044 9.10677 19.3793 9.10677 19.6722 9.39966C19.9651 9.69256 19.9651 10.1674 19.6722 10.4603L13.3082 16.8243C12.6248 17.5077 11.5168 17.5077 10.8333 16.8243L4.46938 10.4603C4.17649 10.1674 4.17649 9.69256 4.46938 9.39966Z"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="accordeon-content">
-                <?php foreach ($annotations as $annotation) : if( $annotation->statut === 'résolu' ) : ?>
-                    <div class="comment-item" data-comment-id="<?= $annotation->id ?>">
-                        <div class="comment-item__header">
-                            <div class="dot">
-                                <?= $annotation->id ?>
-                            </div>
-                            <h5><?= get_userdata($annotation->user_id)->display_name ?></h5>
-                            <span><?= date('d.m.Y', strtotime($annotation->timestamp)) ?></span>
-                            <?php if( check_user_role() ): ?>
-                                <div class="visible-by-client">
-                                    <?php if( !$annotation->client_visible ) : ?>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
-                                            <path fill="#FF6600" d="M1 12s4.188-6 11-6c.947 0 1.839.121 2.678.322L8.36 12.64A4 4 0 0 1 8 11c0-.937.335-1.787.875-2.469c-2.392.812-4.214 2.385-5.254 3.469a15 15 0 0 0 2.98 2.398l-1.453 1.453C2.497 14.13 1 12 1 12m22 0s-4.188 6-11 6c-.946 0-1.836-.124-2.676-.323L5 22l-1.5-1.5l17-17L22 5l-3.147 3.147C21.501 9.869 23 12 23 12m-2.615.006a14.8 14.8 0 0 0-2.987-2.403L16 11a4 4 0 0 1-4 4l-.947.947c.31.031.624.053.947.053c3.978 0 6.943-2.478 8.385-3.994"/>
-                                        </svg>
-                                    <?php else: ?>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
-                                            <path fill="#FF6600" d="M12 6C5.188 6 1 12 1 12s4.188 6 11 6s11-6 11-6s-4.188-6-11-6m0 10c-3.943 0-6.926-2.484-8.379-4c1.04-1.085 2.862-2.657 5.254-3.469A3.96 3.96 0 0 0 8 11a4 4 0 0 0 8 0a3.96 3.96 0 0 0-.875-2.469c2.393.812 4.216 2.385 5.254 3.469c-1.455 1.518-4.437 4-8.379 4"/>
-                                        </svg>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endif; ?>
-                            <div class="device">
-                                <?php if( $annotation->device === 'laptop' ) : ?>
-                                    <svg width="800px" title="laptop" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M10 18H14M7.20003 3H16.8C17.9201 3 18.4802 3 18.908 3.21799C19.2843 3.40973 19.5903 3.71569 19.782 4.09202C20 4.51984 20 5.0799 20 6.2V11.8C20 12.9201 20 13.4802 19.782 13.908C19.5903 14.2843 19.2843 14.5903 18.908 14.782C18.4802 15 17.9201 15 16.8 15H7.20003C6.07992 15 5.51987 15 5.09205 14.782C4.71572 14.5903 4.40976 14.2843 4.21801 13.908C4.00003 13.4802 4.00003 12.9201 4.00003 11.8V6.2C4.00003 5.0799 4.00003 4.51984 4.21801 4.09202C4.40976 3.71569 4.71572 3.40973 5.09205 3.21799C5.51987 3 6.07992 3 7.20003 3ZM4.58888 21H19.4112C20.2684 21 20.697 21 20.9551 20.8195C21.1805 20.6618 21.3311 20.4183 21.3713 20.1462C21.4173 19.8345 21.2256 19.4512 20.8423 18.6845L20.3267 17.6534C19.8451 16.6902 19.6043 16.2086 19.2451 15.8567C18.9274 15.5456 18.5445 15.309 18.1241 15.164C17.6488 15 17.1103 15 16.0335 15H7.96659C6.88972 15 6.35128 15 5.87592 15.164C5.45554 15.309 5.07266 15.5456 4.75497 15.8567C4.39573 16.2086 4.15493 16.6902 3.67334 17.6534L3.1578 18.6845C2.77444 19.4512 2.58276 19.8345 2.6288 20.1462C2.669 20.4183 2.81952 20.6618 3.04492 20.8195C3.30306 21 3.73166 21 4.58888 21Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                <?php elseif( $annotation->device === 'tablet' ) : ?>
-                                    <svg width="800px" title="tablet" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M9 3V4.4C9 4.96005 9 5.24008 9.10899 5.45399C9.20487 5.64215 9.35785 5.79513 9.54601 5.89101C9.75992 6 10.0399 6 10.6 6H13.4C13.9601 6 14.2401 6 14.454 5.89101C14.6422 5.79513 14.7951 5.64215 14.891 5.45399C15 5.24008 15 4.96005 15 4.4V3M8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V6.2C19 5.0799 19 4.51984 18.782 4.09202C18.5903 3.71569 18.2843 3.40973 17.908 3.21799C17.4802 3 16.9201 3 15.8 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.07989 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.07989 21 8.2 21Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                <?php elseif( $annotation->device === 'mobile' ) : ?>
-                                    <svg fill="#000000" title="mobile" width="800px" height="800px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" class="fill">
-                                        <path d="M12.25 0h-8.5A1.25 1.25 0 0 0 2.5 1.25v13.5A1.25 1.25 0 0 0 3.75 16h8.5a1.25 1.25 0 0 0 1.25-1.25V1.25A1.25 1.25 0 0 0 12.25 0zm0 14.75h-8.5V1.25h8.5z"/>
-                                        <ellipse cx="8" cy="12.75" rx=".8" ry=".75"/>
-                                    </svg>
-                                <?php endif; ?>
-                            </div>
-                            <div class="buttons">
-                                <button class="resolve true" title="Résoudre">
-                                    <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="active">
-                                        <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                    <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="resolved">
-                                        <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                                
-                                <?php if ($annotation->user_id == get_current_user_id()) : ?>
-                                <button class="delete" title="Effacer">
-                                    <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M20.5001 6H3.5" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="1.5" stroke-linecap="round"/>
-                                        <path d="M18.8332 8.5L18.3732 15.3991C18.1962 18.054 18.1077 19.3815 17.2427 20.1907C16.3777 21 15.0473 21 12.3865 21H11.6132C8.95235 21 7.62195 21 6.75694 20.1907C5.89194 19.3815 5.80344 18.054 5.62644 15.3991L5.1665 8.5" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="1.5" stroke-linecap="round"/>
-                                        <path d="M9.5 11L10 16" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="1.5" stroke-linecap="round"/>
-                                        <path d="M14.5 11L14 16" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="1.5" stroke-linecap="round"/>
-                                        <path d="M6.5 6C6.55588 6 6.58382 6 6.60915 5.99936C7.43259 5.97849 8.15902 5.45491 8.43922 4.68032C8.44784 4.65649 8.45667 4.62999 8.47434 4.57697L8.57143 4.28571C8.65431 4.03708 8.69575 3.91276 8.75071 3.8072C8.97001 3.38607 9.37574 3.09364 9.84461 3.01877C9.96213 3 10.0932 3 10.3553 3H13.6447C13.9068 3 14.0379 3 14.1554 3.01877C14.6243 3.09364 15.03 3.38607 15.2493 3.8072C15.3043 3.91276 15.3457 4.03708 15.4286 4.28571L15.5257 4.57697C15.5433 4.62992 15.5522 4.65651 15.5608 4.68032C15.841 5.45491 16.5674 5.97849 17.3909 5.99936C17.4162 6 17.4441 6 17.5 6" stroke="<?= WP_ANNOTATION_COLORS[$interface_color]['sombre'] ?>" stroke-width="1.5"/>
-                                    </svg>
-                                </button>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div class="comment-item__content">
-                            <?= formatNotificationsComment($annotation->commentaire) ?>
-                        </div>
-
-                        <div class="comment-item__screenshot">
-                            <div class="comment-item__screenshot--wrapper">
-                                <div class="expend">
-                                    <img src="<?= WP_ANNOTATION_URL . 'assets/images/icons/expend.svg' ?>" alt="" class="">
-                                </div>
-                                <img src="<?= WP_ANNOTATION_URL . 'assets/images/screenshots/' . $annotation->screenshot_url ?>" alt="" class="src-img">
-                            </div>
-                            <div class="comment-item__screenshot--comments open-add-comments<?= !empty( getAllReplies( $annotation->id ) ) ? ' has-comments' : '' ?>">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                    <path fill-rule="evenodd" d="M9.5 4c-3.268 0-6 2.419-6 5.5c0 1.222.435 2.347 1.162 3.255l-.644 2.363a.504.504 0 0 0 .674.593l2.8-1.166a.5.5 0 0 0-.385-.923l-1.856.773l.445-1.63a.5.5 0 0 0-.108-.463C4.903 11.528 4.5 10.555 4.5 9.5c0-2.441 2.193-4.5 5-4.5c2.31 0 4.21 1.398 4.805 3.253c-3.18.094-5.805 2.477-5.805 5.497c0 3.081 2.732 5.5 6 5.5a6.5 6.5 0 0 0 2.192-.378l2.616 1.09c.376.156.782-.2.674-.594l-.644-2.363A5.18 5.18 0 0 0 20.5 13.75c0-2.807-2.267-5.064-5.142-5.444C14.758 5.814 12.335 4 9.5 4m0 9.75c0-2.441 2.193-4.5 5-4.5s5 2.059 5 4.5c0 1.055-.403 2.028-1.088 2.802a.5.5 0 0 0-.108.463l.445 1.63l-1.856-.773a.5.5 0 0 0-.377-.003a5.5 5.5 0 0 1-2.016.381c-2.807 0-5-2.058-5-4.5" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; endforeach; ?>
-            </div>
-        </div>
-        <?php endif; endif; endforeach; ?>
+        <?php endif; endforeach; ?>
     <?php else: ?>
         <div class="no-comment">
             <p>Aucun commentaire.</p>

@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
-$margin: 350px;
+$margin: 400px;
 $laptop: 1280;
 $tablet: 769;
 $mobile: 400;
@@ -132,6 +132,221 @@ html{
         }
     } 
 
+    // :::'###:::::'######::'########:'####::'#######::'##::: ##::::'########::'##::::'##:'########:'########::'#######::'##::: ##::'######::
+    // ::'## ##:::'##... ##:... ##..::. ##::'##.... ##: ###:: ##:::: ##.... ##: ##:::: ##:... ##..::... ##..::'##.... ##: ###:: ##:'##... ##:
+    // :'##:. ##:: ##:::..::::: ##::::: ##:: ##:::: ##: ####: ##:::: ##:::: ##: ##:::: ##:::: ##::::::: ##:::: ##:::: ##: ####: ##: ##:::..::
+    // '##:::. ##: ##:::::::::: ##::::: ##:: ##:::: ##: ## ## ##:::: ########:: ##:::: ##:::: ##::::::: ##:::: ##:::: ##: ## ## ##:. ######::
+    //  #########: ##:::::::::: ##::::: ##:: ##:::: ##: ##. ####:::: ##.... ##: ##:::: ##:::: ##::::::: ##:::: ##:::: ##: ##. ####::..... ##:
+    //  ##.... ##: ##::: ##:::: ##::::: ##:: ##:::: ##: ##:. ###:::: ##:::: ##: ##:::: ##:::: ##::::::: ##:::: ##:::: ##: ##:. ###:'##::: ##:
+    //  ##:::: ##:. ######::::: ##::::'####:. #######:: ##::. ##:::: ########::. #######::::: ##::::::: ##::::. #######:: ##::. ##:. ######::
+    // ..:::::..:::......::::::..:::::....:::.......:::..::::..:::::........::::.......::::::..::::::::..::::::.......:::..::::..:::......:::
+    &__actions{
+        position: fixed;
+        left: 0;
+        top: 0;
+        background: rgba($sombre_rgb, 0.85);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border-radius: 0 0 8px 0;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.35);
+        z-index: 997;
+        transition: all .5s ease;  
+        backdrop-filter: blur(3px);
+
+        .dash-open &{
+            transform: translateX($margin);
+        }
+
+        .screenshot &{
+            display: none;
+        }
+
+        &--bubble{
+            width: 40px;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+            pointer-events: all;  
+            background: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+    
+            .review-mode.screenshot &{
+                display: none;
+            }
+    
+            img{
+                width: 20px;
+                height: 20px;
+                object-fit: contain;
+                display: block;
+                transition: all .5s ease;
+            }
+    
+            &:hover{
+                img{
+                    transform: scale(1.1);
+                }
+            }
+
+            &.ann-dash{
+                img{
+                    &.browse{
+                        display: none;
+                    }
+                }
+
+                .dash-open &{
+                    img{
+                        &.browse{
+                            display: block;
+                        }
+        
+                        &.comment{
+                            display: none;
+                        }
+                    }
+                }
+            }
+
+            &.ann-switch{
+                img{
+                    &.browse{
+                        display: none;
+                    }
+                }
+
+                .review-mode &{
+                    img{
+                        &.browse{
+                            display: block;
+                        }
+        
+                        &.comment{
+                            display: none;
+                        }
+                    }
+                }
+            }
+        }
+    
+        &--switch-bubble{
+            width: 40px;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+            pointer-events: all; 
+            background: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+    
+            svg{
+                width: 16px;
+                height: 16px;
+                object-fit: contain;
+                display: block;
+                transition: all .5s ease;
+
+                path{
+                    fill: $white;
+                    transition: fill .3s ease;
+                }
+
+                &.browse{
+                    display: none;
+                }
+            }
+    
+            .review-mode &{    
+                svg{
+                    &.browse{
+                        display: block;
+                    }
+    
+                    &.comment{
+                        display: none;
+                    }
+                }
+            }
+    
+            .dash-open &{
+                transform: translateX($margin);
+            }
+    
+            .review-mode.screenshot &{
+                display: none;
+            }
+    
+            &:hover{
+                svg{
+                    width: 18px;
+                    height: 18px;
+
+                    path{
+                        fill: #BBB;
+                    }
+                }
+            }
+        }
+    }
+
+    // '##::: ##::'#######::'########:'####::'######::'########::'######::
+    //  ###:: ##:'##.... ##:... ##..::. ##::'##... ##: ##.....::'##... ##:
+    //  ####: ##: ##:::: ##:::: ##::::: ##:: ##:::..:: ##::::::: ##:::..::
+    //  ## ## ##: ##:::: ##:::: ##::::: ##:: ##::::::: ######:::. ######::
+    //  ##. ####: ##:::: ##:::: ##::::: ##:: ##::::::: ##...:::::..... ##:
+    //  ##:. ###: ##:::: ##:::: ##::::: ##:: ##::: ##: ##:::::::'##::: ##:
+    //  ##::. ##:. #######::::: ##::::'####:. ######:: ########:. ######::
+    // ..::::..:::.......::::::..:::::....:::......:::........:::......:::
+    &--notices{
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 999;
+
+        .wp-ann-notice-item{
+            max-width: 250px;
+            background: linear-gradient(90deg, rgba($sombre_rgb, 0.25), rgba($sombre_rgb, 0.75));
+            border: 1px solid $sombre;
+            backdrop-filter: blur(3px);
+            box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
+            border-radius: 4px;
+            overflow: hidden;    
+            position: relative;
+            display: flex;
+            align-items: stretch;   
+
+            span{
+                padding: 0 16px;
+                display: flex;
+                align-items: center;
+                flex-shrink: 0;
+                color: $white;
+                font-size: 24px;
+            }
+
+            p{
+                font-size: 12px;
+                font-weight: 700;
+                line-height: 1.2;
+                color: $white;
+                padding: 24px 16px;
+                flex-grow: 1;
+            }  
+            
+            & + .wp-ann-notice-item{
+                margin-top: 10px;
+            }
+        }
+
+        .screenshot &{
+            display: none;
+        }
+    }
+
     // '##:::::::'####::'######:::'##::::'##:'########:'########:::'#######::'##::::'##:
     //  ##:::::::. ##::'##... ##:: ##:::: ##:... ##..:: ##.... ##:'##.... ##:. ##::'##::
     //  ##:::::::: ##:: ##:::..::: ##:::: ##:::: ##:::: ##:::: ##: ##:::: ##::. ##'##:::
@@ -187,168 +402,6 @@ html{
             }
         }
     }
-    
-    // '########:::::'###:::::'######::'##::::'##::::'########::'##::::'##:'########::'########::'##:::::::'########:
-    //  ##.... ##:::'## ##:::'##... ##: ##:::: ##:::: ##.... ##: ##:::: ##: ##.... ##: ##.... ##: ##::::::: ##.....::
-    //  ##:::: ##::'##:. ##:: ##:::..:: ##:::: ##:::: ##:::: ##: ##:::: ##: ##:::: ##: ##:::: ##: ##::::::: ##:::::::
-    //  ##:::: ##:'##:::. ##:. ######:: #########:::: ########:: ##:::: ##: ########:: ########:: ##::::::: ######:::
-    //  ##:::: ##: #########::..... ##: ##.... ##:::: ##.... ##: ##:::: ##: ##.... ##: ##.... ##: ##::::::: ##...::::
-    //  ##:::: ##: ##.... ##:'##::: ##: ##:::: ##:::: ##:::: ##: ##:::: ##: ##:::: ##: ##:::: ##: ##::::::: ##:::::::
-    //  ########:: ##:::: ##:. ######:: ##:::: ##:::: ########::. #######:: ########:: ########:: ########: ########:
-    // ........:::..:::::..:::......:::..:::::..:::::........::::.......:::........:::........:::........::........::
-    &--dash-bubble{
-        position: fixed;
-        left: 10px;
-        top: 10px;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #FFF;
-        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
-        z-index: 997;
-        border: none;
-        cursor: pointer;
-        pointer-events: all;
-        transition: transform .5s ease, background .3s ease;        
-
-        .logged-in &{
-            top: 42px;
-        }
-
-        .logged-in &{
-            top: 42px;
-        }
-
-        .dash-open &{
-            transform: translateX($margin);
-    
-            .wp-annotations--dash-bubble__wrapper{
-                svg{
-                    &.browse{
-                        display: block;
-                    }
-    
-                    &.comment{
-                        display: none;
-                    }
-                }
-            }
-        }
-
-        .review-mode.screenshot &{
-            display: none;
-        }
-
-        &__wrapper{
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            svg{
-                width: 16px;
-                height: 16px;
-                object-fit: contain;
-                display: block;
-
-                path{
-                    stroke: $main;
-                }
-
-                &.browse{
-                    display: none;
-                }
-            }
-        }
-
-        &:hover{
-            background: #DDD;
-        }
-    }
-
-    // :'######::'##:::::'##:'####:'########::'######::'##::::'##::::'########::'##::::'##:'########::'########::'##:::::::'########:
-    // '##... ##: ##:'##: ##:. ##::... ##..::'##... ##: ##:::: ##:::: ##.... ##: ##:::: ##: ##.... ##: ##.... ##: ##::::::: ##.....::
-    //  ##:::..:: ##: ##: ##:: ##::::: ##:::: ##:::..:: ##:::: ##:::: ##:::: ##: ##:::: ##: ##:::: ##: ##:::: ##: ##::::::: ##:::::::
-    // . ######:: ##: ##: ##:: ##::::: ##:::: ##::::::: #########:::: ########:: ##:::: ##: ########:: ########:: ##::::::: ######:::
-    // :..... ##: ##: ##: ##:: ##::::: ##:::: ##::::::: ##.... ##:::: ##.... ##: ##:::: ##: ##.... ##: ##.... ##: ##::::::: ##...::::
-    // '##::: ##: ##: ##: ##:: ##::::: ##:::: ##::: ##: ##:::: ##:::: ##:::: ##: ##:::: ##: ##:::: ##: ##:::: ##: ##::::::: ##:::::::
-    // . ######::. ###. ###::'####:::: ##::::. ######:: ##:::: ##:::: ########::. #######:: ########:: ########:: ########: ########:
-    // :......::::...::...:::....:::::..::::::......:::..:::::..:::::........::::.......:::........:::........:::........::........::
-    &--switch-bubble{
-        position: fixed;
-        left: 10px;
-        top: 60px;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #FFF;
-        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
-        z-index: 997;
-        border: none;
-        cursor: pointer;
-        pointer-events: all;
-        transition: transform .5s ease, background .3s ease;   
-
-        .logged-in &{
-            top: 92px;
-        }
-
-        .logged-in &{
-            top: 92px;
-        }
-
-        .review-mode &{    
-            .wp-annotations--switch-bubble__wrapper{
-                svg{
-                    &.browse{
-                        display: block;
-                    }
-    
-                    &.comment{
-                        display: none;
-                    }
-                }
-            }
-        }
-
-        .dash-open &{
-            transform: translateX($margin);
-        }
-
-        .review-mode.screenshot &{
-            display: none;
-        }
-
-        &__wrapper{
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            svg{
-                width: 16px;
-                height: 16px;
-                object-fit: contain;
-                display: block;
-
-                path{
-                    fill: $main;
-                }
-
-                &.browse{
-                    display: none;
-                }
-            }
-        }
-
-        &:hover{
-            background: #DDD;
-        }
-    }
 
     // '########:::::'###:::::'######::'##::::'##:'########:::'#######:::::'###::::'########::'########::
     //  ##.... ##:::'## ##:::'##... ##: ##:::: ##: ##.... ##:'##.... ##:::'## ##::: ##.... ##: ##.... ##:
@@ -365,7 +418,8 @@ html{
         width: $margin;
         max-width: calc(100% - 60px);
         height: 100vh;
-        background: $white;
+        background: rgba($white, 0.9);
+        backdrop-filter: blur(8px);
         z-index: 666;
         transition: transform .5s ease;
         transform: translateX(-$margin);        
@@ -413,157 +467,23 @@ html{
             transition: all .2s ease;
         }
 
-        &__header{
-            padding: 24px;
-            border-bottom: 1px solid rgba($sombre_rgb, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            h2{
-                font-weight: 700;
-                color: $sombre;
-                margin: 0;
-                padding: 0;
-                font-size: 32px;
-                padding: 0;
-            }
-        }
-
         &__devices{
-            border-bottom: 1px solid rgba($sombre_rgb, 0.3);
             position: relative;
-
-            .devices-wrapper{
-                display: flex;
-                align-items: center;
-            }
-            
-            &.display-none{
-                display: none;
-            }
-            
-            button{
-                width: 25%;
-                height: 50px;
-                background: none;
-                border: none;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: color .5s ease;
-                
-                svg{
-                    height: 28px;
-                    width: auto;
-
-                    &.fill{
-                        path{
-                            fill: $sombre;
-                        }
-                    }
-
-                    &:not(.fill){
-                        path{
-                            stroke: $sombre;
-                        }
-                    }
-                }
-
-                &.mobile{
-                    svg{
-                        height: 24px;
-                    }
-                }
-
-                &.disabled{
-                    cursor: not-allowed;
-                    opacity: 0.5;
-                }
-            }
-
-            &::after{
-                content: '';
-                height: 3px;
-                width: 25%;
-                background: $main;
-                bottom: 0;
-                left: 0%;
-                position: absolute;
-                transition: left .5s ease;
-            }
-
-            &.laptop{
-                &::after{
-                    left: 25%;
-                }
-            }
-            
-            &.tablet{
-                &::after{
-                    left: 50%;
-                }
-            }
-            
-            &.mobile{
-                &::after{
-                    left: 75%;
-                }
-            }
+            padding: 8px 16px 0;
         }
 
         &__comments{
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid rgba($sombre_rgb, 0.3);
             position: relative;
-            position: sticky;
-            top: 0;
-            background: $white;
-            z-index: 3;
-            
-            button{
-                width: 50%;
-                height: 50px;
-                background: none;
-                border: none;
-                cursor: pointer;
-                font-size: 18px;
-                font-weight: 500;
-                color: rgba($clair_rgb, 0.5);
-                transition: color .5s ease;
+            padding: 8px 16px 16px;
+            border-bottom: 1px solid rgba($sombre_rgb, 0.25);
+        }
 
-                &.comments-resolved{
-                    color: $main;
-                }
-            }
-
-            &::after{
-                content: '';
-                height: 3px;
-                width: 50%;
-                background: $main;
-                bottom: 0;
-                left: 50%;
-                position: absolute;
-                transition: left .5s ease;
-            }
-
-            &.active{
-            
-                button{
-                    color: $main;
-                    
-                    &.comments-resolved{
-                        color: rgba($clair_rgb, 0.5);
-                    }
-                }
-
-                &::after{
-                    left: 0;
-                }
-            }
+        label{
+            font-weight: 700;
+            color: $sombre;
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: block;
         }
 
         &__comments-list{
@@ -603,221 +523,147 @@ html{
     //  ##:.:: ##: ##:::: ##: ##:::: ##: ##.... ##: ##:::::::
     //  ##:::: ##:. #######:: ########:: ##:::: ##: ########:
     // ..:::::..:::.......:::........:::..:::::..::........::
-    &--modal{
+    &__modal{
         position: absolute;
         display: none;
-        transform: translate(-15px, 30px);
-
-        .modal-marker{
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: $main;
-            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
-            top: -30px;
-            left: 0;
-            transform: translateY(-15px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            img{
-                width: 20px;
-                height: 20px;
-                object-fit: contain;
-                object-position: center center;
-            }
-        }
-
-        form{
-            border-radius: 8px;
-            overflow: hidden;
-            background: $white;
-            width: 300px;
-            cursor: default;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-
-            textarea{
-                width: 100%;
-                height: 80px;
-                border: none;
-                border-bottom: 1px solid rgba($sombre_rgb, 0.3);
-                padding: 8px;
-                border-radius: 0;
-                font-family: "Open Sans", serif;
-                color: $sombre;
-                margin-bottom: 8px;
-    
-                &:focus{
-                    outline: none;
-                }
-            }
-
-            .mention-list-main{
-                display: none;
-                width: 100%;
-                padding: 0 8px 8px;
-
-                &__wrapper{
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-start;
-                    gap: 8px;
-                    flex-wrap: wrap;
-                }
-
-                &__item{
-                    padding: 3px 6px;
-                    border: 1px solid $clair;
-                    border-radius: 4px;
-                    font-size: 12px;
-                    cursor: pointer;
-                    transition: background .5s ease;
-
-                    &:hover{
-                        background: rgba($clair_rgb, 0.5);
-                    }
-                }
-            }
-
-            .client-visible{
-                display: block;
-                padding: 0 8px 12px;
-                color: $sombre;
-                font-size: 14px;
-
-                input{
-                    transform: translateY(2px);
-                    opacity: 1;
-                    height: initial;
-                    width: auto;
-                    position: relative;
-                }
-            }
-    
-            .submit-box{
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 8px 8px;
-    
-                button{
-                    padding: 8px 16px;
-                    background: $main;
-                    color: $white;
-                    border: none;
-                    border-radius: 50px;
-                    cursor: pointer;
-                    transition: background .5s ease;
-                    width: fit-content;
-        
-                    &:hover{
-                        background: $alt;
-                    }
-                }
-            }
-
-            .screenshot &{
-                display: none;
-            }
-        }
-        
-    }
-
-    // '##::: ##::'#######::'########:'####::'######::'########::'######::
-    //  ###:: ##:'##.... ##:... ##..::. ##::'##... ##: ##.....::'##... ##:
-    //  ####: ##: ##:::: ##:::: ##::::: ##:: ##:::..:: ##::::::: ##:::..::
-    //  ## ## ##: ##:::: ##:::: ##::::: ##:: ##::::::: ######:::. ######::
-    //  ##. ####: ##:::: ##:::: ##::::: ##:: ##::::::: ##...:::::..... ##:
-    //  ##:. ###: ##:::: ##:::: ##::::: ##:: ##::: ##: ##:::::::'##::: ##:
-    //  ##::. ##:. #######::::: ##::::'####:. ######:: ########:. ######::
-    // ..::::..:::.......::::::..:::::....:::......:::........:::......:::
-    &--notices{
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 999;
-        max-width: 250px;
-        background: #FFF;
-        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.35);
-        border-radius: 8px;
-        overflow: hidden;
-        display: none;
-
-        p{
-            color: $main;
-            line-height: 1.2;
-            font-size: 14px;
-        }
-
-        .logged-in &{
-            top: 42px;
-        }
-
-        &.success{
-            .wp-annotations--notice__success{
-                display: flex;
-            }
-
-            .wp-annotations--notice__error{
-                display: none;
-            }
-        }
-
-        &.error{
-            .wp-annotations--notice__success{
-                display: none;
-            }
-
-            .wp-annotations--notice__error{
-                display: flex;
-            }
-        }
-
-        @media screen and (max-width: 550px){
-            max-width: 100%;
-            width: calc(100% - 20px);
-            left: 10px;
-            top: auto;           
-        }
-    }
-
-    &--notice{
-        position: relative;
-        display: flex;
-        align-items: stretch;
-
-        span{
-            background: rgba($sombre_rgb, 0.15);
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        p{
-            font-size: 12px;
-            color: $main;
-            padding: 16px;
-            flex-grow: 1;
-        }
+        transform: translate(-50%, -50%);
+        width: 30px;
+        height: 30px;
 
         svg{
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            flex-shrink: 0;
-
-            path{
-                stroke: $main;
+            width: 100%;
+            height: 100%;
+            
+            .modal-fill{
+                fill: $main;
             }
-        }    
+
+            .modal-stroke{
+                stroke: $clair;
+            }
+        }
     }
 
+    // '########::'#######::'########::'##::::'##:
+    //  ##.....::'##.... ##: ##.... ##: ###::'###:
+    //  ##::::::: ##:::: ##: ##:::: ##: ####'####:
+    //  ######::: ##:::: ##: ########:: ## ### ##:
+    //  ##...:::: ##:::: ##: ##.. ##::: ##. #: ##:
+    //  ##::::::: ##:::: ##: ##::. ##:: ##:.:: ##:
+    //  ##:::::::. #######:: ##:::. ##: ##:::: ##:
+    // ..:::::::::.......:::..:::::..::..:::::..::
 
-    // Comment item (pages)
+    form#wp-annotation-form{
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        border-radius: 4px;
+        overflow: hidden;
+        background: linear-gradient(90deg, rgba($white, 0.85), rgba(200, 200, 200, 0.85));
+        backdrop-filter: blur(3px);
+        width: 400px;
+        max-width: calc(100% - 40px);
+        cursor: default;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25);
+
+        textarea{
+            width: 100%;
+            height: 80px;
+            border: none;
+            border-bottom: 1px solid rgba($sombre_rgb, 0.3);
+            padding: 8px;
+            border-radius: 0;
+            font-family: "Open Sans", serif;
+            color: $sombre;
+            margin-bottom: 8px;
+            background: none;
+
+            &:focus{
+                outline: none;
+            }
+        }
+
+        .mention-list-main{
+            display: none;
+            width: 100%;
+            padding: 0 8px 8px;
+
+            &__wrapper{
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            &__item{
+                padding: 3px 6px;
+                border: 1px solid $sombre;
+                border-radius: 4px;
+                font-size: 12px;
+                cursor: pointer;
+                transition: background .5s ease;
+
+                &:hover{
+                    background: rgba($clair_rgb, 0.5);
+                }
+            }
+        }
+
+        .client-visible{
+            display: block;
+            padding: 0 8px 12px;
+            color: $sombre;
+            font-size: 14px;
+
+            input{
+                transform: translateY(2px);
+                opacity: 1;
+                height: initial;
+                width: auto;
+                position: relative;
+                accent-color: $sombre;
+            }
+        }
+
+        .submit-box{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px 8px;
+
+            button{
+                padding: 8px 16px;
+                background: $main;
+                color: $white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background .5s ease;
+                width: fit-content;
+    
+                &:hover{
+                    background: $sombre;
+                }
+            }
+        }
+
+        .screenshot &{
+            display: none;
+        }
+    }
+
+    // :'######:::'#######::'##::::'##:'##::::'##:'########:'##::: ##:'########::::'########:::::'###:::::'######:::'########:
+    // '##... ##:'##.... ##: ###::'###: ###::'###: ##.....:: ###:: ##:... ##..::::: ##.... ##:::'## ##:::'##... ##:: ##.....::
+    //  ##:::..:: ##:::: ##: ####'####: ####'####: ##::::::: ####: ##:::: ##::::::: ##:::: ##::'##:. ##:: ##:::..::: ##:::::::
+    //  ##::::::: ##:::: ##: ## ### ##: ## ### ##: ######::: ## ## ##:::: ##::::::: ########::'##:::. ##: ##::'####: ######:::
+    //  ##::::::: ##:::: ##: ##. #: ##: ##. #: ##: ##...:::: ##. ####:::: ##::::::: ##.....::: #########: ##::: ##:: ##...::::
+    //  ##::: ##: ##:::: ##: ##:.:: ##: ##:.:: ##: ##::::::: ##:. ###:::: ##::::::: ##:::::::: ##.... ##: ##::: ##:: ##:::::::
+    // . ######::. #######:: ##:::: ##: ##:::: ##: ########: ##::. ##:::: ##::::::: ##:::::::: ##:::: ##:. ######::: ########:
+    // :......::::.......:::..:::::..::..:::::..::........::..::::..:::::..::::::::..:::::::::..:::::..:::......::::........::
+
     .comment-page-item{
         border-bottom: 2px solid rgba($sombre_rgb, 0.3);
 
@@ -888,7 +734,15 @@ html{
         }
     }
 
-    // Comment item (comments)
+    // :'######:::'#######::'##::::'##:'##::::'##:'########:'##::: ##:'########::::'####:'########:'########:'##::::'##:
+    // '##... ##:'##.... ##: ###::'###: ###::'###: ##.....:: ###:: ##:... ##..:::::. ##::... ##..:: ##.....:: ###::'###:
+    //  ##:::..:: ##:::: ##: ####'####: ####'####: ##::::::: ####: ##:::: ##:::::::: ##::::: ##:::: ##::::::: ####'####:
+    //  ##::::::: ##:::: ##: ## ### ##: ## ### ##: ######::: ## ## ##:::: ##:::::::: ##::::: ##:::: ######::: ## ### ##:
+    //  ##::::::: ##:::: ##: ##. #: ##: ##. #: ##: ##...:::: ##. ####:::: ##:::::::: ##::::: ##:::: ##...:::: ##. #: ##:
+    //  ##::: ##: ##:::: ##: ##:.:: ##: ##:.:: ##: ##::::::: ##:. ###:::: ##:::::::: ##::::: ##:::: ##::::::: ##:.:: ##:
+    // . ######::. #######:: ##:::: ##: ##:::: ##: ########: ##::. ##:::: ##:::::::'####:::: ##:::: ########: ##:::: ##:
+    // :......::::.......:::..:::::..::..:::::..::........::..::::..:::::..::::::::....:::::..:::::........::..:::::..::
+
     .comment-item{
         padding-top: 8px;
         padding-bottom: 8px;
@@ -906,8 +760,8 @@ html{
             .dot{
                 width: 30px;
                 height: 30px;
-                border-radius: 50%;
-                background: $main;
+                border-radius: 4px;
+                background: rgba($main_rgb, 0.7);
                 color: $white;
                 display: flex;
                 align-items: center;
@@ -985,9 +839,9 @@ html{
                     background: none;
                     cursor: pointer;
                     border: 1px solid $sombre;
-                    border-radius: 50%;
+                    border-radius: 2px;
                     padding: 0;
-                    transition: background .5s ease;
+                    transition: all .5s ease;
     
                     svg{
                         width: 14px;
@@ -996,7 +850,7 @@ html{
                     }
     
                     &.true{
-                        background: $sombre;
+                        background: rgba($sombre_rgb, 0.8);
                         
                         .active{
                             display: none;
@@ -1010,7 +864,7 @@ html{
                     }
 
                     &:hover{
-                        background: rgba($clair_rgb, 0.5);
+                        background: rgba($clair_rgb, 0.65);
                     }
                 }
             }
@@ -1038,10 +892,9 @@ html{
             textarea{
                 width: 100%;
                 border: 1px solid $sombre;
-                border-radius: 0;
                 background: none;
                 text-align: left;
-                border-radius: 8px;
+                border-radius: 4px;
                 color: $sombre;
                 transition: border .5s ease;
                 padding: 8px;
@@ -1064,7 +917,7 @@ html{
                     background: $main;
                     color: $white;
                     border: none;
-                    border-radius: 50px;
+                    border-radius: 4px;
                     cursor: pointer;
                     transition: background .5s ease;
                     font-size: 10px;
@@ -1168,14 +1021,23 @@ html{
         }
     }
 
-    // Replies
-    &--replies{
+    // '########::'########:'########::'##:::::::'####:'########::'######:::::'########:::'#######::'##::::'##:
+    //  ##.... ##: ##.....:: ##.... ##: ##:::::::. ##:: ##.....::'##... ##:::: ##.... ##:'##.... ##:. ##::'##::
+    //  ##:::: ##: ##::::::: ##:::: ##: ##:::::::: ##:: ##::::::: ##:::..::::: ##:::: ##: ##:::: ##::. ##'##:::
+    //  ########:: ######::: ########:: ##:::::::: ##:: ######:::. ######::::: ########:: ##:::: ##:::. ###::::
+    //  ##.. ##::: ##...:::: ##.....::: ##:::::::: ##:: ##...:::::..... ##:::: ##.... ##: ##:::: ##::: ## ##:::
+    //  ##::. ##:: ##::::::: ##:::::::: ##:::::::: ##:: ##:::::::'##::: ##:::: ##:::: ##: ##:::: ##:: ##:. ##::
+    //  ##:::. ##: ########: ##:::::::: ########:'####: ########:. ######::::: ########::. #######:: ##:::. ##:
+    // ..:::::..::........::..:::::::::........::....::........:::......::::::........::::.......:::..:::::..::
+
+    &__replies{
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
         z-index: 998;
         display: none;
         align-items: center;
@@ -1183,16 +1045,15 @@ html{
         pointer-events: all;
 
         &.ajax{
-            .wp-annotations--replies{
-                &__ajax{
+            .wp-annotations__replies{
+                &--ajax{
                     opacity: 1;
                     visibility: visible;
                 }
-
-                &__wrapper{
-                    opacity: 0;
-                    visibility: hidden;
-                }
+            }
+            
+            .reply-box{
+                filter: blur(5px);
             }
         }
 
@@ -1205,7 +1066,7 @@ html{
             }
         }
 
-        &__ajax{
+        &--ajax{
             position: absolute;
             top: 0;
             left: 0;
@@ -1221,7 +1082,7 @@ html{
             transition: all .2s ease;
         }
 
-        &__wrapper{
+        &--wrapper{
             position: relative;
             z-index: 1;
             width: 100%;
@@ -1230,23 +1091,27 @@ html{
             padding: 90px 45px;
             overflow: auto;
             transition: all .2s ease;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
         }
 
         @media screen and (max-width: 500px) {
-            &__wrapper{
+            &--wrapper{
                 padding: 60px 0;
             }
         }
     }
 
     .reply-box{
-        background: #FFF;
-        width: 650px;
+        background: rgba($white, 0.75);
+        width: 850px;
         max-width: calc(100% - 48px);
         border-radius: 8px;
         position: relative;
         overflow: hidden;
         margin: 0 auto;
+        transition: all .3s ease;
 
         &.ajax{
             .reply-box__ajax{
@@ -1291,8 +1156,8 @@ html{
             .dot{
                 width: 30px;
                 height: 30px;
-                border-radius: 50%;
-                background: $main;
+                border-radius: 4px;
+                background: rgba($main_rgb, 0.7);
                 color: $white;
                 display: flex;
                 align-items: center;
@@ -1370,7 +1235,7 @@ html{
                     background: none;
                     cursor: pointer;
                     border: 1px solid $sombre;
-                    border-radius: 50%;
+                    border-radius: 2px;
                     padding: 0;
                     transition: background .5s ease;
     
@@ -1409,16 +1274,50 @@ html{
             }
         }
 
+        &__comment{
+            margin-top: 12px;
+            font-size: 16px;
+            background: rgba($sombre_rgb, 0.55);
+            color: $white;
+            padding: 16px;
+            border-radius: 4px;
+
+            &.has-replies{
+                border-radius: 4px 4px 0 0;
+            }
+
+            h5{
+                font-weight: 700;
+                margin: 0 0 12px 0;
+                padding: 0;
+                font-size: 12px;
+                color: $white;
+            }
+
+            p{
+                & + p{
+                    margin-top: 8px;
+                }
+            }
+        }
+
         &__replies{
-            padding-top: 16px;
-            padding-left: 24px;
-            padding-bottom: 12px;
             border-bottom: 1px solid rgba($sombre_rgb, 0.3);
+            padding-bottom: 16px;
 
             .reply-item{
-                padding: 8px 8px 8px 12px;
-                border-left: 2px solid rgba($clair_rgb, 0.5);
-                background: rgba($clair_rgb, 0.05);
+                padding: 24px;
+                background: rgba($white, 0.2);
+                border-left: 4px solid rgba($sombre_rgb, 0.55);
+
+                
+                &:nth-child(odd){
+                    background: rgba($clair_rgb, 0.05);
+                }
+
+                &:last-child{
+                    border-radius: 0 0 4px 4px;
+                }
 
                 &__header{
                     display: flex;
@@ -1489,7 +1388,7 @@ html{
                                 background: none;
                                 cursor: pointer;
                                 border: 1px solid $sombre;
-                                border-radius: 50%;
+                                border-radius: 2px;
                                 padding: 0;
                                 transition: background .5s ease;
                 
@@ -1522,7 +1421,7 @@ html{
                 }
 
                 &__content{
-                    margin-top: 12px;
+                    margin-top: 24px;
                     
                     p{
                         font-size: 16px;
@@ -1542,15 +1441,15 @@ html{
                 }
 
                 &__image{
-                    margin-top: 12px;
-                    width: 80px;
+                    width: 120px;
                     aspect-ratio: 4/3;
-                    border-radius: 12px;
+                    border-radius: 4px;
                     object-fit: cover;
                     border: 1px solid rgba($sombre_rgb, 0.3);
                     overflow: hidden;
                     cursor: pointer;
                     position: relative;
+                    margin-top: 24px;
     
                     .expend{
                         position: absolute;
@@ -1588,22 +1487,8 @@ html{
                     }
                 }
 
-                & + .reply-item{
-                    margin-top: 16px;
-                }
-            }
-        }
-
-        &__comment{
-            margin-top: 12px;
-            font-size: 16px;
-            color: $sombre;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba($sombre_rgb, 0.3);
-
-            p{
-                & + p{
-                    margin-top: 8px;
+                &__clear{
+                    clear: both;
                 }
             }
         }
@@ -1631,9 +1516,9 @@ html{
 
                 &__item{
                     padding: 3px 6px;
-                    border: 1px solid $clair;
+                    border: 1px solid $sombre;
                     border-radius: 4px;
-                    font-size: 14px;
+                    font-size: 12px;
                     cursor: pointer;
                     transition: background .5s ease;
 
@@ -1649,7 +1534,7 @@ html{
                 border-radius: 0;
                 background: none;
                 text-align: left;
-                border-radius: 8px;
+                border-radius: 4px;
                 color: $sombre;
                 transition: border .5s ease;
                 padding: 8px;
@@ -1761,16 +1646,124 @@ html{
                 background: $main;
                 color: $white;
                 border: none;
-                border-radius: 50px;
+                border-radius: 4px;
                 cursor: pointer;
                 transition: background .5s ease;
-                font-size: 10px;
+                font-size: 14px;
                 width: fit-content;
 
                 &:hover{                        
                     background: $sombre;
                 }
             }         
+        }
+    }
+
+    //  ######  ######## ##       ########  ######  ########  #######  
+    // ##    ## ##       ##       ##       ##    ##    ##    ##     ## 
+    // ##       ##       ##       ##       ##          ##           ## 
+    //  ######  ######   ##       ######   ##          ##     #######  
+    //       ## ##       ##       ##       ##          ##    ##        
+    // ##    ## ##       ##       ##       ##    ##    ##    ##        
+    //  ######  ######## ######## ########  ######     ##    ######### 
+    .select2{
+        &-container{
+            &--default{
+                .select2-selection--single{
+                    height: 40px;
+                    border: 1px solid rgba($sombre_rgb, 0.25);
+                    border-radius: 4px;
+                    background: none;
+
+                    .select2-selection__rendered{
+                        height: 38px;
+                        display: flex;
+                        align-items: center;
+                        padding: 0 16px;
+                        font-size: 16px;
+                        color: $sombre;
+
+                        span{
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }                    
+                    }
+
+                    .select2-selection__arrow{
+                        top: 50%;
+                        transform: translateY(-50%);
+                    }
+                }
+            }
+        }                
+    }
+}
+
+//  ######  ######## ##       ########  ######  ########  #######     ########  ########   #######  ########  ########   #######  ##      ## ##    ## 
+// ##    ## ##       ##       ##       ##    ##    ##    ##     ##    ##     ## ##     ## ##     ## ##     ## ##     ## ##     ## ##  ##  ## ###   ## 
+// ##       ##       ##       ##       ##          ##           ##    ##     ## ##     ## ##     ## ##     ## ##     ## ##     ## ##  ##  ## ####  ## 
+//  ######  ######   ##       ######   ##          ##     #######     ##     ## ########  ##     ## ########  ##     ## ##     ## ##  ##  ## ## ## ## 
+//       ## ##       ##       ##       ##          ##    ##           ##     ## ##   ##   ##     ## ##        ##     ## ##     ## ##  ##  ## ##  #### 
+// ##    ## ##       ##       ##       ##    ##    ##    ##           ##     ## ##    ##  ##     ## ##        ##     ## ##     ## ##  ##  ## ##   ### 
+//  ######  ######## ######## ########  ######     ##    #########    ########  ##     ##  #######  ##        ########   #######   ###  ###  ##    ## 
+
+.website-page{
+    .wp-annotations-dropdown{
+        // width: 100% !important;
+        
+        // Search
+        .select2-search--dropdown{
+            display: none !important;
+        }
+    
+        // Dropdown
+        &.select2-dropdown{
+            border: 1px solid rgba($sombre_rgb, 0.25) !important;
+            overflow: hidden !important;
+            background: $white;
+            z-index: 99999;
+    
+            &.select2-dropdown--below{
+                border-radius: 0 0 4px 4px !important;
+            }
+    
+            &.select2-dropdown--above{
+                border-radius: 4px 4px 0 0 !important;
+            }
+    
+            .select2{
+                &-results{
+                    &__options{
+                        max-height: 200px;
+                        overflow-y: auto;
+                    }
+    
+                    &__option{
+                        height: 40px;
+                        padding: 0 16px;
+                        font-size: 16px;
+                        color: $sombre;
+                        display: flex;
+                        align-items: center;
+
+                        span{
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }
+    
+                        &--selected {
+                            background: rgba($alt_rgb, 0.5) !important;
+                        }
+    
+                        &--highlighted{
+                            background: $alt !important;
+                            color: $white !important;
+                        }
+                    }
+                }
+            }
         }
     }
 }

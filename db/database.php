@@ -1,4 +1,6 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 // Création des tables
 function wp_annotation_create_tables() {
     global $wpdb;
@@ -12,8 +14,6 @@ function wp_annotation_create_tables() {
         $table_name => [
             'id' => 'BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY',
             'page_id' => 'INT NOT NULL',
-            'position_x' => 'INT NOT NULL',
-            'position_y' => 'INT NOT NULL',
             'commentaire' => 'TEXT NOT NULL',
             'timestamp' => "DATETIME DEFAULT CURRENT_TIMESTAMP",
             'statut' => "ENUM('non résolu', 'résolu') DEFAULT 'non résolu'",
@@ -34,7 +34,7 @@ function wp_annotation_create_tables() {
     ];
 
     foreach ($tables as $table => $columns) {
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table'") != $table) {
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table)) != $table) {
             $columns_sql = implode(", ", array_map(fn($col, $type) => "$col $type", array_keys($columns), $columns));
             $sql = "CREATE TABLE $table ($columns_sql) $charset_collate;";
             dbDelta($sql);

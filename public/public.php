@@ -1,4 +1,6 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 function wp_annotation_add_review_mode_class() {
     if ( isset($_GET['review-mode']) && $_GET['review-mode'] == '1' ) {
         echo '<script type="text/javascript">
@@ -40,6 +42,9 @@ function wp_annotation_init() {
     if ($plugin_enabled && is_user_logged_in() && is_user_allowed_for_annotations()) {
         add_action('wp_head', function(){
             $interface_color = get_option('wp_annotation_color', 'blue');
+        if ( ! array_key_exists( $interface_color, WP_ANNOTATION_COLORS ) ) {
+            $interface_color = 'blue';
+        }
         ?>
         <style>
             :root {
